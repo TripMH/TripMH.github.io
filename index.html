@@ -123,7 +123,7 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* SECTION HEADERS (Beautiful, blurred style restored) */
+    /* SECTION HEADERS */
     .section-header {
       position: sticky; top: 0; z-index: 10;
       padding: 8px 16px;
@@ -131,6 +131,7 @@
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
+      border-right: 4px solid var(--accent); 
     }
     .section-header-left { display: flex; align-items: center; gap: 8px; }
     .section-header-title { font-size: 13px; font-weight: 600; color: var(--text); }
@@ -145,10 +146,11 @@
       margin-right: 6px; transition: opacity .2s;
     }
     .daily-route-btn:hover { opacity: 0.85; }
+    .daily-route-btn svg { width: 12px; height: 12px; }
 
     .progress-bar-wrap { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
     .progress-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width .5s ease; }
-    .progress-bar-fill.done { background: var(--success); }
+    .progress-bar-fill.done { background: var(--success) !important; }
 
     .cards-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 
@@ -157,6 +159,7 @@
     .card.done { opacity: .48; filter: saturate(0.4); }
     .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
     .card.done .card-check { border-color: var(--success) !important; background: var(--success-glow) !important; color: var(--success) !important; }
+    .card.done .card-booking-bar { display: none !important; } /* Hide booking warning if done */
     
     .card-booking-bar { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: var(--danger-glow); border-bottom: 1px solid rgba(248,113,113,.18); }
     .card-booking-bar svg { width: 12px; height: 12px; color: var(--danger); flex-shrink: 0; }
@@ -168,7 +171,7 @@
     .card-main { flex: 1; min-width: 0; }
     .card-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .card-title-inner { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
-    .card-icon { font-size: 19px; flex-shrink: 0; line-height: 1; }
+    .card-icon { font-size: 16px; flex-shrink: 0; line-height: 1; }
     .card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.35; word-break: break-word; }
     .chevron { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-dim); margin-top: 2px; transition: transform .22s; }
     .card.expanded .chevron { transform: rotate(180deg); }
@@ -179,8 +182,6 @@
     .badge-time    { background: var(--accent-glow);   color: var(--accent);   border: 1px solid var(--accent-border); font-family: 'Courier New', monospace; }
     .badge-area    { background: var(--bg-muted);      color: var(--text-muted); }
     .badge-cost    { background: var(--success-glow);  color: var(--success);  border: 1px solid color-mix(in srgb,var(--success) 28%,transparent); }
-    .badge-dur     { background: var(--purple-glow);   color: var(--purple);   border: 1px solid color-mix(in srgb,var(--purple) 28%,transparent); font-family: 'Courier New', monospace; }
-    .badge-transport { background: var(--warning-glow); color: var(--warning); border: 1px solid color-mix(in srgb,var(--warning) 28%,transparent); }
 
     .card-details { display: none; padding: 0 13px 13px; gap: 10px; flex-direction: column; }
     .card.expanded .card-details { display: flex; }
@@ -343,11 +344,14 @@
 <script>
 'use strict';
 
-const LS_DATA = 'tripmh_data_v6';
-const LS_COMPLETED = 'tripmh_completed_v6';
-const LS_EXPANDED = 'tripmh_expanded_v6';
-const LS_TAB = 'tripmh_tab_v6';
-const LS_DARK = 'tripmh_dark_v6';
+const LS_DATA = 'tripmh_data_v8';
+const LS_COMPLETED = 'tripmh_completed_v8';
+const LS_EXPANDED = 'tripmh_expanded_v8';
+const LS_TAB = 'tripmh_tab_v8';
+const LS_DARK = 'tripmh_dark_v8';
+
+// Array of vibrant colors for days
+const DAY_COLORS = ['#22d3ee', '#4ade80', '#c084fc', '#fbbf24', '#f87171', '#60a5fa', '#f472b6', '#34d399', '#fb923c', '#a78bfa'];
 
 let state = {
   activeTab: 'itinerary',
@@ -376,7 +380,6 @@ function persistAll() {
 function genId() { return 'i' + Math.random().toString(36).substr(2, 9); }
 function esc(str) { return String(str||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); }
 
-// THIS FIXES THE HIGHLIGHT ERROR
 function highlight(text, query) {
   if (!query || !text) return esc(text);
   const safe = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -387,7 +390,6 @@ const SVG = {
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
   clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
   pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
-  dur:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>',
   bus:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>',
   book:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
   nav:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>',
@@ -418,9 +420,8 @@ function buildMapUrl(place, address) {
   return q || '';
 }
 
-// Map Daily Route URL Builder
 function buildDailyRouteUrl(activities) {
-  const locs = activities.filter(a => a.type !== 'tip' && (a.mapPos || a.placeName)).map(a => encodeURIComponent((a.placeName + ' ' + (a.area || '')).trim()));
+  const locs = activities.filter(a => a.type !== 'tip' && (a.mapPos || a.placeName)).map(a => encodeURIComponent(((a.mapPos || a.placeName) + ' ' + (a.area || '')).trim()));
   if (locs.length === 0) return '';
   if (locs.length === 1) return `https://www.google.com/maps/search/?api=1&query=${locs[0]}`;
   
@@ -428,7 +429,7 @@ function buildDailyRouteUrl(activities) {
   const dest = locs[locs.length - 1];
   const waypoints = locs.slice(1, locs.length - 1).join('|');
   
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
+  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=transit`;
   if (waypoints) url += `&waypoints=${waypoints}`;
   return url;
 }
@@ -461,7 +462,7 @@ function parseCSVRaw(text) {
 
 const Aliases = {
   place: ['שם המקום', 'אטרקציה', 'יעד', 'מקום', 'כותרת', 'title', 'name'],
-  day: ['יום', 'day'],
+  day: ['יום', 'day', 'תאריך'],
   date: ['תאריך', 'date'],
   time: ['שעות', 'זמן פתיחה', 'מתי', 'time', 'טווח'],
   dur: ['משך', 'זמן מוערך', 'duration'],
@@ -484,8 +485,12 @@ function getCol(obj, type) {
 }
 
 function parseDateVal(d) {
-  const m = (d||'').match(/(\d+)\/(\d+)\/(\d+)/);
-  return m ? new Date(`${m[3]}-${m[2]}-${m[1]}`).getTime() : 0;
+  if (!d) return 0;
+  const m = d.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
+  if (m) {
+    return new Date(`${m[3]}-${m[2]}-${m[1]}`).getTime();
+  }
+  return 0;
 }
 
 function needsBooking(bookText, descText) {
@@ -527,23 +532,26 @@ function handleFiles(files) {
           const book = getCol(obj, 'book');
           const link = getCol(obj, 'link');
 
-          if (fileType === 'tips' || (!place && !day && !date)) {
-            if (place || desc) {
-              data.tips.push({
-                id: genId(), type: 'tip', _idx: i,
-                title: place || 'טיפ ' + i,
-                category: area || 'כללי',
-                content: desc || Object.values(obj).join(' '),
-                link: link, linkLabel: getCol(obj, 'linkLabel') || 'למידע נוסף'
-              });
-            }
-          } else {
+          // Improved Tip detection: If it has place/title but no date/time/cost/area it's likely a tip
+          const isProbablyTip = fileType === 'tips' || (!day && !date && !getCol(obj, 'time') && !getCol(obj, 'cost'));
+
+          if (isProbablyTip && (place || desc)) {
+            data.tips.push({
+              id: genId(), type: 'tip', _idx: i,
+              title: place || 'טיפ ' + i,
+              category: area || 'כללי',
+              content: desc || Object.values(obj).join(' '),
+              link: link, linkLabel: getCol(obj, 'linkLabel') || 'למידע נוסף'
+            });
+          } else if (place || desc) {
             const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(day);
+            const rawDayLabel = day || date || 'ללא תאריך';
+            
             const item = {
               id: genId(), type: isOpt ? 'option' : 'itinerary', _idx: i,
               placeName: place || 'ללא שם',
-              dayLabel: [day, date].filter(Boolean).join(' • ') || 'ללא תאריך',
-              dateVal: parseDateVal(date),
+              dayLabel: rawDayLabel,
+              dateVal: parseDateVal(rawDayLabel),
               description: desc,
               timeRange: getCol(obj, 'time'),
               duration: getCol(obj, 'dur'),
@@ -556,7 +564,7 @@ function handleFiles(files) {
               requiresBooking: needsBooking(book, desc),
               icon: detectIcon(place + ' ' + desc + ' ' + area)
             };
-            item.mapUrl = buildMapUrl(item.link, item.placeName);
+            item.mapUrl = buildMapUrl(item.link, item.area || item.placeName);
             data[isOpt ? 'options' : 'itinerary'].push(item);
           }
         }
@@ -669,6 +677,8 @@ function renderList(containerId, items, q) {
   });
 
   let html = '';
+  let colorIndex = 0;
+  
   map.forEach((arr, key) => {
     const done = arr.filter(a => state.completedIds.has(a.id)).length;
     const allDone = done === arr.length && arr.length > 0;
@@ -677,17 +687,19 @@ function renderList(containerId, items, q) {
     const routeUrl = buildDailyRouteUrl(arr);
     const mapBtnHtml = routeUrl ? `<a href="${routeUrl}" target="_blank" class="daily-route-btn" title="ניווט יומי במפות Google" onclick="event.stopPropagation()">${SVG.map} ניווט יומי</a>` : '';
 
+    const dayColor = DAY_COLORS[colorIndex % DAY_COLORS.length];
+    colorIndex++;
+
     html += `
       <div>
-        <div class="section-header">
+        <div class="section-header" style="border-right-color: ${dayColor};">
           <div class="section-header-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--accent);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span class="section-header-title">${highlight(key, q)}</span>
             ${mapBtnHtml}
           </div>
           <span class="section-badge ${allDone?'all-done':''}">${done}/${arr.length}</span>
         </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill ${allDone?'done':''}" style="width:${(done/arr.length)*100}%"></div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill ${allDone?'done':''}" style="width:${(done/arr.length)*100}%; background: ${allDone ? 'var(--success)' : dayColor}"></div></div>
         <div class="cards-list">
           ${arr.map(a => a.type==='tip' ? renderTipCard(a, state.completedIds.has(a.id), q) : renderCard(a, state.completedIds.has(a.id), q)).join('')}
         </div>
