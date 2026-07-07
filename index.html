@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TripM - Travel Manager</title>
+    <style>
+        :root {
+            /* Dark Mode (Default for battery saving & contrast) */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e2e8f0;
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.2s, color 0.2s; padding-bottom: 80px; overflow-x: hidden; }
+
+        header { background-color: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .app-title { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+        .app-title span { color: var(--accent); }
+        .header-actions { display: flex; gap: 8px; }
+
+        .btn-icon { background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
+        .btn-icon:active { transform: scale(0.95); }
+        .btn-danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+
+        .search-bar { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); background-color: var(--bg-primary); color: var(--text-primary); font-size: 1rem; margin-bottom: 12px; transition: border-color 0.2s; }
+        .search-bar:focus { outline: none; border-color: var(--accent); }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 5px; }
+        .tab { flex: 1; padding: 10px 5px; text-align: center; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
+        .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        main { padding: 15px; max-width: 800px; margin: 0 auto; }
+
+        .empty-state { text-align: center; padding: 40px 20px; background: var(--bg-secondary); border-radius: 16px; border: 1px dashed var(--border); margin-top: 20px; }
+        .empty-state h2 { margin-bottom: 10px; font-size: 1.3rem; }
+        .empty-state p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; }
+        .upload-btn { background: var(--accent); color: white; border: none; padding: 14px 24px; border-radius: 10px; font-size: 1.05rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); transition: 0.2s; width: 100%; max-width: 250px; }
+        .upload-btn:active { transform: scale(0.98); }
+        
+        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 15px; position: relative; transition: opacity 0.3s; }
+        .card.completed { opacity: 0.5; border-right: 4px solid var(--success); }
+        
+        .card-header { display: flex; gap: 12px; align-items: flex-start; }
+        .card-icon { font-size: 1.8rem; background: var(--bg-primary); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; }
+        .card-content { flex-grow: 1; }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; line-height: 1.3; padding-left: 30px; /* Space for checkbox */ }
+        .card-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.8rem; margin-bottom: 8px; }
+        .tag { background: var(--bg-primary); color: var(--text-secondary); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-weight: 600; }
+        .tag.highlight { color: var(--accent); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
+        .tag.alert { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
+
+        .checkbox-wrapper { position: absolute; top: 16px; left: 16px; z-index: 10; }
+        .checkbox-custom { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-primary); appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .checkbox-custom:checked { background: var(--success); border-color: var(--success); }
+        .checkbox-custom:checked::after { content: '✓'; color: white; font-weight: bold; font-size: 14px; }
+
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .action-btn { padding: 10px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-nav { background-color: var(--accent); color: white; }
+        .btn-expand { background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border); }
+
+        .card-details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); animation: fadeIn 0.3s ease; }
+        .card-details.open { display: block; }
+        .detail-row { margin-bottom: 12px; }
+        .detail-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: bold; margin-bottom: 3px; }
+        .detail-text { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
+        .detail-link { color: var(--accent); text-decoration: none; font-weight: 500; word-break: break-all; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .day-divider { margin: 25px 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid var(--border); color: var(--accent); font-weight: 800; font-size: 1.2rem; }
+
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--success); color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        
+        .file-upload-hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="app-title">Trip<span>M</span></div>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">☀️ בהיר</button>
+                <button class="btn-icon btn-danger" onclick="clearAllData()">🗑️ נקה הכל</button>
+            </div>
+        </div>
+
+        <input type="text" id="searchInput" class="search-bar" placeholder="חפש מיקום, עיר, טיפ..." oninput="renderData()">
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('route', this)">📍 מסלול</div>
+            <div class="tab" onclick="switchTab('tips', this)">💡 טיפים</div>
+            <div class="tab" onclick="switchTab('options', this)">⭐ אופציות</div>
+        </div>
+    </header>
+
+    <main id="appContent">
+        </main>
+
+    <div id="toast">הקובץ נטען בהצלחה!</div>
+    <input type="file" id="csvFileInput" class="file-upload-hidden" accept=".csv" multiple onchange="handleFileUpload(event)">
+
+    <script>
+        // --- 1. State Management (Local Storage for Offline Use) ---
+        let appData = {
+            route: JSON.parse(localStorage.getItem('tripM_route')) || [],
+            tips: JSON.parse(localStorage.getItem('tripM_tips')) || [],
+            options: JSON.parse(localStorage.getItem('tripM_options')) || [],
+            checkedItems: JSON.parse(localStorage.getItem('tripM_checked')) || {}
+        };
+        
+        let currentTab = 'route';
+
+        // --- 2. Theme Management ---
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('tripM_theme', 'dark');
+                btn.textContent = '☀️ בהיר';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('tripM_theme', 'light');
+                btn.textContent = '🌙 כהה';
+            }
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('tripM_theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('themeBtn').textContent = '🌙 כהה';
+        }
+
+        // --- 3. Robust CSV Parser (Handles quotes and commas inside text) ---
+        function parseCSV(csvText) {
+            const rows = [];
+            let row = [];
+            let inQuotes = false;
+            let val = '';
+            
+            for (let i = 0; i < csvText.length; i++) {
+                let char = csvText[i];
+                let nextChar = csvText[i + 1];
+
+                if (char === '"' && inQuotes && nextChar === '"') {
+                    val += '"'; i++; // Skip escaped quote
+                } else if (char === '"') {
+                    inQuotes = !inQuotes; // Toggle quote state
+                } else if (char === ',' && !inQuotes) {
+                    row.push(val.trim()); val = ''; // End of value
+                } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
+                    if (char === '\r') i++; // Skip \n
+                    row.push(val.trim());
+                    if (row.join('').trim() !== '') rows.push(row); // Push row if not empty
+                    row = []; val = '';
+                } else {
+                    val += char;
+                }
+            }
+            if (val || row.length > 0) { row.push(val.trim()); rows.push(row); }
+            return rows;
+        }
+
+        // --- 4. File Upload & Intelligent Data Sorting ---
+        function triggerUpload() { document.getElementById('csvFileInput').click(); }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            let filesProcessed = 0;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    const parsed = parseCSV(text);
+                    if (parsed.length < 2) return;
+
+                    const headers = parsed[0];
+                    const dataRows = parsed.slice(1);
+                    const formattedData = dataRows.map(row => {
+                        let obj = {};
+                        headers.forEach((header, index) => {
+                            obj[header.replace(/"/g, '').trim()] = row[index] ? row[index].replace(/^"|"$/g, '') : '';
+                        });
+                        return obj;
+                    });
+
+                    // Intelligent categorization based on headers
+                    const headerStr = headers.join(',').toLowerCase();
+                    if (headerStr.includes('קטגוריה') && headerStr.includes('טיפים')) {
+                        appData.tips = [...appData.tips, ...formattedData];
+                        localStorage.setItem('tripM_tips', JSON.stringify(appData.tips));
+                    } else if (headerStr.includes('טווח שעות מומלץ')) {
+                        // Check if it's main route or extensions based on the 'יום' column format
+                        const isExtension = formattedData.some(item => item['יום'] && item['יום'].includes('אופציה'));
+                        if (isExtension) {
+                            appData.options = [...appData.options, ...formattedData];
+                            localStorage.setItem('tripM_options', JSON.stringify(appData.options));
+                        } else {
+                            appData.route = [...appData.route, ...formattedData];
+                            localStorage.setItem('tripM_route', JSON.stringify(appData.route));
+                        }
+                    }
+
+                    filesProcessed++;
+                    if (filesProcessed === files.length) {
+                        showToast("הנתונים נשמרו בהצלחה במכשיר!");
+                        renderData();
+                    }
+                };
+                reader.readAsText(file);
+            });
+            event.target.value = ''; // Reset input
+        }
+
+        function clearAllData() {
+            if(confirm("האם אתה בטוח שברצונך למחוק את כל הנתונים השמורים באפליקציה?")) {
+                localStorage.removeItem('tripM_route');
+                localStorage.removeItem('tripM_tips');
+                localStorage.removeItem('tripM_options');
+                localStorage.removeItem('tripM_checked');
+                appData = { route: [], tips: [], options: [], checkedItems: {} };
+                renderData();
+            }
+        }
+
+        function toggleCheck(id) {
+            appData.checkedItems[id] = !appData.checkedItems[id];
+            localStorage.setItem('tripM_checked', JSON.stringify(appData.checkedItems));
+            const card = document.getElementById(`card-${id}`);
+            if (card) {
+                appData.checkedItems[id] ? card.classList.add('completed') : card.classList.remove('completed');
+            }
+        }
+
+        function toggleDetails(id) {
+            const details = document.getElementById(`details-${id}`);
+            const btn = document.getElementById(`btn-expand-${id}`);
+            if (details.classList.contains('open')) {
+                details.classList.remove('open');
+                btn.innerHTML = '👁️ הצג פרטים';
+            } else {
+                details.classList.add('open');
+                btn.innerHTML = '⬆️ סגור פרטים';
+            }
+        }
+
+        // --- 5. Navigation & UI Rendering ---
+        function switchTab(tabName, el) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if(el) el.classList.add('active');
+            renderData();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function buildMapsUrl(query) {
+            if(!query || query.trim() === '') return '';
+            // If it's already a URL, return it
+            if(query.startsWith('http')) return query;
+            // Otherwise create a Google Maps intent query
+            return `https://maps.google.com/?q=${encodeURIComponent(query)}`;
+        }
+
+        function renderData() {
+            const container = document.getElementById('appContent');
+            const searchQ = document.getElementById('searchInput').value.toLowerCase();
+            const dataToRender = appData[currentTab];
+
+            if (!dataToRender || dataToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>אין נתונים זמינים</h2>
+                        <p>האפליקציה כעת ריקה. עליך להעלות קבצי CSV (מסלול, טיפים או השלמות) כדי שהנתונים יישמרו על המכשיר שלך לשימוש אופליין.</p>
+                        <button class="upload-btn" onclick="triggerUpload()">📥 העלה קבצי CSV</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            let currentDayHeader = '';
+
+            dataToRender.forEach((item, index) => {
+                const uniqueId = `${currentTab}-${index}`;
+                
+                // Filtering
+                const searchableText = Object.values(item).join(' ').toLowerCase();
+                if (searchQ && !searchableText.includes(searchQ)) return;
+
+                // Handle Route & Options Format
+                if (currentTab === 'route' || currentTab === 'options') {
+                    const icon = item['אייקון'] || '📍';
+                    const day = item['יום'] || '';
+                    const title = item['שם המקום'] || '';
+                    const time = item['טווח שעות מומלץ'] || '';
+                    const area = item['אזור במסלול'] || '';
+                    const desc = item['תיאור ומה ניתן לעשות'] || '';
+                    const transport = item['תחבורה והגעה ליעד'] || '';
+                    const mapQuery = item['מיקום במפה'] || '';
+                    const link = item['קישור'] || '';
+                    const cost = item['עלות משוערת (₪)'] || '';
+                    const book = item['איך ומתי להזמין (צ'ק-אין/אאוט)'] || '';
+
+                    // Add Day Divider
+                    if (day && day !== currentDayHeader && currentTab === 'route') {
+                        html += `<div class="day-divider">${day} ${item['תאריך'] ? '- ' + item['תאריך'] : ''}</div>`;
+                        currentDayHeader = day;
+                    }
+
+                    const isChecked = appData.checkedItems[uniqueId] ? 'checked' : '';
+                    const completedClass = isChecked ? 'completed' : '';
+
+                    html += `
+                    <div class="card ${completedClass}" id="card-${uniqueId}">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" class="checkbox-custom" ${isChecked} onchange="toggleCheck('${uniqueId}')">
+                        </div>
+                        <div class="card-header" onclick="toggleDetails('${uniqueId}')">
+                            <div class="card-icon">${icon}</div>
+                            <div class="card-content">
+                                <div class="card-title">${title}</div>
+                                <div class="card-meta">
+                                    ${time ? `<span class="tag highlight">🕒 ${time}</span>` : ''}
+                                    ${area ? `<span class="tag">🗺️ ${area}</span>` : ''}
+                                    ${book && book.includes('🚨') ? `<span class="tag alert">⚠️ דורש הזמנה</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-details" id="details-${uniqueId}">
+                            ${desc ? `<div class="detail-row"><div class="detail-label">תיאור</div><div class="detail-text">${desc}</div></div>` : ''}
+                            ${transport ? `<div class="detail-row"><div class="detail-label">תחבורה</div><div class="detail-text">🚆 ${transport}</div></div>` : ''}
+                            ${cost ? `<div class="detail-row"><div class="detail-label">עלות</div><div class="detail-text">💳 ${cost}</div></div>` : ''}
+                            ${book ? `<div class="detail-row"><div class="detail-label">הזמנות / צ'ק אין</div><div class="detail-text">${book}</div></div>` : ''}
+                            ${link ? `<div class="detail-row"><div class="detail-label">קישור רלוונטי</div><a href="${link}" target="_blank" class="detail-link">🌐 פתח קישור באתר</a></div>` : ''}
+                            
+                            <div class="card-actions">
+                                <button class="action-btn btn-expand" id="btn-expand-${uniqueId}" onclick="toggleDetails('${uniqueId}')">⬆️ סגור פרטים</button>
+                                ${mapQuery ? `<a href="${buildMapsUrl(mapQuery)}" target="_blank" class="action-btn btn-nav">📍 נווט ב-Maps</a>` : '<div></div>'}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                } 
+                // Handle Tips Format
+                else if (currentTab === 'tips') {
+                    const icon = item['אייקון'] || '💡';
+                    const category = item['קטגוריה'] || 'כללי';
+                    const desc = item['ריכוז הנחיות וטיפים (מסוכם לפי נושא)'] || '';
+                    const linksRaw = item['אפליקציות וקישורים רלוונטיים'] || '';
+                    
+                    let formattedLinks = linksRaw;
+                    if(linksRaw) {
+                         formattedLinks = linksRaw.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="detail-link" style="display:block; margin-bottom:8px;">הורד / פתח 📥</a>');
+                    }
+
+                    const isChecked = appData.checkedItems[uniqueId] ? 'checked' : '';
+                    const completedClass = isChecked ? 'completed' : '';
+
+                    html += `
+                    <div class="card ${completedClass}" id="card-${uniqueId}">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" class="checkbox-custom" ${isChecked} onchange="toggleCheck('${uniqueId}')">
+                        </div>
+                        <div class="card-header" onclick="toggleDetails('${uniqueId}')">
+                            <div class="card-icon">${icon}</div>
+                            <div class="card-content">
+                                <div class="card-title">${category}</div>
+                            </div>
+                        </div>
+                        <div class="card-details" id="details-${uniqueId}">
+                            <div class="detail-row">
+                                <div class="detail-text">${desc}</div>
+                            </div>
+                            ${formattedLinks ? `
+                            <div class="detail-row" style="margin-top:15px; border-top:1px solid var(--border); padding-top:10px;">
+                                <div class="detail-label">אפליקציות וקישורים</div>
+                                <div class="detail-text">${formattedLinks}</div>
+                            </div>` : ''}
+                            <div class="card-actions" style="grid-template-columns: 1fr;">
+                                <button class="action-btn btn-expand" id="btn-expand-${uniqueId}" onclick="toggleDetails('${uniqueId}')">⬆️ סגור פרטים</button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html || '<div class="empty-state"><h3>לא נמצאו תוצאות לחיפוש זה.</h3></div>';
+        }
+
+        // Initialize App
+        renderData();
+
+    </script>
+</body>
+</html>
