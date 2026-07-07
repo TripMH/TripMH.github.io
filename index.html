@@ -15,7 +15,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ============================================================
-       DESIGN TOKENS — DARK (default)
+       DESIGN TOKENS — DARK
     ============================================================ */
     :root {
       --bg:            #0c0f14;
@@ -45,9 +45,6 @@
       --radius-xl: 20px;
     }
 
-    /* ============================================================
-       LIGHT THEME
-    ============================================================ */
     html.light {
       --bg:            #f2f4f8;
       --bg-elevated:   #e8ecf1;
@@ -71,9 +68,6 @@
       --purple-glow:   rgba(147,51,234,0.09);
     }
 
-    /* ============================================================
-       GLOBAL
-    ============================================================ */
     html {
       font-family: 'Segoe UI', 'Heebo', 'Arial', sans-serif;
       font-size: 16px;
@@ -93,9 +87,6 @@
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
     html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
 
-    /* ============================================================
-       APP SHELL
-    ============================================================ */
     #app {
       max-width: 480px;
       margin: 0 auto;
@@ -103,6 +94,7 @@
       display: flex;
       flex-direction: column;
       background: var(--bg);
+      position: relative;
     }
 
     /* ============================================================
@@ -171,7 +163,7 @@
     .upload-btn svg { width: 16px; height: 16px; }
     .upload-btn.loading { opacity: .6; cursor: not-allowed; }
 
-    /* Modals (Hint & Edit) */
+    /* Modals */
     .upload-hint {
       position: fixed; inset: 0; z-index: 100;
       background: rgba(0,0,0,.6);
@@ -194,35 +186,17 @@
       margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
     }
     .upload-hint-title svg { width: 17px; height: 17px; color: var(--accent); }
-    .upload-hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-    .upload-hint-list li {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 13px; color: var(--text-muted); line-height: 1.5;
-    }
-    .upload-hint-list .badge {
-      flex-shrink: 0; margin-top: 1px;
-      padding: 1px 8px; border-radius: 99px; font-size: 11px; font-weight: 600;
-    }
-    .badge-main    { background: var(--accent-glow);   color: var(--accent);   border: 1px solid var(--accent-border); }
-    .badge-tips    { background: var(--success-glow);  color: var(--success);  border: 1px solid color-mix(in srgb,var(--success) 28%,transparent); }
-    .badge-options { background: var(--warning-glow);  color: var(--warning);  border: 1px solid color-mix(in srgb,var(--warning) 28%,transparent); }
-    .upload-hint-cols {
-      background: var(--bg-muted); border-radius: var(--radius-sm);
-      padding: 10px 12px; margin-bottom: 14px;
-      font-size: 11px; color: var(--text-muted); line-height: 1.8;
-    }
-    .upload-hint-cols strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 12px; }
-    .hint-btn-row { display: flex; gap: 8px; }
+    
+    .hint-btn-row { display: flex; gap: 8px; margin-top: 15px; }
     .hint-btn-row button {
       flex: 1; padding: 10px; border-radius: var(--radius-sm);
       font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
-      transition: opacity .15s;
+      transition: opacity .15s; border: none;
     }
     .hint-btn-row button:hover { opacity: .85; }
-    .hint-pick { background: var(--accent); color: var(--bg); border: none; }
-    .hint-cancel { background: var(--bg-muted); color: var(--text-muted); border: 1px solid var(--border); }
+    .hint-pick { background: var(--accent); color: var(--bg); }
+    .hint-cancel { background: var(--bg-muted); color: var(--text-muted); border: 1px solid var(--border) !important; }
 
-    /* Edit Form Styles */
     .edit-group { margin-bottom: 12px; }
     .edit-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; font-weight: 600; }
     .edit-input {
@@ -234,54 +208,42 @@
     .edit-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
     textarea.edit-input { resize: vertical; min-height: 80px; }
 
-    /* Search */
-    .search-wrap { position: relative; padding: 0 16px 10px; }
-    .search-icon {
-      position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
-      width: 15px; height: 15px; color: var(--text-muted); pointer-events: none;
+    /* Undo Toast Timer */
+    .undo-toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--bg-elevated); color: var(--text);
+      padding: 10px 16px; border-radius: var(--radius);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 1000; opacity: 0; pointer-events: none;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+      overflow: hidden;
+      width: 90%; max-width: 320px;
     }
-    #search-input {
-      width: 100%; height: 40px;
-      padding: 0 38px 0 34px;
-      border-radius: var(--radius); border: 1px solid transparent;
-      background: var(--bg-muted); color: var(--text);
-      font-size: 14px; font-family: inherit;
-      outline: none; transition: border .2s;
-      direction: rtl;
+    .undo-toast.visible {
+      transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto;
     }
-    #search-input::placeholder { color: var(--text-muted); }
-    #search-input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px var(--accent-glow); }
-    .search-clear {
-      position: absolute; left: 28px; top: 50%; transform: translateY(-50%);
-      width: 20px; height: 20px; border-radius: 50%;
-      border: none; background: var(--border); cursor: pointer;
-      display: none; align-items: center; justify-content: center;
-      color: var(--text-muted);
+    .undo-btn {
+      background: var(--accent-glow); color: var(--accent);
+      border: 1px solid var(--accent-border); border-radius: 6px;
+      padding: 6px 12px; font-size: 12px; font-weight: bold;
+      cursor: pointer; transition: background 0.2s; margin-right: auto;
     }
-    .search-clear.visible { display: flex; }
-    .search-clear svg { width: 11px; height: 11px; }
-
-    /* Error banner */
-    .error-banner {
-      margin: 0 16px 8px;
-      padding: 10px 12px; border-radius: var(--radius-sm);
-      background: var(--danger-glow); border: 1px solid rgba(248,113,113,.22);
-      display: flex; align-items: flex-start; gap: 8px;
+    .undo-btn:hover { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+    .undo-progress {
+      position: absolute; bottom: 0; left: 0; height: 3px;
+      background: var(--accent); width: 100%;
+      transform-origin: left;
     }
-    .error-banner svg { width: 15px; height: 15px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
-    .error-banner p  { font-size: 12px; color: var(--danger); line-height: 1.5; flex: 1; }
-    .error-close { background: none; border: none; cursor: pointer; color: var(--danger); opacity: .6; flex-shrink: 0; }
-    .error-close:hover { opacity: 1; }
-    .error-close svg { width: 13px; height: 13px; }
-
-    /* Toast */
-    #save-toast {
-      position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
-      background: var(--success); color: var(--bg); padding: 6px 16px; border-radius: 99px;
-      font-size: 12px; font-weight: 600; opacity: 0; pointer-events: none;
-      transition: opacity 0.3s, transform 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .undo-toast.visible .undo-progress {
+      animation: shrinkBar 10s linear forwards;
     }
-    #save-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes shrinkBar {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
 
     /* Tab bar */
     #tab-bar { display: flex; border-bottom: 1px solid var(--border); }
@@ -296,11 +258,7 @@
     }
     .tab-btn svg { width: 16px; height: 16px; }
     .tab-btn.active { color: var(--accent); }
-    .tab-btn .tab-count {
-      font-size: 9px; font-family: 'Courier New', monospace;
-      color: var(--text-dim); margin-top: -2px;
-    }
-    .tab-btn.active .tab-count { color: color-mix(in srgb, var(--accent) 65%, transparent); }
+    .tab-btn .tab-count { font-size: 9px; font-family: 'Courier New', monospace; color: var(--text-dim); margin-top: -2px; }
     .tab-btn.active::after {
       content: ''; position: absolute;
       bottom: 0; left: 6px; right: 6px;
@@ -308,147 +266,72 @@
       background: var(--accent);
     }
 
-    /* ============================================================
-       MAIN CONTENT
-    ============================================================ */
-    #tab-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #tab-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ============================================================
-       EMPTY STATE
-    ============================================================ */
-    .empty-state {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 64px 24px; text-align: center; gap: 8px;
-    }
-    .empty-icon {
-      width: 72px; height: 72px; border-radius: var(--radius-xl);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 8px;
-    }
-    .empty-icon svg { width: 38px; height: 38px; }
-    .empty-state h3 { font-size: 17px; font-weight: 600; color: var(--text); }
-    .empty-state p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; max-width: 280px; }
-
-    /* ============================================================
-       DAY / CATEGORY STICKY SECTION HEADERS
-    ============================================================ */
+    /* DAY HEADERS - Much more prominent */
     .section-header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      padding: 8px 16px;
-      background: color-mix(in srgb, var(--bg) 94%, transparent);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+      margin: 12px 14px 4px;
+      padding: 10px 16px;
+      background: var(--accent-glow);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-sm);
       display: flex; align-items: center; justify-content: space-between;
     }
-    .section-header-left { display: flex; align-items: center; gap: 8px; }
-    .section-header-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .section-header-left { display: flex; align-items: center; gap: 10px; }
+    .section-header-title { font-size: 14px; font-weight: 700; color: var(--accent); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
     .section-badge {
-      font-size: 10px; font-family: 'Courier New', monospace;
-      padding: 2px 8px; border-radius: 99px;
-      background: var(--bg-muted); color: var(--text-muted);
+      font-size: 11px; font-family: 'Courier New', monospace;
+      padding: 3px 8px; border-radius: 99px;
+      background: var(--bg-card); color: var(--text);
+      font-weight: bold; border: 1px solid var(--border);
     }
-    .section-badge.all-done { background: var(--success-glow); color: var(--success); }
-    .section-badge.options  { background: var(--warning-glow); color: var(--warning); }
+    .section-badge.all-done { background: var(--success); color: var(--bg); border-color: var(--success); }
 
-    .progress-bar-wrap {
-      height: 2px; background: var(--border); border-radius: 2px; overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%; border-radius: 2px;
-      background: var(--accent); transition: width .5s ease;
-    }
-    .progress-bar-fill.done { background: var(--success); }
+    .cards-list { padding: 4px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
 
-    /* ============================================================
-       CARDS LIST
-    ============================================================ */
-    .cards-list {
-      padding: 10px 14px;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-
-    /* ============================================================
-       ACTIVITY CARD
-    ============================================================ */
+    /* ACTIVITY CARD */
     .card {
       border-radius: var(--radius);
       border: 1px solid var(--border);
       background: var(--bg-card);
-      overflow: hidden;
-      transition: border-color .2s;
-      position: relative;
+      overflow: hidden; transition: border-color .2s; position: relative;
     }
-
-    /* Done state */
-    .card.done {
-      opacity: .48;
-      filter: saturate(0.4);
-    }
+    .card.done { opacity: .48; filter: saturate(0.4); }
     .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
     .card.done .card-check {
       border-color: var(--success) !important;
       background: var(--success-glow) !important;
       color: var(--success) !important;
     }
-    .card:not(.done):hover { border-color: var(--accent-border); }
-    .card:not(.done):hover .card-check { border-color: var(--accent); }
-
     .card-booking-bar {
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px;
-      background: var(--danger-glow);
-      border-bottom: 1px solid rgba(248,113,113,.18);
+      display: flex; align-items: center; gap: 6px; padding: 5px 12px;
+      background: var(--danger-glow); border-bottom: 1px solid rgba(248,113,113,.18);
     }
-    .card-booking-bar svg { width: 12px; height: 12px; color: var(--danger); flex-shrink: 0; }
     .card-booking-bar span { font-size: 11px; font-weight: 600; color: var(--danger); }
 
     .card-body {
       display: flex; align-items: flex-start; gap: 11px;
-      padding: 13px 13px 12px;
-      cursor: pointer;
-      user-select: none;
+      padding: 13px 13px 12px; cursor: pointer; user-select: none;
     }
-
     .card-check {
       flex-shrink: 0; margin-top: 1px;
       width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid var(--border);
-      background: none; cursor: pointer;
+      border: 2px solid var(--border); background: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s, color .15s;
-      color: transparent;
+      transition: all .15s; color: transparent;
     }
-    .card-check svg { width: 13px; height: 13px; }
-
-    .card-main { flex: 1; min-width: 0; }
-
-    .card-title-row {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 8px;
-    }
+    .card-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .card-title-inner { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
     .card-icon { font-size: 19px; flex-shrink: 0; line-height: 1; }
-    .card-title {
-      font-size: 14px; font-weight: 600; color: var(--text);
-      line-height: 1.35; word-break: break-word;
-    }
-
-    .chevron {
-      width: 15px; height: 15px; flex-shrink: 0;
-      color: var(--text-dim); margin-top: 2px;
-      transition: transform .22s;
-    }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.35; word-break: break-word; }
+    .chevron { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-dim); margin-top: 2px; transition: transform .22s; }
     .card.expanded .chevron { transform: rotate(180deg); }
 
-    .card-badges {
-      display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;
-    }
+    .card-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
     .badge {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 2px 8px; border-radius: 99px;
@@ -458,230 +341,33 @@
     .badge-time    { background: var(--accent-glow);   color: var(--accent);   border: 1px solid var(--accent-border); font-family: 'Courier New', monospace; }
     .badge-area    { background: var(--bg-muted);      color: var(--text-muted); }
     .badge-cost    { background: var(--success-glow);  color: var(--success);  border: 1px solid color-mix(in srgb,var(--success) 28%,transparent); }
-    .badge-dur     { background: var(--purple-glow);   color: var(--purple);   border: 1px solid color-mix(in srgb,var(--purple) 28%,transparent); font-family: 'Courier New', monospace; }
+    .badge-dur     { background: var(--purple-glow);   color: var(--purple);   border: 1px solid color-mix(in srgb,var(--purple) 28%,transparent); }
     .badge-transport { background: var(--warning-glow); color: var(--warning); border: 1px solid color-mix(in srgb,var(--warning) 28%,transparent); }
 
-    /* EXPANDED SECTION */
-    .card-details {
-      display: none;
-      padding: 0 13px 13px;
-      gap: 10px; flex-direction: column;
-    }
+    .card-details { display: none; padding: 0 13px 13px; gap: 10px; flex-direction: column; }
     .card.expanded .card-details { display: flex; }
+    .details-divider { height: 1px; background: var(--border); border-radius: 1px; margin-bottom: 2px; }
+    .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; white-space: pre-wrap; }
 
-    .details-divider {
-      height: 1px; background: var(--border); border-radius: 1px;
-      margin-bottom: 2px;
-    }
-
-    .card-desc {
-      font-size: 13px; color: var(--text-muted); line-height: 1.7;
-      white-space: pre-wrap;
-    }
-
-    .detail-row {
-      display: flex; align-items: flex-start; gap: 8px;
-      font-size: 12px; color: var(--text-muted); line-height: 1.55;
-    }
+    .detail-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.55; }
     .detail-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
-    .detail-row.transport svg { color: var(--warning); }
-    .detail-row.booking    svg { color: var(--danger); }
-    .detail-row.address    svg { color: var(--accent); }
-    .detail-row.checkin    svg { color: var(--purple); }
-    .detail-row.date       svg { color: var(--text-muted); }
-    .detail-row .dr-label {
-      font-size: 10px; font-weight: 600; color: var(--text-dim);
-      text-transform: uppercase; letter-spacing: .04em;
-      white-space: nowrap; margin-top: 1px;
-    }
+    .detail-row.booking svg { color: var(--danger); }
+    .detail-row .dr-label { font-size: 10px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; margin-top: 1px; }
     .detail-row .dr-value { flex: 1; }
 
     .nav-btns { display: flex; flex-direction: column; gap: 6px; }
-
-    .nav-btn {
-      display: flex; align-items: center; gap: 8px;
-      width: 100%; padding: 9px 12px;
-      border-radius: var(--radius-sm); border: 1px solid var(--accent-border);
-      background: var(--accent-glow); color: var(--accent);
-      font-size: 12px; font-weight: 600; font-family: inherit;
-      cursor: pointer; text-align: right;
-      transition: background .15s, transform .1s;
-      line-height: 1.3;
-    }
-    .nav-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
-    .nav-btn:active { transform: scale(.98); }
-    .nav-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-    .nav-btn .nav-label { flex: 1; }
-    .nav-btn .nav-sub { font-size: 10px; font-weight: 400; opacity: .65; display: block; }
-    .nav-btn .nav-ext { opacity: .5; width: 12px; height: 12px; }
-
-    .nav-btn.from-prev {
-      border-color: color-mix(in srgb,var(--warning) 28%,transparent);
-      background: var(--warning-glow); color: var(--warning);
-    }
-    .nav-btn.from-prev:hover { background: color-mix(in srgb, var(--warning) 20%, transparent); }
-
     .link-btn {
-      display: flex; align-items: center; gap: 8px;
-      width: 100%; padding: 9px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid color-mix(in srgb,var(--text-muted) 20%,transparent);
+      display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
       background: var(--bg-muted); color: var(--text-muted);
-      font-size: 12px; font-weight: 500; font-family: inherit;
-      text-decoration: none; transition: background .15s;
-      cursor: pointer;
+      font-size: 12px; font-weight: 500; text-decoration: none; transition: background .15s; cursor: pointer;
     }
     .link-btn:hover { background: color-mix(in srgb, var(--text-muted) 12%, transparent); color: var(--text); }
-    .link-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .link-btn .ext { opacity: .45; width: 11px; height: 11px; margin-right: auto; }
-
-    /* ============================================================
-       TIP CARD
-    ============================================================ */
-    .tip-preview {
-      font-size: 11px; color: var(--text-muted); margin-top: 5px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden; line-height: 1.5;
-    }
-
-    .tip-link-btn {
-      display: flex; align-items: center; gap: 8px;
-      width: 100%; padding: 9px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
-      background: var(--warning-glow); color: var(--warning);
-      font-size: 12px; font-weight: 500; font-family: inherit;
-      text-decoration: none; transition: background .15s;
-    }
-    .tip-link-btn:hover { background: color-mix(in srgb, var(--warning) 20%, transparent); }
-    .tip-link-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .tip-link-btn .ext-icon { opacity: .5; width: 11px; height: 11px; margin-right: auto; }
-
-    /* ============================================================
-       OPTIONS HEADER
-    ============================================================ */
-    .options-count-label {
-      display: flex; align-items: center; gap: 7px;
-      padding: 12px 16px 4px;
-      font-size: 13px; color: var(--text-muted); font-weight: 500;
-    }
-    .options-count-label svg { width: 14px; height: 14px; color: var(--warning); }
-
-    /* ============================================================
-       NEARBY / GPS
-    ============================================================ */
-    #nearby-inner {
-      padding: 28px 16px 32px;
-      display: flex;
-      flex-direction: column; align-items: center; gap: 20px;
-    }
-
-    .nearby-hero { text-align: center; }
-    .nearby-hero-icon {
-      width: 64px; height: 64px; border-radius: var(--radius-xl);
-      background: var(--accent-glow); border: 1px solid var(--accent-border);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 12px;
-    }
-    .nearby-hero-icon svg { width: 32px; height: 32px; color: var(--accent); }
-    .nearby-hero h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    .nearby-hero p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; max-width: 280px; margin: 0 auto; }
-
-    .gps-btn {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 24px; border-radius: var(--radius-xl);
-      border: 1px solid var(--accent-border); background: var(--accent-glow);
-      color: var(--accent); font-size: 15px; font-weight: 600; font-family: inherit;
-      cursor: pointer; transition: background .15s, transform .1s;
-    }
-    .gps-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
-    .gps-btn:active { transform: scale(.96); }
-    .gps-btn.success { border-color: color-mix(in srgb,var(--success) 30%,transparent); background: var(--success-glow); color: var(--success); }
-    .gps-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-    .gps-btn svg { width: 20px; height: 20px; }
-
-    .gps-error {
-      display: none;
-      width: 100%; padding: 12px 14px; border-radius: var(--radius);
-      background: var(--danger-glow); border: 1px solid rgba(248,113,113,.22);
-      gap: 10px; align-items: flex-start;
-    }
-    .gps-error.visible { display: flex; }
-    .gps-error svg { width: 17px; height: 17px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
-    .gps-error p { font-size: 13px; color: var(--danger); line-height: 1.5; }
-
-    .gps-coords {
-      display: none;
-      align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px;
-      background: var(--success-glow); border: 1px solid color-mix(in srgb,var(--success) 28%,transparent);
-      font-size: 11px; font-family: 'Courier New', monospace; color: var(--success);
-    }
-    .gps-coords.visible { display: flex; }
-    .gps-coords svg { width: 13px; height: 13px; }
-
-    .cat-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      width: 100%; transition: opacity .3s;
-    }
-    .cat-grid.disabled { opacity: .35; pointer-events: none; }
-
-    .cat-btn {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; padding: 18px 10px; border-radius: var(--radius-xl);
-      border: 1px solid; cursor: pointer; font-family: inherit;
-      font-size: 12px; font-weight: 500; text-align: center; line-height: 1.35;
-      transition: opacity .15s, transform .1s;
-    }
-    .cat-btn:active { transform: scale(.96); }
-    .cat-btn svg { width: 24px; height: 24px; }
-    .cat-btn .ext { width: 11px; height: 11px; opacity: .4; }
-    .cat-btn.food    { background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.22); color: #fb923c; }
-    .cat-btn.train   { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.22); color: #60a5fa; }
-    .cat-btn.conbini { background: rgba(34,197,94,.08);  border-color: rgba(34,197,94,.22);  color: #4ade80; }
-    .cat-btn.toilet  { background: rgba(168,85,247,.08); border-color: rgba(168,85,247,.22); color: #c084fc; }
-
-    .gps-hint     { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.7; }
-    .gps-privacy  { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.7; margin-top: 4px; }
-
-    /* ============================================================
-       DEMO BOTTOM BANNER
-    ============================================================ */
-    #demo-banner { position: sticky; bottom: 0; z-index: 10; padding: 0 14px 14px; }
-    .demo-banner-inner {
-      display: flex; align-items: center; gap: 12px;
-      padding: 11px 14px; border-radius: var(--radius-lg);
-      background: color-mix(in srgb, var(--warning) 8%, var(--bg));
-      border: 1px solid color-mix(in srgb, var(--warning) 20%, transparent);
-      backdrop-filter: blur(8px); cursor: pointer; transition: background .15s;
-    }
-    .demo-banner-inner:hover { background: color-mix(in srgb, var(--warning) 13%, var(--bg)); }
-    .demo-banner-icon {
-      width: 30px; height: 30px; border-radius: var(--radius-sm);
-      background: var(--warning-glow); flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
-    }
-    .demo-banner-icon svg { width: 15px; height: 15px; color: var(--warning); }
-    .demo-banner-title { font-size: 12px; font-weight: 600; color: var(--warning); }
-    .demo-banner-sub   { font-size: 11px; color: color-mix(in srgb, var(--warning) 60%, transparent); }
-
-    /* ============================================================
-       HIGHLIGHTS & MISC
-    ============================================================ */
-    mark {
-      background: var(--accent-glow);
-      color: var(--accent);
-      border-radius: 3px; padding: 0 2px;
-      font-style: normal;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { animation: spin .8s linear infinite; }
+    .link-btn.primary { background: var(--accent-glow); color: var(--accent); border-color: var(--accent-border); font-weight: 600; }
 
     /* Loading splash */
     #loading-splash {
-      position: fixed; inset: 0; z-index: 999;
-      background: var(--bg);
+      position: fixed; inset: 0; z-index: 999; background: var(--bg);
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
     }
     #loading-splash.gone { display: none; }
@@ -691,59 +377,43 @@
       display: flex; align-items: center; justify-content: center;
     }
     .splash-icon svg { width: 26px; height: 26px; color: var(--accent); }
-    #loading-splash p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; }
   </style>
 </head>
 <body>
 
 <div id="loading-splash">
   <div class="splash-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
   </div>
-  <p>TripMH טוען...</p>
+  <p style="font-size:13px; color:var(--text-muted); font-weight:500;">TripMH טוען...</p>
 </div>
 
-<div id="save-toast">נשמר בהצלחה</div>
+<div id="undo-toast" class="undo-toast">
+  <span>סומן כהושלם</span>
+  <button id="undo-btn" class="undo-btn">בטל פעולה</button>
+  <div class="undo-progress" id="undo-progress"></div>
+</div>
 
-<div class="upload-hint hidden" id="upload-hint" role="dialog" aria-modal="true" aria-label="העלאת קבצים">
+<div class="upload-hint hidden" id="upload-hint">
   <div class="upload-hint-box">
-    <div class="upload-hint-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      העלאת קבצי CSV
-    </div>
-    <ul class="upload-hint-list">
-      <li>
-        <span class="badge badge-main">מסלול</span>
-        <span>שמרו כ-<strong>מסלול ראשי.csv</strong> (או itinerary)</span>
-      </li>
-      <li>
-        <span class="badge badge-options">אופציות</span>
-        <span>שמרו כ-<strong>מסלול השלמה.csv</strong> (או options)</span>
-      </li>
-      <li>
-        <span class="badge badge-tips">טיפים</span>
-        <span>שמרו כ-<strong>טיפים.csv</strong> (או tips)</span>
-      </li>
-    </ul>
-    <div class="upload-hint-cols">
-      המערכת יודעת כעת לזהות את הקבצים באופן חכם יותר לפי שמות העמודות גם אם שם הקובץ אינו מדויק.
+    <div class="upload-hint-title">העלאת קבצי CSV</div>
+    <div style="font-size: 13px; color: var(--text-muted); margin-bottom:15px; line-height: 1.5;">
+      המערכת יודעת כעת לקרוא כמעט כל קובץ, אבל מומלץ לוודא שהשמות מכילים מילים ברורות (כמו "מסלול", "השלמה", או "טיפים").
     </div>
     <div class="hint-btn-row">
-      <button class="hint-pick" id="hint-pick-btn">בחר קבצים</button>
-      <button class="hint-cancel" id="hint-cancel-btn">ביטול</button>
+      <button class="hint-pick" id="hint-pick-btn">בחר קבצים להעלאה</button>
+      <button class="hint-cancel" id="hint-cancel-btn">סגור</button>
     </div>
   </div>
 </div>
 
-<div class="upload-hint hidden" id="edit-modal" role="dialog" aria-modal="true" aria-label="עריכת פריט">
-  <div class="upload-hint-box edit-box">
-    <div class="upload-hint-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      עריכת נתונים
-    </div>
-    <div id="edit-form-container" style="display: flex; flex-direction: column;">
-       </div>
-    <div class="hint-btn-row" style="margin-top: 15px;">
+<div class="upload-hint hidden" id="edit-modal">
+  <div class="upload-hint-box">
+    <div class="upload-hint-title">עריכת נתונים</div>
+    <div id="edit-form-container"></div>
+    <div class="hint-btn-row">
       <button class="hint-pick" id="edit-save-btn">שמור שינויים</button>
       <button class="hint-cancel" id="edit-cancel-btn">ביטול</button>
     </div>
@@ -751,363 +421,108 @@
 </div>
 
 <div id="app">
-
   <header id="app-header">
     <div class="header-top">
       <div class="logo">
         <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
         </div>
         <div>
           <div class="logo-title">TripMH</div>
           <span class="logo-sub" id="demo-label" style="display:none">נתוני הדגמה</span>
         </div>
       </div>
-
       <div class="header-actions">
-        <div class="pill-counter" id="progress-pill" style="display:none">
-          <div class="dot"></div>
-          <span id="progress-text">0/0</span>
-        </div>
-
-        <button class="icon-btn" id="theme-btn" title="החלפת ערכת נושא" aria-label="החלפת ערכת נושא">
-          <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-        </button>
-
-        <button class="icon-btn" id="export-btn" title="ייצא גיבוי JSON" aria-label="ייצא גיבוי JSON" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
-
-        <button class="icon-btn danger" id="clear-btn" title="נקה נתונים" aria-label="נקה נתונים" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        </button>
-
-        <button class="upload-btn" id="upload-btn" title="העלה קובץ CSV" aria-label="העלה קובץ CSV">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
+        <div class="pill-counter" id="progress-pill" style="display:none"><div class="dot"></div><span id="progress-text">0/0</span></div>
+        <button class="icon-btn" id="theme-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+        <button class="icon-btn danger" id="clear-btn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/></svg></button>
+        <button class="upload-btn" id="upload-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>
       </div>
     </div>
-
-    <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="חיפוש — מקום, אזור, מילת מפתח..." autocomplete="off" />
-      <button class="search-clear" id="search-clear" aria-label="נקה חיפוש">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-
-    <div class="error-banner" id="error-banner" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <p id="error-text"></p>
-      <button class="error-close" id="error-close" aria-label="סגור שגיאה">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-
-    <nav id="tab-bar" role="tablist" aria-label="ניווט לשוניות">
-      <button class="tab-btn active" data-tab="itinerary" role="tab" aria-selected="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        מסלול
-        <span class="tab-count" id="tab-count-itinerary"></span>
-      </button>
-      <button class="tab-btn" data-tab="options" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        אופציות
-        <span class="tab-count" id="tab-count-options"></span>
-      </button>
-      <button class="tab-btn" data-tab="tips" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
-        טיפים
-        <span class="tab-count" id="tab-count-tips"></span>
-      </button>
-      <button class="tab-btn" data-tab="nearby" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        סביבי
-        <span class="tab-count"></span>
-      </button>
+    <nav id="tab-bar">
+      <button class="tab-btn active" data-tab="itinerary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>מסלול</button>
+      <button class="tab-btn" data-tab="options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>אופציות</button>
+      <button class="tab-btn" data-tab="tips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>טיפים</button>
     </nav>
   </header>
 
   <main id="tab-content">
-    <div class="tab-panel active" id="panel-itinerary" role="tabpanel" aria-label="מסלול">
-      <div id="itinerary-content"></div>
-    </div>
-    <div class="tab-panel" id="panel-options" role="tabpanel" aria-label="אופציות">
-      <div id="options-content"></div>
-    </div>
-    <div class="tab-panel" id="panel-tips" role="tabpanel" aria-label="טיפים">
-      <div id="tips-content"></div>
-    </div>
-    <div class="tab-panel" id="panel-nearby" role="tabpanel" aria-label="סביבי">
-      <div id="nearby-inner">
-        <div class="nearby-hero">
-          <div class="nearby-hero-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          </div>
-          <h2>סביבי — GPS מהיר</h2>
-          <p>לחצו לאיתור מיקום מדויק, ואז בחרו קטגוריה לפתיחת Google Maps מיידית.</p>
-        </div>
-
-        <button class="gps-btn" id="gps-btn" aria-label="אתר מיקום GPS">
-          <svg id="gps-icon-locate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          <svg id="gps-icon-spin" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-          <svg id="gps-icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          <span id="gps-btn-text">אתר מיקום GPS</span>
-        </button>
-
-        <div class="gps-error" id="gps-error">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <p id="gps-error-text"></p>
-        </div>
-
-        <div class="gps-coords" id="gps-coords">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>
-          <span id="gps-coords-text"></span>
-        </div>
-
-        <div class="cat-grid disabled" id="cat-grid">
-          <button class="cat-btn food" data-query="restaurants near me" aria-label="מסעדות קרובות">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
-            מסעדות קרובות
-            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </button>
-          <button class="cat-btn train" data-query="train station" aria-label="תחנת רכבת">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><circle cx="8.5" cy="16.5" r="1.5"/><circle cx="15.5" cy="16.5" r="1.5"/><path d="M8.5 18 6 21"/><path d="M15.5 18 18 21"/></svg>
-            תחנת רכבת
-            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </button>
-          <button class="cat-btn conbini" data-query="7-Eleven FamilyMart Lawson convenience store" aria-label="קונביני קרוב">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Conbini קרוב
-            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </button>
-          <button class="cat-btn toilet" data-query="public toilet restroom" aria-label="שירותים ציבוריים">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="2"/><circle cx="15" cy="7" r="2"/><path d="M5 22V12.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2V22"/><path d="M12 10.5V22"/></svg>
-            שירותים ציבוריים
-            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </button>
-        </div>
-
-        <p class="gps-hint" id="gps-hint">יש לאתר מיקום תחילה כדי להפעיל את הכפתורים</p>
-        <p class="gps-privacy">המיקום נשאר במכשיר בלבד ואינו נשלח לשרת.<br>לחיצה על כפתור פותחת Google Maps בלבד.</p>
-      </div>
-    </div>
+    <div class="tab-panel active" id="panel-itinerary"></div>
+    <div class="tab-panel" id="panel-options"></div>
+    <div class="tab-panel" id="panel-tips"></div>
   </main>
-
-  <div id="demo-banner" style="display:none">
-    <div class="demo-banner-inner" id="demo-banner-inner">
-      <div class="demo-banner-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </div>
-      <div>
-        <div class="demo-banner-title">מוצגים נתוני הדגמה</div>
-        <div class="demo-banner-sub">לחצו להעלאת קבצי CSV אישיים</div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<input type="file" id="file-input" accept=".csv,text/csv" multiple style="display:none" aria-label="בחר קבצי CSV" />
+<input type="file" id="file-input" accept=".csv,text/csv" multiple style="display:none" />
 
 <script>
 'use strict';
 
-/* ================================================================
-   CONSTANTS & STATE
-================================================================ */
-const LS_COMPLETED = 'tripmh_completed_v3';
-const LS_DARK      = 'tripmh_dark_v1';
-const LS_DATA      = 'tripmh_data_v3';
-const LS_TAB       = 'tripmh_tab_v1';
-const LS_EXPANDED  = 'tripmh_expanded_v1';
-const LS_SEARCH    = 'tripmh_search_v1';
-const LS_META      = 'tripmh_meta_v1';
+const LS_DATA = 'tripmh_data_v4';
+const LS_COMPLETED = 'tripmh_completed_v4';
+const LS_EXPANDED = 'tripmh_expanded_v4';
+const LS_TAB = 'tripmh_tab_v4';
 
 let state = {
   activeTab: 'itinerary',
-  searchQuery: '',
-  isDark: true,
-  isDemo: false,
-  data: null,         // { itinerary:[], options:[], tips:[], errors:[] }
+  data: { itinerary: [], options: [], tips: [] },
   completedIds: new Set(),
-  expandedIds: new Set(),
-  gpsCoords: null,
+  expandedIds: new Set()
 };
 
 let currentEditId = null;
+let undoTimer = null;
+let lastToggle = null; // { id, wasCompleted }
 
-/* ================================================================
-   UTILITIES
-================================================================ */
-function safeGet(key, fallback) {
-  try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : fallback; }
-  catch { return fallback; }
-}
-function safeSet(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
-}
+function safeGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+function safeSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
-/* ----------------------------------------------------------------
-   PERSISTENCE
----------------------------------------------------------------- */
 function persistAll() {
-  safeSet(LS_DATA,      state.data);
+  safeSet(LS_DATA, state.data);
   safeSet(LS_COMPLETED, Array.from(state.completedIds));
-  safeSet(LS_EXPANDED,  Array.from(state.expandedIds));
-  safeSet(LS_SEARCH,    state.searchQuery);
-  safeSet(LS_TAB,       state.activeTab);
-}
-
-function persistCompleted() {
-  safeSet(LS_COMPLETED, Array.from(state.completedIds));
-}
-
-function persistExpanded() {
   safeSet(LS_EXPANDED, Array.from(state.expandedIds));
+  safeSet(LS_TAB, state.activeTab);
 }
 
-function persistMeta(fileNames, totalItems) {
-  safeSet(LS_META, { savedAt: new Date().toISOString(), fileNames, totalItems });
-}
+function genId() { return 'i' + Math.random().toString(36).substr(2, 9); }
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-let _toastTimer = null;
-function showSaveToast(msg) {
-  let toast = document.getElementById('save-toast');
-  if (!toast) return;
-  toast.textContent = msg || 'נשמר';
-  toast.classList.add('visible');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
-}
-
-function restorePersistedState() {
-  state.completedIds = new Set(safeGet(LS_COMPLETED, []));
-  state.expandedIds  = new Set(safeGet(LS_EXPANDED, []));
-  const savedSearch = safeGet(LS_SEARCH, '');
-  if (savedSearch) {
-    state.searchQuery = savedSearch;
-    const inp = document.getElementById('search-input');
-    if (inp) {
-      inp.value = savedSearch;
-      document.getElementById('search-clear')?.classList.add('visible');
-    }
-  }
-  const savedTab = safeGet(LS_TAB, 'itinerary');
-  if (['itinerary','options','tips','nearby'].includes(savedTab)) state.activeTab = savedTab;
-  
-  const savedData = safeGet(LS_DATA, null);
-  if (savedData && (savedData.itinerary?.length || savedData.options?.length || savedData.tips?.length)) {
-    state.data   = savedData;
-    state.isDemo = false;
-    return true; 
-  }
-  return false; 
-}
-
-/* ----------------------------------------------------------------
-   EXPORT
----------------------------------------------------------------- */
-function exportBackup() {
-  try {
-    const meta = safeGet(LS_META, {});
-    const payload = {
-      version: 3,
-      exportedAt: new Date().toISOString(),
-      meta,
-      data: state.data,
-      completedIds: Array.from(state.completedIds),
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement('a'), { href: url, download: 'tripmh-backup-' + new Date().toISOString().slice(0,10) + '.json' });
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-    showSaveToast('גיבוי הורד בהצלחה');
-  } catch(e) {
-    showError('שגיאה בייצוא: ' + String(e));
-  }
-}
-
-let _id = 0;
-function genId() { return 'i' + Date.now() + '_' + (++_id); }
-
-function esc(str) {
-  return String(str || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function highlight(text, query) {
-  if (!query || !text) return esc(text);
-  const safe = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  return esc(text).replace(new RegExp('(' + safe + ')', 'gi'), '<mark>$1</mark>');
-}
-
-function stripUrls(text) {
-  return (text || '').replace(/https?:\/\/[^\s,\u0000-\u001F"<>[\]`{|}\\^]+/gi,'').replace(/\s{2,}/g,' ').trim();
-}
-
-function extractLinks(text) {
-  const matches = (text || '').match(/https?:\/\/[^\s,\u0000-\u001F"<>[\]`{|}\\^]+/gi) || [];
-  return matches.map(url => {
-    let label = 'פתח קישור';
-    if (/play\.google|apps\.apple/i.test(url))     label = 'הורד אפליקציה';
-    else if (/maps\.google|goo\.gl\/maps/i.test(url)) label = 'פתח במפות';
-    else if (/chabad/i.test(url))                  label = 'אתר חב"ד';
-    else if (/smart-ex|smartex/i.test(url))        label = 'SmartEX';
-    else if (/booking\.com/i.test(url))            label = 'Booking.com';
-    else if (/airbnb/i.test(url))                  label = 'Airbnb';
-    else if (/tripadvisor/i.test(url))             label = 'TripAdvisor';
-    return { label, url };
-  });
-}
-
-function buildMapUrl(rawUrl, placeName, address) {
-  if (rawUrl && rawUrl.startsWith('http')) {
-    if (/\/0$|\/$/.test(rawUrl)) {
-      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((placeName + ' ' + (address||'')).trim());
-    }
-    return rawUrl;
-  }
-  const q = [(placeName||''), (address||'')].filter(Boolean).join(' ').trim();
-  if (q) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
-  return '';
-}
+const SVG = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  dur:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>',
+  bus:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>',
+  book:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  nav:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>',
+  link:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  warn:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  chev:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>'
+};
 
 function detectIcon(text) {
   const t = (text || '').toLowerCase();
-  if (t.match(/מסעד|אוכל|food|ramen|sushi|noodle|yakiniku|wagyu/)) return '🍜';
-  if (t.match(/מוזיאון|museum/))                                   return '🏛️';
-  if (t.match(/מקדש|shrine|temple|jinja|torii/))                   return '⛩️';
-  if (t.match(/פארק|גן|park|garden/))                              return '🌿';
-  if (t.match(/קניות|שוק|market|mall|shop|akihabara|harajuku/))    return '🛍️';
-  if (t.match(/מלון|hotel|hostel|inn|ryokan/))                     return '🏨';
-  if (t.match(/תחנה|station|train|shinkansen|bullet/))             return '🚆';
-  if (t.match(/טיסה|flight|airport|narita|haneda|kansai/))         return '✈️';
-  if (t.match(/הר|mountain|fuji|yama/))                            return '🗻';
-  if (t.match(/ים|חוף|beach|sea|ocean/))                           return '🏖️';
-  if (t.match(/טיול|הליכה|hike|trail|trek/))                       return '🥾';
-  if (t.match(/קפה|cafe|coffee|kissaten/))                         return '☕';
-  if (t.match(/בר|bar|sake|izakaya/))                              return '🍶';
-  if (t.match(/שבת|shabbat|shabbos/))                              return '🕯️';
-  if (t.match(/כשר|kosher/))                                       return '✡️';
-  if (t.match(/חב"ד|chabad/))                                      return '🕍';
-  if (t.match(/אמנות|art|gallery/))                                return '🎨';
-  if (t.match(/אנימה|anime|manga|otaku/))                          return '🎌';
-  if (t.match(/אונסן|onsen|spa|bath|sento/))                       return '♨️';
-  if (t.match(/אוטובוס|bus|metro|subway/))                         return '🚌';
-  if (t.match(/טקס|ceremony|matsuri|festival/))                    return '🎎';
+  if (t.match(/מסעד|אוכל|food|ramen|sushi/)) return '🍜';
+  if (t.match(/מוזיאון|museum/)) return '🏛️';
+  if (t.match(/מקדש|shrine|temple/)) return '⛩️';
+  if (t.match(/פארק|גן|park|garden/)) return '🌿';
+  if (t.match(/קניות|שוק|market|mall/)) return '🛍️';
+  if (t.match(/מלון|hotel|ryokan/)) return '🏨';
+  if (t.match(/תחנה|station|train/)) return '🚆';
+  if (t.match(/טיסה|flight|airport/)) return '✈️';
+  if (t.match(/אוטובוס|bus/)) return '🚌';
   return '📍';
 }
 
-/* ================================================================
-   CSV PARSER
-================================================================ */
+function buildMapUrl(place, address) {
+  const q = [(place||''), (address||'')].filter(Boolean).join(' ').trim();
+  if (q && !q.startsWith('http')) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  return q || '';
+}
+
 function parseCSVRaw(text) {
-  const rows = [];
-  let i = 0, n = text.length;
+  const rows = []; let i = 0, n = text.length;
   while (i < n) {
     const row = [];
     while (i < n) {
@@ -1116,8 +531,7 @@ function parseCSVRaw(text) {
         i++;
         while (i < n) {
           if (text[i] === '"') {
-            if (text[i+1] === '"') { field += '"'; i += 2; }
-            else { i++; break; }
+            if (text[i+1] === '"') { field += '"'; i += 2; } else { i++; break; }
           } else { field += text[i++]; }
         }
       } else {
@@ -1128,943 +542,382 @@ function parseCSVRaw(text) {
     }
     if (i < n && text[i] === '\r') i++;
     if (i < n && text[i] === '\n') i++;
-    if (row.length > 0 && !(row.length === 1 && row[0] === '')) rows.push(row);
+    if (row.length > 0 && row.some(c => c !== '')) rows.push(row);
   }
   return rows;
 }
 
-function normalizeHeader(h) { return h.trim().toLowerCase().replace(/\s+/g,' ').replace(/[()（）]/g,'').trim(); }
+const Aliases = {
+  place: ['שם', 'מקום', 'יעד', 'אטרקציה', 'title', 'name'],
+  day: ['יום', 'day'],
+  date: ['תאריך', 'date'],
+  time: ['שעות', 'זמן', 'מתי', 'time'],
+  dur: ['משך', 'זמן מוערך', 'duration'],
+  cost: ['עלות', 'מחיר', 'כסף', 'cost'],
+  trans: ['תחבורה', 'הגעה', 'איך'],
+  book: ['הזמנה', 'שריון', 'כרטיסים', 'booking'],
+  desc: ['תיאור', 'הערות', 'מה', 'desc'],
+  area: ['אזור', 'עיר', 'מיקום במפה', 'כתובת'],
+  link: ['קישור', 'אתר', 'url', 'link'],
+  linkLabel: ['שם הקישור', 'טקסט']
+};
 
-function rowsToObjects(rows) {
-  if (rows.length < 2) return [];
-  const headers = rows[0].map(normalizeHeader);
-  return rows.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = (row[i] || '').trim(); });
-    return obj;
-  });
-}
-
-function col(obj, ...terms) {
+function getCol(obj, type) {
   const keys = Object.keys(obj);
-  for (const term of terms) {
-    const t = term.toLowerCase();
-    const found = keys.find(k => k.includes(t));
-    if (found !== undefined && obj[found]) return obj[found].trim();
+  for (const alias of Aliases[type] || []) {
+    const k = keys.find(x => x.includes(alias));
+    if (k !== undefined && obj[k]) return obj[k].trim();
   }
   return '';
 }
 
-/* Improved detection for smarter file routing */
-function detectFileType(filename) {
-  const name = (filename || '').toLowerCase();
-  if (/tip|טיפ|hint|notes/.test(name)) return 'tips';
-  if (/opt|אופצי|חלופ|altern|השלמה/.test(name)) return 'options';
-  if (/itinerary|ראשי|מסלול(?!.*השלמה)|schedule|program/.test(name)) return 'itinerary';
-  return 'auto'; 
+function parseDateVal(d) {
+  const m = (d||'').match(/(\d+)\/(\d+)\/(\d+)/);
+  return m ? new Date(`${m[3]}-${m[2]}-${m[1]}`).getTime() : 0;
 }
 
-function autoClassifyRow(obj) {
-  const keys = Object.keys(obj).map(k => k.toLowerCase());
-  if (keys.some(k => /קטגוריה|category|טיפ|tip/.test(k))) return 'tip';
+function handleFiles(files) {
+  if (!files || !files.length) return;
+  document.getElementById('upload-hint').classList.add('hidden');
+  document.getElementById('loading-splash').classList.remove('gone');
   
-  const dayVal = col(obj, 'יום', 'day', 'תאריך', 'date');
-  if (!dayVal) {
-    const hasPlaceOrTime = col(obj, 'שם המקום', 'place', 'שעות', 'time', 'אזור במסלול');
-    return hasPlaceOrTime ? 'option' : 'tip';
-  }
-  if (/אופצי|option|חלופ|השלמה/i.test(dayVal)) return 'option';
-  return 'itinerary';
-}
-
-function parseItineraryRow(obj, idx) {
-  const icon        = col(obj, 'אייקון', 'icon', 'emoji');
-  const day         = col(obj, 'יום', 'day');
-  const date        = col(obj, 'תאריך', 'date');
-  const dayLabel    = [day, date].filter(Boolean).join(' • ') || 'ללא תאריך';
-
-  const placeName   = col(obj, 'שם המקום', 'מקום', 'place', 'name', 'יעד', 'destination') || ('יעד ' + (idx+1));
-  const mapPos      = col(obj, 'מיקום במפה', 'מיקום', 'position', 'location', 'address', 'כתובת');
-  const description = col(obj, 'תיאור ומה ניתן לעשות', 'תיאור', 'description', 'הסבר', 'פרטים', 'details');
-  const transport   = col(obj, 'תחבורה והגעה', 'תחבורה', 'transport', 'transit', 'הגעה', 'getting there');
-  const area        = col(obj, 'אזור במסלול', 'אזור', 'area', 'city', 'region', 'עיר');
-  const timeRange   = col(obj, 'טווח שעות מומלץ', 'טווח שעות', 'שעות', 'time range', 'hours', 'שעה');
-  const duration    = col(obj, 'זמן מוערך', 'זמן', 'duration', 'estimated time', 'משך');
-  const cost        = col(obj, 'עלות משוערת', 'עלות', 'cost', 'price', 'מחיר', 'כסף');
-  const booking     = col(obj, 'איך ומתי להזמין', 'הזמנה', 'booking', 'reservation', 'checkin', "צ'ק", 'book');
-  const link        = col(obj, 'קישור', 'link', 'url', 'website');
-  const navFromPrev = col(obj, 'ניווט גוגל מפות', 'ניווט', 'navigation', 'nav', 'google maps');
-
-  const mapUrl      = buildMapUrl(link, placeName, mapPos);
-  const navUrl      = buildMapUrl(navFromPrev, placeName, mapPos);
-
-  const requiresBooking = !!booking || /שריון|book|reserv/i.test(Object.values(obj).join(' '));
-  const resolvedIcon = icon || detectIcon(placeName + ' ' + description + ' ' + area);
-
-  return {
-    id: genId(), type: 'itinerary',
-    dayLabel, day, date,
-    placeName, mapPos, description, transport, area,
-    timeRange, duration, cost, booking, link, navFromPrev,
-    mapUrl, navUrl,
-    requiresBooking,
-    icon: resolvedIcon,
-    links: extractLinks(description + ' ' + link),
-  };
-}
-
-function parseOptionsRow(obj, idx) {
-  const base = parseItineraryRow(obj, idx);
-  return { ...base, type: 'option' };
-}
-
-function parseTipRow(obj, idx) {
-  const category = col(obj, 'קטגוריה', 'category', 'נושא', 'topic', 'סוג') || 'כללי';
-  const title    = col(obj, 'כותרת', 'title', 'שם', 'name', 'ריכוז') || ('טיפ ' + (idx+1));
-  const content  = col(obj, 'תוכן', 'content', 'הסבר', 'פרטים', 'description', 'details', 'הנחיות', 'טקסט', 'text')
-                || Object.values(obj).filter(Boolean).join(' | ');
-  return {
-    id: genId(), type: 'tip',
-    category, title, content,
-    links: extractLinks(content),
-  };
-}
-
-function parseSingleCSV(text, filename) {
-  const errors = [], items = [];
-  const rows = parseCSVRaw(text);
-  if (rows.length < 2) { errors.push('הקובץ ריק או חסרות שורות נתונים'); return { items, errors }; }
-  const objects = rowsToObjects(rows);
-  const fileType = detectFileType(filename);
-
-  objects.forEach((obj, idx) => {
+  setTimeout(async () => {
     try {
-      let type = fileType;
-      if (type === 'auto') type = autoClassifyRow(obj);
+      const data = { itinerary: [], options: [], tips: [] };
+      for (const f of files) {
+        const text = await f.text();
+        const rows = parseCSVRaw(text);
+        if (rows.length < 2) continue;
+        const headers = rows[0].map(h => h.toLowerCase().trim());
+        
+        let fileType = 'itinerary';
+        if (/options|חלופ|השלמ/i.test(f.name)) fileType = 'options';
+        else if (/tips|טיפ/i.test(f.name)) fileType = 'tips';
 
-      if (type === 'tip')         items.push(parseTipRow(obj, idx));
-      else if (type === 'option') items.push(parseOptionsRow(obj, idx));
-      else                        items.push(parseItineraryRow(obj, idx));
-    } catch(e) { errors.push('שורה ' + (idx+2) + ': ' + String(e)); }
-  });
-
-  return { items, errors };
-}
-
-function parseCSVFiles(files) {
-  const result = { itinerary: [], options: [], tips: [], errors: [] };
-  files.forEach(f => {
-    const { items, errors } = parseSingleCSV(f.content, f.name);
-    result.errors.push(...errors.map(e => '[' + f.name + '] ' + e));
-    items.forEach(item => {
-      if      (item.type === 'itinerary') result.itinerary.push(item);
-      else if (item.type === 'option')    result.options.push(item);
-      else if (item.type === 'tip')       result.tips.push(item);
-    });
-  });
-  result.itinerary.sort((a,b) => {
-    const ka = (a.day||'') + (a.date||'');
-    const kb = (b.day||'') + (b.date||'');
-    return ka.localeCompare(kb, 'he');
-  });
-  return result;
-}
-
-/* ================================================================
-   SAMPLE DATA
-================================================================ */
-function getSampleData() {
-  return {
-    itinerary: [
-      { id:'d1', type:'itinerary', dayLabel:'יום שני • 14/10/2026', day:'יום שני', date:'14/10/2026',
-        placeName:'מקדש פושימי אינארי', area:'קיוטו', icon:'⛩️',
-        timeRange:'09:00–11:30', duration:'2.5 שעות', cost:'חינם',
-        transport:'רכבת מיוקיו תחנת Fushimi Inari (Kintetsu)',
-        description:'מקדש שינטו מפורסם עם אלפי שערי טוריי כתומים. הכניסה חופשית. מומלץ להגיע מוקדם לפני ההמונים.',
-        booking:'', mapPos:'Fushimi Inari, Kyoto', link:'',
-        mapUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
-        navUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
-        navFromPrev:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
-        requiresBooking:false, links:[], },
-    ],
-    options: [],
-    tips: [
-      { id:'dt1', type:'tip', category:'תחבורה ו-JR Pass',
-        title:'JR Pass — קנו לפני הטיסה',
-        content:'רכשו JR Pass בישראל לפני הטיסה — זול יותר ב-20%. מכסה את כל קווי JR. הורידו SmartEX: https://smart-ex.jp/en/',
-        links:[{label:'SmartEX App', url:'https://smart-ex.jp/en/'}] }
-    ],
-    errors: []
-  };
-}
-
-/* ================================================================
-   SVG ICONS
-================================================================ */
-const SVG = {
-  check:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
-  clock:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-  pin:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
-  duration:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>',
-  bus:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>',
-  booking:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
-  navigate:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>',
-  nav2:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
-  extlink:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
-  chevron:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
-  warn:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-  link:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-  edit:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
-};
-
-/* ================================================================
-   RENDERING
-================================================================ */
-function renderActivityCard(item, completed, q) {
-  const hasCost      = !!item.cost;
-  const hasDuration  = !!item.duration;
-  const hasTransport = !!item.transport;
-  const hasDesc      = !!item.description;
-  const hasBooking   = !!item.booking;
-  const hasMapUrl    = !!item.mapUrl;
-  const hasNavUrl    = !!item.navUrl;
-  const hasLinks     = item.links && item.links.length > 0;
-  const hasDetails   = hasDesc || hasBooking || hasMapUrl || hasNavUrl || hasLinks || !!item.mapPos || true; // Always true to show Edit
-
-  let costDisplay = '';
-  if (hasCost) {
-    const c = item.cost.trim();
-    costDisplay = (c === 'חינם' || c === 'free' || c === 'Free') ? 'חינם'
-                : c.startsWith('₪') ? c : '₪' + c;
-  }
-
-  return `<article class="card${completed ? ' done' : ''}" data-id="${esc(item.id)}">
-    ${item.requiresBooking && !completed ? `<div class="card-booking-bar">${SVG.warn}<span>דורש שריון / הזמנה מראש</span></div>` : ''}
-    <div class="card-body">
-      <button class="card-check" data-check="${esc(item.id)}"
-        aria-label="${completed ? 'סמן כלא הושלם' : 'סמן כהושלם'}"
-        aria-pressed="${completed}"
-        style="border-color:${completed ? 'var(--success)' : ''};background:${completed ? 'var(--success-glow)' : ''};color:${completed ? 'var(--success)' : 'transparent'}"
-      >${completed ? SVG.check : ''}</button>
-      <div class="card-main">
-        <div class="card-title-row">
-          <div class="card-title-inner">
-            <span class="card-icon" aria-hidden="true">${esc(item.icon || '📍')}</span>
-            <h3 class="card-title">${highlight(item.placeName, q)}</h3>
-          </div>
-          ${hasDetails ? `<span class="chevron">${SVG.chevron}</span>` : ''}
-        </div>
-        <div class="card-badges">
-          ${item.timeRange ? `<span class="badge badge-time">${SVG.clock}${esc(item.timeRange)}</span>` : ''}
-          ${hasDuration    ? `<span class="badge badge-dur">${SVG.duration}${esc(item.duration)}</span>` : ''}
-          ${item.area      ? `<span class="badge badge-area">${SVG.pin}${highlight(item.area, q)}</span>` : ''}
-          ${hasCost        ? `<span class="badge badge-cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${esc(costDisplay)}</span>` : ''}
-          ${hasTransport   ? `<span class="badge badge-transport">${SVG.bus}${highlight(item.transport, q)}</span>` : ''}
-        </div>
-      </div>
-    </div>
-    ${hasDetails ? `<div class="card-details">
-      <div class="details-divider"></div>
-      ${hasDesc ? `<p class="card-desc">${highlight(item.description, q)}</p>` : ''}
-      ${hasBooking ? `<div class="detail-row booking">${SVG.booking}<span class="dr-label">הזמנה</span><span class="dr-value">${highlight(item.booking, q)}</span></div>` : ''}
-      ${item.mapPos && item.mapPos !== item.placeName ? `<div class="detail-row address">${SVG.pin}<span class="dr-label">מיקום</span><span class="dr-value">${esc(item.mapPos)}</span></div>` : ''}
-      <div class="nav-btns">
-        ${hasMapUrl ? `<button class="nav-btn" data-nav="${esc(item.mapUrl)}">
-          ${SVG.navigate}
-          <span class="nav-label">פתח מיקום ב-Google Maps<span class="nav-sub">מיקום המקום</span></span>
-          <span class="nav-ext">${SVG.extlink}</span>
-        </button>` : ''}
-      </div>
-      ${hasLinks ? item.links.map(l => `<a class="link-btn" href="${esc(l.url)}" target="_blank" rel="noopener">
-        ${SVG.link}${esc(l.label)}<span class="ext">${SVG.extlink}</span>
-      </a>`).join('') : ''}
-      <button class="link-btn edit-btn" data-edit="${esc(item.id)}" style="margin-top:4px; justify-content:center;">
-        ${SVG.edit} ערוך נתונים
-      </button>
-    </div>` : ''}
-  </article>`;
-}
-
-function renderTipCard(item, completed, q) {
-  const displayContent = stripUrls(item.content);
-  const hasLinks = item.links && item.links.length > 0;
-
-  return `<article class="card tip-card${completed ? ' done' : ''}" data-id="${esc(item.id)}">
-    <div class="card-body">
-      <button class="card-check" data-check="${esc(item.id)}"
-        aria-label="${completed ? 'סמן כלא נקרא' : 'סמן כנקרא'}"
-        aria-pressed="${completed}"
-        style="border-color:${completed ? 'var(--success)' : ''};background:${completed ? 'var(--success-glow)' : ''};color:${completed ? 'var(--success)' : 'transparent'}"
-      >${completed ? SVG.check : ''}</button>
-      <div class="card-main">
-        <div class="card-title-row">
-          <h3 class="card-title">${highlight(item.title, q)}</h3>
-          <span class="chevron">${SVG.chevron}</span>
-        </div>
-        ${displayContent ? `<p class="tip-preview">${esc(displayContent)}</p>` : ''}
-      </div>
-    </div>
-    <div class="card-details">
-      <div class="details-divider"></div>
-      ${displayContent ? `<p class="card-desc">${highlight(displayContent, q)}</p>` : ''}
-      ${hasLinks ? item.links.map(l => `<a class="tip-link-btn" href="${esc(l.url)}" target="_blank" rel="noopener">
-        ${SVG.extlink}${esc(l.label)}<span class="ext-icon">${SVG.extlink}</span>
-      </a>`).join('') : ''}
-      <button class="link-btn edit-btn" data-edit="${esc(item.id)}" style="margin-top:8px; justify-content:center;">
-        ${SVG.edit} ערוך נתונים
-      </button>
-    </div>
-  </article>`;
-}
-
-function renderEmpty(svgStr, color, title, desc) {
-  return `<div class="empty-state">
-    <div class="empty-icon" style="background:color-mix(in srgb,${color} 10%,transparent);border:1px solid color-mix(in srgb,${color} 22%,transparent)">
-      ${svgStr}
-    </div>
-    <h3>${esc(title)}</h3>
-    <p>${esc(desc)}</p>
-  </div>`;
-}
-
-function noResultsHtml(q) {
-  return `<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור “${esc(q)}”</p></div>`;
-}
-
-function filterActivity(items, q) {
-  if (!q) return items;
-  const lq = q.toLowerCase();
-  return items.filter(i =>
-    (i.placeName||'').toLowerCase().includes(lq) ||
-    (i.area||'').toLowerCase().includes(lq) ||
-    (i.description||'').toLowerCase().includes(lq) ||
-    (i.dayLabel||'').toLowerCase().includes(lq)
-  );
-}
-function filterTips(items, q) {
-  if (!q) return items;
-  const lq = q.toLowerCase();
-  return items.filter(i =>
-    (i.title||'').toLowerCase().includes(lq) ||
-    (i.category||'').toLowerCase().includes(lq) ||
-    (i.content||'').toLowerCase().includes(lq)
-  );
-}
-
-function renderItinerary() {
-  const el = document.getElementById('itinerary-content');
-  const items = state.data?.itinerary || [];
-  const q = state.searchQuery;
-  const filtered = filterActivity(items, q);
-
-  if (items.length === 0) {
-    el.innerHTML = renderEmpty(
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
-      'var(--accent)', 'אין מסלול ראשי עדיין',
-      'העלו קובץ CSV של המסלול שלכם בעזרת כפתור הפלוס למעלה'
-    );
-    return;
-  }
-  if (filtered.length === 0) { el.innerHTML = noResultsHtml(q); return; }
-
-  const map = new Map();
-  filtered.forEach(item => {
-    const key = item.dayLabel || 'ללא תאריך';
-    if (!map.has(key)) map.set(key, []);
-    map.get(key).push(item);
-  });
-
-  let html = '';
-  map.forEach((activities, dayKey) => {
-    const done  = activities.filter(a => state.completedIds.has(a.id)).length;
-    const total = activities.length;
-    const pct   = total > 0 ? (done / total * 100) : 0;
-    const allDone = done === total && total > 0;
-
-    html += `<div>
-      <div class="section-header">
-        <div class="section-header-left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--accent);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span class="section-header-title">${esc(dayKey)}</span>
-        </div>
-        <span class="section-badge${allDone ? ' all-done' : ''}">${done}/${total}</span>
-      </div>
-      <div class="progress-bar-wrap"><div class="progress-bar-fill${allDone ? ' done' : ''}" style="width:${pct}%"></div></div>
-      <div class="cards-list">${activities.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}</div>
-    </div>`;
-  });
-  el.innerHTML = html;
-}
-
-function renderOptions() {
-  const el = document.getElementById('options-content');
-  const items = state.data?.options || [];
-  const q = state.searchQuery;
-  const filtered = filterActivity(items, q);
-
-  if (items.length === 0) {
-    el.innerHTML = renderEmpty(
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:38px;height:38px;color:var(--warning)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
-      'var(--warning)', 'אין מסלולי השלמה',
-      'העלו קובץ אופציות ומסלולי השלמה (options.csv)'
-    );
-    return;
-  }
-  if (filtered.length === 0) { el.innerHTML = noResultsHtml(q); return; }
-
-  el.innerHTML = `
-    <div class="options-count-label">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      ${filtered.length} אופציות זמינות
-    </div>
-    <div class="cards-list">${filtered.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}</div>`;
-}
-
-function renderTips() {
-  const el = document.getElementById('tips-content');
-  const items = state.data?.tips || [];
-  const q = state.searchQuery;
-  const filtered = filterTips(items, q);
-
-  if (items.length === 0) {
-    el.innerHTML = renderEmpty(
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:38px;height:38px;color:var(--success)"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
-      'var(--success)', 'אין טיפים',
-      'העלו קובץ טיפים ומידע כללי לטיול'
-    );
-    return;
-  }
-  if (filtered.length === 0) { el.innerHTML = noResultsHtml(q); return; }
-
-  const map = new Map();
-  filtered.forEach(item => {
-    const key = item.category || 'כללי';
-    if (!map.has(key)) map.set(key, []);
-    map.get(key).push(item);
-  });
-
-  let html = '';
-  map.forEach((tips, cat) => {
-    html += `<div>
-      <div class="section-header">
-        <div class="section-header-left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:var(--success);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-          <span class="section-header-title">${esc(cat)}</span>
-        </div>
-        <span class="section-badge">${tips.length}</span>
-      </div>
-      <div class="cards-list">${tips.map(item => renderTipCard(item, state.completedIds.has(item.id), q)).join('')}</div>
-    </div>`;
-  });
-  el.innerHTML = html;
-}
-
-function renderAll() {
-  renderItinerary();
-  renderOptions();
-  renderTips();
-  updateCounts();
-  updateProgress();
-  
-  if (state.expandedIds.size > 0) {
-    state.expandedIds.forEach(id => {
-      const card = document.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
-      if (card) card.classList.add('expanded');
-    });
-  }
-}
-
-function updateCounts() {
-  const d = state.data;
-  [['itinerary', d?.itinerary?.length||0], ['options', d?.options?.length||0], ['tips', d?.tips?.length||0]].forEach(([tab, n]) => {
-    const el = document.getElementById('tab-count-' + tab);
-    if (el) el.textContent = n > 0 ? n : '';
-  });
-}
-
-function updateProgress() {
-  const d = state.data;
-  const pill = document.getElementById('progress-pill');
-  if (!d) { pill.style.display = 'none'; return; }
-  const all = [...(d.itinerary||[]), ...(d.options||[]), ...(d.tips||[])];
-  if (all.length === 0) { pill.style.display = 'none'; return; }
-  const done = all.filter(i => state.completedIds.has(i.id)).length;
-  pill.style.display = 'flex';
-  document.getElementById('progress-text').textContent = done + '/' + all.length;
-}
-
-function setTab(tabId) {
-  state.activeTab = tabId;
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    const active = btn.dataset.tab === tabId;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-selected', active);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => {
-    p.classList.toggle('active', p.id === 'panel-' + tabId);
-  });
-  safeSet(LS_TAB, tabId);
-}
-
-function toggleComplete(id) {
-  if (state.completedIds.has(id)) state.completedIds.delete(id);
-  else state.completedIds.add(id);
-  persistCompleted();
-  showSaveToast(state.completedIds.has(id) ? 'סומן כהושלם' : 'הוסר סימון');
-  renderAll();
-}
-
-function applyTheme() {
-  document.documentElement.classList.toggle('dark',  state.isDark);
-  document.documentElement.classList.toggle('light', !state.isDark);
-  document.getElementById('theme-icon-sun').style.display  = state.isDark ? 'block' : 'none';
-  document.getElementById('theme-icon-moon').style.display = state.isDark ? 'none'  : 'block';
-  try { localStorage.setItem(LS_DARK, String(state.isDark)); } catch {}
-}
-
-function loadDemoData() {
-  state.data = getSampleData();
-  state.isDemo = true;
-  document.getElementById('demo-label').style.display = 'block';
-  document.getElementById('demo-banner').style.display = 'block';
-  document.getElementById('clear-btn').style.display   = 'none';
-}
-
-function clearData() {
-  if (!confirm('למחוק את כל הנתונים ולחזור לנתוני הדגמה?')) return;
-  try {
-    [LS_DATA, LS_COMPLETED, LS_EXPANDED, LS_SEARCH, LS_META].forEach(k => localStorage.removeItem(k));
-  } catch {}
-  state.completedIds = new Set();
-  state.expandedIds  = new Set();
-  state.searchQuery  = '';
-  const inp = document.getElementById('search-input');
-  if (inp) inp.value = '';
-  document.getElementById('search-clear')?.classList.remove('visible');
-  document.getElementById('export-btn').style.display = 'none';
-  loadDemoData();
-  renderAll();
-  showSaveToast('הנתונים נמחקו');
-}
-
-/* ================================================================
-   FILE UPLOAD
-================================================================ */
-function setUploading(on) {
-  const btn = document.getElementById('upload-btn');
-  if (on) {
-    btn.classList.add('loading');
-    btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
-  } else {
-    btn.classList.remove('loading');
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-  }
-}
-
-async function handleFiles(files) {
-  if (!files || files.length === 0) return;
-  setUploading(true);
-  hideError();
-  try {
-    const loaded = await Promise.all(
-      Array.from(files).map(f => f.text().then(content => ({ name: f.name, content })))
-    );
-    const result = parseCSVFiles(loaded);
-
-    const prevIdMap = new Map();
-    if (state.data) {
-      [...(state.data.itinerary||[]), ...(state.data.options||[]), ...(state.data.tips||[])].forEach(item => {
-        const key = (item.placeName || item.title || '').trim().toLowerCase();
-        if (key) prevIdMap.set(key, item.id);
-      });
-    }
-
-    state.data   = result;
-    state.isDemo = false;
-
-    const newCompleted = new Set();
-    [...(result.itinerary||[]), ...(result.options||[]), ...(result.tips||[])].forEach(item => {
-      const key = (item.placeName || item.title || '').trim().toLowerCase();
-      const oldId = prevIdMap.get(key);
-      if (oldId && state.completedIds.has(oldId)) newCompleted.add(item.id);
-    });
-    state.completedIds = newCompleted;
-
-    const fileNames   = Array.from(files).map(f => f.name);
-    const totalItems  = (result.itinerary?.length||0) + (result.options?.length||0) + (result.tips?.length||0);
-    persistMeta(fileNames, totalItems);
-    persistAll();
-
-    document.getElementById('demo-label').style.display = 'none';
-    document.getElementById('demo-banner').style.display = 'none';
-    document.getElementById('clear-btn').style.display   = 'flex';
-    document.getElementById('export-btn').style.display  = 'flex';
-
-    if (result.errors.length > 0) showError(result.errors.slice(0,3).join(' • '));
-
-    if      (result.itinerary.length > 0) setTab('itinerary');
-    else if (result.options.length > 0)   setTab('options');
-    else if (result.tips.length > 0)      setTab('tips');
-
-    renderAll();
-    showSaveToast('קבצים נטענו בהצלחה (' + totalItems + ' פריטים)');
-  } catch(e) {
-    showError('שגיאה בטעינת הקובץ: ' + String(e));
-  }
-  setUploading(false);
-}
-
-function showError(msg) {
-  document.getElementById('error-banner').style.display = 'flex';
-  document.getElementById('error-text').textContent = msg;
-}
-function hideError() { document.getElementById('error-banner').style.display = 'none'; }
-
-/* ================================================================
-   EDIT ITEM LOGIC
-================================================================ */
-function openEditModal(id) {
-  let item = state.data.itinerary.find(i => i.id === id) || 
-             state.data.options.find(i => i.id === id) || 
-             state.data.tips.find(i => i.id === id);
-  if (!item) return;
-
-  currentEditId = id;
-  const container = document.getElementById('edit-form-container');
-  let html = '';
-
-  if (item.type === 'tip') {
-    html = `
-      <div class="edit-group">
-        <label class="edit-label">כותרת הטיפ</label>
-        <input type="text" class="edit-input" id="edit-title" value="${esc(item.title)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">קטגוריה</label>
-        <input type="text" class="edit-input" id="edit-category" value="${esc(item.category)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">תוכן</label>
-        <textarea class="edit-input" id="edit-content">${esc(item.content)}</textarea>
-      </div>
-    `;
-  } else {
-    html = `
-      <div class="edit-group">
-        <label class="edit-label">שם המקום</label>
-        <input type="text" class="edit-input" id="edit-placeName" value="${esc(item.placeName)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">יום ותאריך (למשל: יום ראשון • 15/10)</label>
-        <input type="text" class="edit-input" id="edit-dayLabel" value="${esc(item.dayLabel)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">תיאור</label>
-        <textarea class="edit-input" id="edit-description">${esc(item.description)}</textarea>
-      </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div class="edit-group">
-          <label class="edit-label">אזור / עיר</label>
-          <input type="text" class="edit-input" id="edit-area" value="${esc(item.area)}">
-        </div>
-        <div class="edit-group">
-          <label class="edit-label">טווח שעות</label>
-          <input type="text" class="edit-input" id="edit-timeRange" value="${esc(item.timeRange)}">
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div class="edit-group">
-          <label class="edit-label">זמן מוערך</label>
-          <input type="text" class="edit-input" id="edit-duration" value="${esc(item.duration)}">
-        </div>
-        <div class="edit-group">
-          <label class="edit-label">עלות משוערת</label>
-          <input type="text" class="edit-input" id="edit-cost" value="${esc(item.cost)}">
-        </div>
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">תחבורה והגעה</label>
-        <input type="text" class="edit-input" id="edit-transport" value="${esc(item.transport)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">איך ומתי להזמין</label>
-        <input type="text" class="edit-input" id="edit-booking" value="${esc(item.booking)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">מיקום במפה / כתובת (לניווט)</label>
-        <input type="text" class="edit-input" id="edit-mapPos" value="${esc(item.mapPos)}">
-      </div>
-      <div class="edit-group">
-        <label class="edit-label">קישור (אתר)</label>
-        <input type="text" class="edit-input" id="edit-link" value="${esc(item.link)}">
-      </div>
-    `;
-  }
-
-  container.innerHTML = html;
-  document.getElementById('edit-modal').classList.remove('hidden');
-}
-
-function saveEditModal() {
-  if (!currentEditId) return;
-
-  let item = state.data.itinerary.find(i => i.id === currentEditId) || 
-             state.data.options.find(i => i.id === currentEditId) || 
-             state.data.tips.find(i => i.id === currentEditId);
-
-  if (!item) return;
-
-  const val = (id) => document.getElementById(id)?.value || '';
-
-  if (item.type === 'tip') {
-    item.title = val('edit-title');
-    item.category = val('edit-category') || 'כללי';
-    item.content = val('edit-content');
-    item.links = extractLinks(item.content);
-  } else {
-    item.placeName = val('edit-placeName');
-    item.dayLabel = val('edit-dayLabel');
-    item.description = val('edit-description');
-    item.area = val('edit-area');
-    item.timeRange = val('edit-timeRange');
-    item.duration = val('edit-duration');
-    item.cost = val('edit-cost');
-    item.transport = val('edit-transport');
-    item.booking = val('edit-booking');
-    item.mapPos = val('edit-mapPos');
-    item.link = val('edit-link');
-
-    item.mapUrl = buildMapUrl(item.link, item.placeName, item.mapPos);
-    item.requiresBooking = !!item.booking || /שריון|book|reserv/i.test(item.description + ' ' + item.booking);
-    item.links = extractLinks(item.description + ' ' + item.link);
-    item.icon = detectIcon(item.placeName + ' ' + item.description + ' ' + item.area);
-  }
-
-  // שמירה מלאה למערכת
-  persistAll();
-  renderAll();
-  
-  document.getElementById('edit-modal').classList.add('hidden');
-  currentEditId = null;
-  showSaveToast('השינויים נשמרו בהצלחה');
-}
-
-function closeEditModal() {
-  document.getElementById('edit-modal').classList.add('hidden');
-  currentEditId = null;
-}
-
-/* ================================================================
-   CARD INTERACTIONS
-================================================================ */
-function initCardInteractions() {
-  document.getElementById('tab-content').addEventListener('click', e => {
-    
-    // Check Complete
-    const checkBtn = e.target.closest('[data-check]');
-    if (checkBtn) {
-      e.stopPropagation();
-      toggleComplete(checkBtn.dataset.check);
-      return;
-    }
-
-    // Edit Button
-    const editBtn = e.target.closest('[data-edit]');
-    if (editBtn) {
-      e.stopPropagation();
-      openEditModal(editBtn.dataset.edit);
-      return;
-    }
-
-    // Nav Links
-    const navBtn = e.target.closest('[data-nav]');
-    if (navBtn) {
-      e.stopPropagation();
-      window.open(navBtn.dataset.nav, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Expand/Collapse Card
-    const cardBody = e.target.closest('.card-body');
-    if (cardBody) {
-      const card = cardBody.closest('.card');
-      if (card) {
-        const details = card.querySelector('.card-details');
-        if (details) {
-          const willExpand = !card.classList.contains('expanded');
-          card.classList.toggle('expanded', willExpand);
-          const id = card.dataset.id;
-          if (id) {
-            if (willExpand) state.expandedIds.add(id);
-            else state.expandedIds.delete(id);
-            persistExpanded();
+        for (let i = 1; i < rows.length; i++) {
+          const obj = {};
+          headers.forEach((h, j) => obj[h] = rows[i][j]);
+          
+          if (fileType === 'tips' || getCol(obj, 'place') === '') {
+            data.tips.push({
+              id: genId(), type: 'tip', _idx: i,
+              title: getCol(obj, 'place') || 'טיפ ' + i,
+              category: getCol(obj, 'area') || 'כללי',
+              content: getCol(obj, 'desc') || Object.values(obj).join(' ')
+            });
+          } else {
+            const place = getCol(obj, 'place');
+            const desc = getCol(obj, 'desc');
+            const book = getCol(obj, 'book');
+            const day = getCol(obj, 'day');
+            const date = getCol(obj, 'date');
+            const isOpt = fileType === 'options' || /אופצי/i.test(day);
+            
+            const item = {
+              id: genId(), type: isOpt ? 'option' : 'itinerary', _idx: i,
+              placeName: place,
+              dayLabel: [day, date].filter(Boolean).join(' • ') || 'ללא תאריך',
+              dateVal: parseDateVal(date),
+              description: desc,
+              timeRange: getCol(obj, 'time'),
+              duration: getCol(obj, 'dur'),
+              cost: getCol(obj, 'cost'),
+              transport: getCol(obj, 'trans'),
+              booking: book,
+              area: getCol(obj, 'area'),
+              link: getCol(obj, 'link'),
+              linkLabel: getCol(obj, 'linkLabel') || 'מידע נוסף',
+              requiresBooking: !!book || /שריון|הזמנה|מראש/i.test(desc + ' ' + book),
+              icon: detectIcon(place + ' ' + desc)
+            };
+            item.mapUrl = buildMapUrl(item.link, item.placeName);
+            data[isOpt ? 'options' : 'itinerary'].push(item);
           }
         }
       }
-      return;
-    }
-  });
 
-  // Edit Modal Buttons
-  document.getElementById('edit-save-btn').addEventListener('click', saveEditModal);
-  document.getElementById('edit-cancel-btn').addEventListener('click', closeEditModal);
-  document.getElementById('edit-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('edit-modal')) closeEditModal();
-  });
+      data.itinerary.sort((a,b) => {
+        if(a.dateVal && b.dateVal && a.dateVal !== b.dateVal) return a.dateVal - b.dateVal;
+        return a._idx - b._idx; 
+      });
+
+      state.data = data;
+      state.completedIds = new Set();
+      persistAll();
+      setTab(data.itinerary.length > 0 ? 'itinerary' : (data.options.length > 0 ? 'options' : 'tips'));
+      renderAll();
+      document.getElementById('clear-btn').style.display = 'flex';
+    } catch(e) { alert("שגיאה בקריאת הקובץ."); }
+    document.getElementById('loading-splash').classList.add('gone');
+  }, 100);
 }
 
-/* ================================================================
-   GPS
-================================================================ */
-function initGPS() {
-  document.getElementById('gps-btn').addEventListener('click', () => {
-    if (!navigator.geolocation) {
-      showGPSError('הדפדפן אינו תומך ב-GPS. נסה Chrome או Safari.');
-      return;
-    }
-    setGPSLoading(true);
-    clearGPSError();
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        state.gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
-        setGPSLoading(false);
-        showGPSSuccess();
-      },
-      err => {
-        let msg = 'לא ניתן לאתר מיקום.';
-        if (err.code === 1) msg = 'הגישה ל-GPS נדחתה. אפשר הרשאת מיקום בהגדרות.';
-        else if (err.code === 2) msg = 'איתות GPS לא זמין. נסה באזור פתוח יותר.';
-        else if (err.code === 3) msg = 'תם הזמן לאיתור מיקום. נסה שוב.';
-        setGPSLoading(false);
-        showGPSError(msg);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-    );
-  });
-
-  document.getElementById('cat-grid').addEventListener('click', e => {
-    const btn = e.target.closest('.cat-btn');
-    if (!btn || !state.gpsCoords) return;
-    const { lat, lng } = state.gpsCoords;
-    const url = 'https://www.google.com/maps/search/' + encodeURIComponent(btn.dataset.query) + '/@' + lat + ',' + lng + ',16z';
-    window.open(url, '_blank', 'noopener,noreferrer');
-  });
-}
-
-function setGPSLoading(on) {
-  const btn = document.getElementById('gps-btn');
-  btn.disabled = on;
-  document.getElementById('gps-icon-locate').style.display  = on ? 'none' : (state.gpsCoords ? 'none'  : 'block');
-  document.getElementById('gps-icon-spin').style.display    = on ? 'block': 'none';
-  document.getElementById('gps-icon-refresh').style.display = on ? 'none' : (state.gpsCoords ? 'block' : 'none');
-  document.getElementById('gps-btn-text').textContent       = on ? 'מאתר...' : (state.gpsCoords ? 'רענן מיקום' : 'אתר מיקום GPS');
-}
-
-function showGPSSuccess() {
-  const { lat, lng, accuracy } = state.gpsCoords;
-  document.getElementById('gps-btn').classList.add('success');
-  document.getElementById('gps-icon-locate').style.display  = 'none';
-  document.getElementById('gps-icon-spin').style.display    = 'none';
-  document.getElementById('gps-icon-refresh').style.display = 'block';
-  document.getElementById('gps-btn-text').textContent = 'רענן מיקום';
-  document.getElementById('gps-coords').classList.add('visible');
-  document.getElementById('gps-coords-text').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5) + ' ±' + accuracy + 'מ\'';
-  document.getElementById('cat-grid').classList.remove('disabled');
-  document.getElementById('gps-hint').style.display = 'none';
-}
-function showGPSError(msg) {
-  document.getElementById('gps-error').classList.add('visible');
-  document.getElementById('gps-error-text').textContent = msg;
-}
-function clearGPSError() { document.getElementById('gps-error').classList.remove('visible'); }
-
-function showUploadHint() { document.getElementById('upload-hint').classList.remove('hidden'); }
-function hideUploadHint() { document.getElementById('upload-hint').classList.add('hidden'); }
-
-/* ================================================================
-   INIT
-================================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-
-  const savedDark = localStorage.getItem(LS_DARK);
-  state.isDark = savedDark !== null ? savedDark === 'true' : true;
-  applyTheme();
-
-  const hadData = restorePersistedState();
-  if (hadData) {
-    document.getElementById('clear-btn').style.display  = 'flex';
-    document.getElementById('export-btn').style.display = 'flex';
-    const meta = safeGet(LS_META, null);
-    if (meta?.savedAt) {
-      const d = new Date(meta.savedAt);
-      const label = document.getElementById('demo-label');
-      if (label) { label.textContent = 'שמור • ' + d.toLocaleDateString('he-IL'); label.style.display = 'block'; }
-    }
-  } else {
-    loadDemoData();
+/* RENDERING */
+function renderCard(item, completed) {
+  let costStr = '';
+  if (item.cost) {
+    let c = item.cost.replace(/₪/g,'').trim();
+    costStr = (c.toLowerCase()==='free' || c==='חינם') ? 'חינם' : '₪' + c;
   }
+  
+  const hasDetails = true; // Always true for edit button
 
-  setTab(state.activeTab);
+  return `
+    <article class="card ${completed ? 'done' : ''}" data-id="${item.id}">
+      ${(item.requiresBooking && !completed) ? `<div class="card-booking-bar">${SVG.warn}<span>דורש שריון / הזמנה מראש</span></div>` : ''}
+      <div class="card-body">
+        <button class="card-check" data-check="${item.id}" style="border-color:${completed?'var(--success)':''};background:${completed?'var(--success-glow)':''};color:${completed?'var(--success)':'transparent'}">${completed?SVG.check:''}</button>
+        <div class="card-main">
+          <div class="card-title-row">
+            <div class="card-title-inner">
+              <span class="card-icon">${item.icon}</span>
+              <h3 class="card-title">${esc(item.placeName)}</h3>
+            </div>
+            <span class="chevron">${SVG.chev}</span>
+          </div>
+          <div class="card-badges">
+            ${item.timeRange ? `<span class="badge badge-time">${SVG.clock}${esc(item.timeRange)}</span>` : ''}
+            ${item.area ? `<span class="badge badge-area">${SVG.pin}${esc(item.area)}</span>` : ''}
+            ${costStr ? `<span class="badge badge-cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${esc(costStr)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="card-details">
+        <div class="details-divider"></div>
+        ${item.description ? `<p class="card-desc">${esc(item.description)}</p>` : ''}
+        ${item.booking ? `<div class="detail-row booking">${SVG.book}<span class="dr-label">הזמנה:</span><span class="dr-value">${esc(item.booking)}</span></div>` : ''}
+        ${item.transport ? `<div class="detail-row">${SVG.bus}<span class="dr-label">הגעה:</span><span class="dr-value">${esc(item.transport)}</span></div>` : ''}
+        <div class="nav-btns" style="margin-top:8px">
+          <button class="link-btn primary" data-nav="${esc(item.mapUrl)}">${SVG.nav} נווט ב-Google Maps</button>
+          ${item.link ? `<a href="${esc(item.link)}" target="_blank" class="link-btn">${SVG.link} ${esc(item.linkLabel || 'קישור לאתר')}</a>` : ''}
+          <button class="link-btn" data-edit="${item.id}" style="justify-content:center; border-style:dashed;">${SVG.edit} ערוך נתונים</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderList(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items || !items.length) {
+    el.innerHTML = `<div style="text-align:center; padding: 50px 20px; color:var(--text-muted)">אין נתונים להצגה בעמודה זו.</div>`;
+    return;
+  }
+  
+  const map = new Map();
+  items.forEach(i => {
+    const key = i.dayLabel || i.category || 'כללי';
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(i);
+  });
+
+  let html = '';
+  map.forEach((arr, key) => {
+    const done = arr.filter(a => state.completedIds.has(a.id)).length;
+    const allDone = done === arr.length;
+    html += `
+      <div>
+        <div class="section-header">
+          <div class="section-header-left">
+            <span class="section-header-title">${esc(key)}</span>
+          </div>
+          <span class="section-badge ${allDone?'all-done':''}">${done}/${arr.length}</span>
+        </div>
+        <div class="cards-list">
+          ${arr.map(a => a.type==='tip' ? renderTipCard(a, state.completedIds.has(a.id)) : renderCard(a, state.completedIds.has(a.id))).join('')}
+        </div>
+      </div>
+    `;
+  });
+  el.innerHTML = html;
+}
+
+function renderTipCard(item, completed) {
+  return `
+    <article class="card ${completed ? 'done' : ''}" data-id="${item.id}">
+      <div class="card-body">
+        <button class="card-check" data-check="${item.id}" style="border-color:${completed?'var(--success)':''};background:${completed?'var(--success-glow)':''};color:${completed?'var(--success)':'transparent'}">${completed?SVG.check:''}</button>
+        <div class="card-main">
+          <div class="card-title-row">
+            <h3 class="card-title">${esc(item.title)}</h3>
+            <span class="chevron">${SVG.chev}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-details">
+        <p class="card-desc">${esc(item.content)}</p>
+        <button class="link-btn" data-edit="${item.id}" style="justify-content:center; border-style:dashed;">${SVG.edit} ערוך</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderAll() {
+  renderList('panel-itinerary', state.data.itinerary);
+  renderList('panel-options', state.data.options);
+  renderList('panel-tips', state.data.tips);
+  
+  document.getElementById('progress-text').innerText = state.completedIds.size + '/' + (state.data.itinerary.length + state.data.options.length + state.data.tips.length);
+  document.getElementById('progress-pill').style.display = 'flex';
+
+  state.expandedIds.forEach(id => {
+    const c = document.querySelector(`.card[data-id="${id}"]`);
+    if(c) c.classList.add('expanded');
+  });
+}
+
+function setTab(t) {
+  state.activeTab = t;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-'+t));
+  persistAll();
+}
+
+function toggleComplete(id) {
+  const wasCompleted = state.completedIds.has(id);
+  if (wasCompleted) state.completedIds.delete(id);
+  else state.completedIds.add(id);
+  persistAll();
   renderAll();
+  
+  // Show Undo Toast
+  lastToggle = { id, wasCompleted };
+  const toast = document.getElementById('undo-toast');
+  toast.querySelector('span').innerText = wasCompleted ? 'הסרת סימון הושלם' : 'המקום סומן כהושלם';
+  toast.classList.remove('visible'); // reset animation
+  void toast.offsetWidth; // trigger reflow
+  toast.classList.add('visible');
+  
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(() => { toast.classList.remove('visible'); }, 10000);
+}
 
-  // Events
-  document.getElementById('tab-bar').addEventListener('click', e => {
-    const btn = e.target.closest('.tab-btn');
-    if (btn?.dataset.tab) setTab(btn.dataset.tab);
-  });
-
-  const searchInput = document.getElementById('search-input');
-  const searchClear = document.getElementById('search-clear');
-  searchInput.addEventListener('input', () => {
-    state.searchQuery = searchInput.value;
-    searchClear.classList.toggle('visible', !!searchInput.value);
-    safeSet(LS_SEARCH, state.searchQuery);
+document.getElementById('undo-btn').addEventListener('click', () => {
+  if (lastToggle) {
+    if (lastToggle.wasCompleted) state.completedIds.add(lastToggle.id);
+    else state.completedIds.delete(lastToggle.id);
+    persistAll();
     renderAll();
-  });
-  searchClear.addEventListener('click', () => {
-    searchInput.value = '';
-    state.searchQuery = '';
-    searchClear.classList.remove('visible');
-    safeSet(LS_SEARCH, '');
-    renderAll();
-  });
-
-  document.getElementById('theme-btn').addEventListener('click', () => {
-    state.isDark = !state.isDark;
-    applyTheme();
-  });
-
-  document.getElementById('export-btn').addEventListener('click', exportBackup);
-  document.getElementById('clear-btn').addEventListener('click', clearData);
-
-  const fileInput = document.getElementById('file-input');
-  document.getElementById('upload-btn').addEventListener('click', showUploadHint);
-  document.getElementById('demo-banner-inner').addEventListener('click', showUploadHint);
-
-  document.getElementById('hint-pick-btn').addEventListener('click', () => {
-    hideUploadHint();
-    fileInput.click();
-  });
-  document.getElementById('hint-cancel-btn').addEventListener('click', hideUploadHint);
-  document.getElementById('upload-hint').addEventListener('click', e => {
-    if (e.target === document.getElementById('upload-hint')) hideUploadHint();
-  });
-
-  fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
-  document.getElementById('error-close').addEventListener('click', hideError);
-
-  document.getElementById('app').addEventListener('dragover', e => e.preventDefault());
-  document.getElementById('app').addEventListener('drop', e => {
-    e.preventDefault();
-    hideUploadHint();
-    handleFiles(e.dataTransfer.files);
-  });
-
-  initCardInteractions();
-  initGPS();
-
-  document.getElementById('loading-splash').classList.add('gone');
+  }
+  document.getElementById('undo-toast').classList.remove('visible');
+  clearTimeout(undoTimer);
 });
+
+// Edit Modal Logic
+function openEdit(id) {
+  currentEditId = id;
+  const item = [...state.data.itinerary, ...state.data.options, ...state.data.tips].find(x => x.id === id);
+  if(!item) return;
+
+  const cont = document.getElementById('edit-form-container');
+  if (item.type === 'tip') {
+    cont.innerHTML = `
+      <div class="edit-group"><label class="edit-label">כותרת</label><input id="ed-title" class="edit-input" value="${esc(item.title)}"></div>
+      <div class="edit-group"><label class="edit-label">תוכן</label><textarea id="ed-desc" class="edit-input">${esc(item.content)}</textarea></div>
+    `;
+  } else {
+    cont.innerHTML = `
+      <div class="edit-group"><label class="edit-label">שם המקום</label><input id="ed-title" class="edit-input" value="${esc(item.placeName)}"></div>
+      <div class="edit-group"><label class="edit-label">יום / תאריך</label><input id="ed-day" class="edit-input" value="${esc(item.dayLabel)}"></div>
+      <div class="edit-group"><label class="edit-label">תיאור ופרטים</label><textarea id="ed-desc" class="edit-input">${esc(item.description)}</textarea></div>
+      <div style="display:flex;gap:10px">
+        <div class="edit-group" style="flex:1"><label class="edit-label">שעות</label><input id="ed-time" class="edit-input" value="${esc(item.timeRange)}"></div>
+        <div class="edit-group" style="flex:1"><label class="edit-label">עלות</label><input id="ed-cost" class="edit-input" value="${esc(item.cost)}"></div>
+      </div>
+      <div class="edit-group"><label class="edit-label">הזמנה / כרטיסים (השאר ריק אם לא צריך)</label><input id="ed-book" class="edit-input" value="${esc(item.booking)}"></div>
+      <div class="edit-group"><label class="edit-label">כתובת לניווט (באנגלית)</label><input id="ed-area" class="edit-input" value="${esc(item.area)}"></div>
+      <div style="display:flex;gap:10px">
+        <div class="edit-group" style="flex:2"><label class="edit-label">קישור לאתר</label><input id="ed-link" class="edit-input" value="${esc(item.link)}"></div>
+        <div class="edit-group" style="flex:1"><label class="edit-label">שם הקישור</label><input id="ed-linklb" class="edit-input" value="${esc(item.linkLabel)}"></div>
+      </div>
+    `;
+  }
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+document.getElementById('edit-save-btn').addEventListener('click', () => {
+  const item = [...state.data.itinerary, ...state.data.options, ...state.data.tips].find(x => x.id === currentEditId);
+  if (item.type === 'tip') {
+    item.title = document.getElementById('ed-title').value;
+    item.content = document.getElementById('ed-desc').value;
+  } else {
+    item.placeName = document.getElementById('ed-title').value;
+    item.dayLabel = document.getElementById('ed-day').value;
+    item.description = document.getElementById('ed-desc').value;
+    item.timeRange = document.getElementById('ed-time').value;
+    item.cost = document.getElementById('ed-cost').value;
+    item.booking = document.getElementById('ed-book').value;
+    item.area = document.getElementById('ed-area').value;
+    item.link = document.getElementById('ed-link').value;
+    item.linkLabel = document.getElementById('ed-linklb').value;
+    item.requiresBooking = !!item.booking || /שריון|מראש/i.test(item.description);
+    item.mapUrl = buildMapUrl(item.link, item.placeName);
+  }
+  persistAll();
+  renderAll();
+  document.getElementById('edit-modal').classList.add('hidden');
+});
+document.getElementById('edit-cancel-btn').addEventListener('click', () => document.getElementById('edit-modal').classList.add('hidden'));
+
+
+/* Listeners */
+document.getElementById('tab-content').addEventListener('click', e => {
+  const check = e.target.closest('[data-check]');
+  if(check) { e.stopPropagation(); return toggleComplete(check.dataset.check); }
+  
+  const nav = e.target.closest('[data-nav]');
+  if(nav) { e.stopPropagation(); return window.open(nav.dataset.nav, '_blank'); }
+
+  const edit = e.target.closest('[data-edit]');
+  if(edit) { e.stopPropagation(); return openEdit(edit.dataset.edit); }
+
+  const card = e.target.closest('.card');
+  if(card) {
+    card.classList.toggle('expanded');
+    if(card.classList.contains('expanded')) state.expandedIds.add(card.dataset.id);
+    else state.expandedIds.delete(card.dataset.id);
+    persistAll();
+  }
+});
+
+document.getElementById('tab-bar').addEventListener('click', e => {
+  const b = e.target.closest('.tab-btn');
+  if(b) setTab(b.dataset.tab);
+});
+
+document.getElementById('upload-btn').addEventListener('click', () => document.getElementById('upload-hint').classList.remove('hidden'));
+document.getElementById('hint-cancel-btn').addEventListener('click', () => document.getElementById('upload-hint').classList.add('hidden'));
+document.getElementById('hint-pick-btn').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', e => handleFiles(e.target.files));
+
+document.getElementById('theme-btn').addEventListener('click', () => {
+  document.documentElement.classList.toggle('light');
+  document.documentElement.classList.toggle('dark');
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if(!confirm('למחוק הכל?')) return;
+  localStorage.clear();
+  location.reload();
+});
+
+// Boot
+const saved = safeGet(LS_DATA, null);
+if (saved && (saved.itinerary.length || saved.options.length)) {
+  state.data = saved;
+  state.completedIds = new Set(safeGet(LS_COMPLETED, []));
+  state.expandedIds = new Set(safeGet(LS_EXPANDED, []));
+  document.getElementById('clear-btn').style.display = 'flex';
+  setTab(safeGet(LS_TAB, 'itinerary'));
+  renderAll();
+} else {
+  document.getElementById('demo-banner').style.display = 'block';
+  // simple demo
+  state.data.itinerary = [{ id:'1', type:'itinerary', placeName:'ברוכים הבאים ל-TripMH', dayLabel:'היום', description:'לחצו על כפתור הפלוס למעלה כדי להעלות קבצי מסלול (CSV). המערכת תדע לסדר אותם אוטומטית!', requiresBooking:false, icon:'👋' }];
+  renderAll();
+}
+document.getElementById('loading-splash').classList.add('gone');
+
 </script>
 </body>
 </html>
