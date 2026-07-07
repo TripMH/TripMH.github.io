@@ -8,8 +8,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="description" content="TripMH — מדריך נסיעה אופליין, CSV, GPS וניווט" />
   <title>TripMH — מדריך הנסיעה שלך</title>
-
-  <!-- Lucide icons via CDN (tiny subset loaded as SVG strings inline) -->
   <style>
     /* ============================================================
        RESET & BASE
@@ -20,59 +18,61 @@
        DESIGN TOKENS — DARK (default)
     ============================================================ */
     :root {
-      --bg:           #0c0f14;
-      --bg-elevated:  #131820;
-      --bg-card:      #161c25;
-      --bg-muted:     #1c2230;
-      --border:       rgba(255,255,255,0.08);
-      --text:         #e8ecf2;
-      --text-muted:   #6b7a94;
-      --text-dim:     #3d4a60;
+      --bg:            #0c0f14;
+      --bg-elevated:   #131820;
+      --bg-card:       #161c25;
+      --bg-muted:      #1c2230;
+      --border:        rgba(255,255,255,0.08);
+      --text:          #e8ecf2;
+      --text-muted:    #6b7a94;
+      --text-dim:      #3d4a60;
 
-      --accent:       #22d3ee;          /* cyan */
-      --accent-glow:  rgba(34,211,238,0.13);
-      --accent-border:rgba(34,211,238,0.28);
-      --success:      #4ade80;          /* green */
-      --success-glow: rgba(74,222,128,0.12);
-      --warning:      #fbbf24;          /* amber */
-      --warning-glow: rgba(251,191,36,0.12);
-      --danger:       #f87171;          /* red */
-      --danger-glow:  rgba(248,113,113,0.12);
+      --accent:        #22d3ee;
+      --accent-glow:   rgba(34,211,238,0.12);
+      --accent-border: rgba(34,211,238,0.28);
+      --success:       #4ade80;
+      --success-glow:  rgba(74,222,128,0.12);
+      --warning:       #fbbf24;
+      --warning-glow:  rgba(251,191,36,0.11);
+      --danger:        #f87171;
+      --danger-glow:   rgba(248,113,113,0.11);
+      --purple:        #c084fc;
+      --purple-glow:   rgba(192,132,252,0.11);
 
       --radius-sm: 8px;
       --radius:    12px;
       --radius-lg: 16px;
       --radius-xl: 20px;
-
-      --header-h: 120px; /* approximate sticky header height */
     }
 
     /* ============================================================
-       LIGHT THEME OVERRIDES
+       LIGHT THEME
     ============================================================ */
     html.light {
-      --bg:           #f4f6fa;
-      --bg-elevated:  #eaecf1;
-      --bg-card:      #ffffff;
-      --bg-muted:     #edf0f5;
-      --border:       rgba(0,0,0,0.09);
-      --text:         #111827;
-      --text-muted:   #6b7280;
-      --text-dim:     #9ca3af;
+      --bg:            #f2f4f8;
+      --bg-elevated:   #e8ecf1;
+      --bg-card:       #ffffff;
+      --bg-muted:      #edf0f5;
+      --border:        rgba(0,0,0,0.08);
+      --text:          #111827;
+      --text-muted:    #6b7280;
+      --text-dim:      #9ca3af;
 
-      --accent:       #0891b2;
-      --accent-glow:  rgba(8,145,178,0.10);
-      --accent-border:rgba(8,145,178,0.25);
-      --success:      #16a34a;
-      --success-glow: rgba(22,163,74,0.10);
-      --warning:      #d97706;
-      --warning-glow: rgba(217,119,6,0.10);
-      --danger:       #dc2626;
-      --danger-glow:  rgba(220,38,38,0.10);
+      --accent:        #0891b2;
+      --accent-glow:   rgba(8,145,178,0.09);
+      --accent-border: rgba(8,145,178,0.25);
+      --success:       #16a34a;
+      --success-glow:  rgba(22,163,74,0.09);
+      --warning:       #d97706;
+      --warning-glow:  rgba(217,119,6,0.09);
+      --danger:        #dc2626;
+      --danger-glow:   rgba(220,38,38,0.09);
+      --purple:        #9333ea;
+      --purple-glow:   rgba(147,51,234,0.09);
     }
 
     /* ============================================================
-       GLOBAL TYPOGRAPHY
+       GLOBAL
     ============================================================ */
     html {
       font-family: 'Segoe UI', 'Heebo', 'Arial', sans-serif;
@@ -88,9 +88,6 @@
       direction: rtl;
     }
 
-    /* ============================================================
-       SCROLLBAR
-    ============================================================ */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
@@ -116,8 +113,8 @@
       top: 0;
       z-index: 20;
       background: color-mix(in srgb, var(--bg) 92%, transparent);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
     }
 
@@ -128,21 +125,18 @@
       padding: 14px 16px 8px;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .logo { display: flex; align-items: center; gap: 8px; }
     .logo-icon {
       width: 34px; height: 34px;
       border-radius: var(--radius-sm);
       background: var(--accent-glow);
       display: flex; align-items: center; justify-content: center;
       border: 1px solid var(--accent-border);
+      flex-shrink: 0;
     }
     .logo-icon svg { width: 18px; height: 18px; color: var(--accent); }
     .logo-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.1; }
-    .logo-demo  { font-size: 10px; font-weight: 600; color: var(--warning); display: block; }
+    .logo-sub    { font-size: 10px; font-weight: 600; color: var(--warning); display: block; }
 
     .header-actions { display: flex; align-items: center; gap: 6px; }
 
@@ -152,10 +146,7 @@
       background: var(--bg-muted); font-size: 11px;
       font-family: 'Courier New', monospace; color: var(--text-muted);
     }
-    .pill-counter .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--success);
-    }
+    .pill-counter .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
 
     .icon-btn {
       width: 32px; height: 32px; border-radius: var(--radius-sm);
@@ -175,16 +166,62 @@
       transition: opacity .15s, transform .1s;
       box-shadow: 0 2px 8px rgba(34,211,238,.2);
     }
-    .upload-btn:hover { opacity: .88; }
+    .upload-btn:hover { opacity: .85; }
     .upload-btn:active { transform: scale(.9); }
     .upload-btn svg { width: 16px; height: 16px; }
     .upload-btn.loading { opacity: .6; cursor: not-allowed; }
 
-    /* Search */
-    .search-wrap {
-      position: relative;
-      padding: 0 16px 10px;
+    /* Upload hint modal */
+    .upload-hint {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 24px;
     }
+    .upload-hint.hidden { display: none; }
+    .upload-hint-box {
+      width: calc(100% - 32px); max-width: 448px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+    }
+    .upload-hint-title {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .upload-hint-title svg { width: 17px; height: 17px; color: var(--accent); }
+    .upload-hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .upload-hint-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+    }
+    .upload-hint-list .badge {
+      flex-shrink: 0; margin-top: 1px;
+      padding: 1px 8px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    }
+    .badge-main    { background: var(--accent-glow);   color: var(--accent);   border: 1px solid var(--accent-border); }
+    .badge-tips    { background: var(--success-glow);  color: var(--success);  border: 1px solid color-mix(in srgb,var(--success) 28%,transparent); }
+    .badge-options { background: var(--warning-glow);  color: var(--warning);  border: 1px solid color-mix(in srgb,var(--warning) 28%,transparent); }
+    .upload-hint-cols {
+      background: var(--bg-muted); border-radius: var(--radius-sm);
+      padding: 10px 12px; margin-bottom: 14px;
+      font-size: 11px; color: var(--text-muted); line-height: 1.8;
+    }
+    .upload-hint-cols strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 12px; }
+    .hint-btn-row { display: flex; gap: 8px; }
+    .hint-btn-row button {
+      flex: 1; padding: 10px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .hint-btn-row button:hover { opacity: .85; }
+    .hint-pick { background: var(--accent); color: var(--bg); border: none; }
+    .hint-cancel { background: var(--bg-muted); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* Search */
+    .search-wrap { position: relative; padding: 0 16px 10px; }
     .search-icon {
       position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
       width: 15px; height: 15px; color: var(--text-muted); pointer-events: none;
@@ -218,19 +255,13 @@
       display: flex; align-items: flex-start; gap: 8px;
     }
     .error-banner svg { width: 15px; height: 15px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
-    .error-banner p  { font-size: 12px; color: var(--danger); line-height: 1.5; }
-    .error-close {
-      margin-right: auto; background: none; border: none; cursor: pointer;
-      color: var(--danger); opacity: .6; flex-shrink: 0;
-    }
+    .error-banner p  { font-size: 12px; color: var(--danger); line-height: 1.5; flex: 1; }
+    .error-close { background: none; border: none; cursor: pointer; color: var(--danger); opacity: .6; flex-shrink: 0; }
     .error-close:hover { opacity: 1; }
     .error-close svg { width: 13px; height: 13px; }
 
     /* Tab bar */
-    #tab-bar {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-    }
+    #tab-bar { display: flex; border-bottom: 1px solid var(--border); }
     .tab-btn {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; gap: 3px;
@@ -257,12 +288,7 @@
     /* ============================================================
        MAIN CONTENT
     ============================================================ */
-    #tab-content {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
+    #tab-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
@@ -272,34 +298,32 @@
     .empty-state {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 72px 24px; text-align: center;
+      padding: 64px 24px; text-align: center; gap: 8px;
     }
     .empty-icon {
       width: 72px; height: 72px; border-radius: var(--radius-xl);
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
     .empty-icon svg { width: 38px; height: 38px; }
-    .empty-state h3 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-    .empty-state p  { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 280px; }
+    .empty-state h3 { font-size: 17px; font-weight: 600; color: var(--text); }
+    .empty-state p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; max-width: 280px; }
 
     /* ============================================================
-       DAY / CATEGORY STICKY HEADERS
+       DAY / CATEGORY STICKY SECTION HEADERS
     ============================================================ */
     .section-header {
       position: sticky;
-      top: 0; /* Will be overridden by JS if needed */
+      top: 0;
       z-index: 10;
       padding: 8px 16px;
-      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      background: color-mix(in srgb, var(--bg) 94%, transparent);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
     }
     .section-header-left { display: flex; align-items: center; gap: 8px; }
-    .section-header-left svg { width: 15px; height: 15px; color: var(--accent); flex-shrink: 0; }
-    .section-header-left.tips svg { color: var(--success); }
     .section-header-title { font-size: 13px; font-weight: 600; color: var(--text); }
     .section-badge {
       font-size: 10px; font-family: 'Courier New', monospace;
@@ -307,10 +331,10 @@
       background: var(--bg-muted); color: var(--text-muted);
     }
     .section-badge.all-done { background: var(--success-glow); color: var(--success); }
+    .section-badge.options  { background: var(--warning-glow); color: var(--warning); }
 
     .progress-bar-wrap {
-      height: 2px; background: var(--border); border-radius: 2px;
-      overflow: hidden; margin-top: 5px;
+      height: 2px; background: var(--border); border-radius: 2px; overflow: hidden;
     }
     .progress-bar-fill {
       height: 100%; border-radius: 2px;
@@ -319,11 +343,11 @@
     .progress-bar-fill.done { background: var(--success); }
 
     /* ============================================================
-       CARDS CONTAINER
+       CARDS LIST
     ============================================================ */
     .cards-list {
-      padding: 12px 16px;
-      display: flex; flex-direction: column; gap: 10px;
+      padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 8px;
     }
 
     /* ============================================================
@@ -334,159 +358,210 @@
       border: 1px solid var(--border);
       background: var(--bg-card);
       overflow: hidden;
-      transition: border-color .2s, opacity .2s;
-      cursor: pointer;
+      transition: border-color .2s;
       position: relative;
     }
-    .card:hover { border-color: var(--accent-border); }
-    .card.done {
-      opacity: .52;
-    }
-    .card.done::before {
-      content: '';
-      position: absolute; inset: 0;
-      border-right: 3px solid var(--success);
-      border-radius: inherit;
-      pointer-events: none;
-      z-index: 1;
-    }
 
+    /* Done state — grey out, strikethrough, keep visible */
+    .card.done {
+      opacity: .48;
+      filter: saturate(0.4);
+    }
+    .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
+    .card.done .card-check {
+      border-color: var(--success) !important;
+      background: var(--success-glow) !important;
+      color: var(--success) !important;
+    }
+    .card:not(.done):hover { border-color: var(--accent-border); }
+    .card:not(.done):hover .card-check { border-color: var(--accent); }
+
+    /* Booking warning bar */
     .card-booking-bar {
       display: flex; align-items: center; gap: 6px;
-      padding: 6px 12px;
+      padding: 5px 12px;
       background: var(--danger-glow);
       border-bottom: 1px solid rgba(248,113,113,.18);
     }
-    .card-booking-bar svg { width: 13px; height: 13px; color: var(--danger); }
+    .card-booking-bar svg { width: 12px; height: 12px; color: var(--danger); flex-shrink: 0; }
     .card-booking-bar span { font-size: 11px; font-weight: 600; color: var(--danger); }
 
+    /* Card body (always visible) */
     .card-body {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 14px;
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 13px 13px 12px;
+      cursor: pointer;
+      user-select: none;
     }
 
+    /* Check button */
     .card-check {
-      flex-shrink: 0; margin-top: 2px;
+      flex-shrink: 0; margin-top: 1px;
       width: 24px; height: 24px; border-radius: 50%;
       border: 2px solid var(--border);
       background: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s;
+      transition: border-color .15s, background .15s, color .15s;
       color: transparent;
     }
-    .card-check svg { width: 14px; height: 14px; }
-    .card-check:hover { border-color: var(--accent); background: var(--accent-glow); }
-    .card.done .card-check {
-      border-color: var(--success); background: var(--success-glow);
-      color: var(--success);
-    }
+    .card-check svg { width: 13px; height: 13px; }
 
     .card-main { flex: 1; min-width: 0; }
 
+    /* Title row */
     .card-title-row {
       display: flex; align-items: flex-start;
       justify-content: space-between; gap: 8px;
     }
     .card-title-inner { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
-    .card-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+    .card-icon { font-size: 19px; flex-shrink: 0; line-height: 1; }
     .card-title {
-      font-size: 15px; font-weight: 600; color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      line-height: 1.3;
+      font-size: 14px; font-weight: 600; color: var(--text);
+      line-height: 1.35; word-break: break-word;
     }
-    .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
 
     .chevron {
-      width: 16px; height: 16px; flex-shrink: 0;
-      color: var(--text-muted); margin-top: 2px;
-      transition: transform .2s;
+      width: 15px; height: 15px; flex-shrink: 0;
+      color: var(--text-dim); margin-top: 2px;
+      transition: transform .22s;
     }
     .card.expanded .chevron { transform: rotate(180deg); }
 
-    .card-tags {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    /* PROMINENT BADGES (always visible) */
+    .card-badges {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;
     }
-    .tag {
+    .badge {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 2px 8px; border-radius: 99px;
-      font-size: 11px; font-weight: 500;
+      font-size: 11px; font-weight: 500; line-height: 1.4;
     }
-    .tag svg { width: 11px; height: 11px; }
-    .tag.time { background: var(--accent-glow); color: var(--accent); font-family: 'Courier New', monospace; }
-    .tag.area { background: var(--bg-muted); color: var(--text-muted); }
+    .badge svg { width: 11px; height: 11px; flex-shrink: 0; }
+    .badge-time    { background: var(--accent-glow);   color: var(--accent);   border: 1px solid var(--accent-border); font-family: 'Courier New', monospace; }
+    .badge-area    { background: var(--bg-muted);      color: var(--text-muted); }
+    .badge-cost    { background: var(--success-glow);  color: var(--success);  border: 1px solid color-mix(in srgb,var(--success) 28%,transparent); }
+    .badge-dur     { background: var(--purple-glow);   color: var(--purple);   border: 1px solid color-mix(in srgb,var(--purple) 28%,transparent); font-family: 'Courier New', monospace; }
+    .badge-transport { background: var(--warning-glow); color: var(--warning); border: 1px solid color-mix(in srgb,var(--warning) 28%,transparent); }
 
-    /* Expanded section */
+    /* EXPANDED SECTION */
     .card-details {
       display: none;
-      padding: 12px 14px 14px;
-      border-top: 1px solid var(--border);
+      padding: 0 13px 13px;
       gap: 10px; flex-direction: column;
     }
     .card.expanded .card-details { display: flex; }
 
-    .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
-    .card-address {
-      display: flex; align-items: flex-start; gap: 6px;
-      font-size: 12px; color: var(--text-muted);
+    .details-divider {
+      height: 1px; background: var(--border); border-radius: 1px;
+      margin-bottom: 2px;
     }
-    .card-address svg { width: 13px; height: 13px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+    /* Description */
+    .card-desc {
+      font-size: 13px; color: var(--text-muted); line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    /* Detail rows (transport, booking info, address) */
+    .detail-row {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12px; color: var(--text-muted); line-height: 1.55;
+    }
+    .detail-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+    .detail-row.transport svg { color: var(--warning); }
+    .detail-row.booking    svg { color: var(--danger); }
+    .detail-row.address    svg { color: var(--accent); }
+    .detail-row.checkin    svg { color: var(--purple); }
+    .detail-row.date       svg { color: var(--text-muted); }
+    .detail-row .dr-label {
+      font-size: 10px; font-weight: 600; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .04em;
+      white-space: nowrap; margin-top: 1px;
+    }
+    .detail-row .dr-value { flex: 1; }
+
+    /* Navigation buttons */
+    .nav-btns { display: flex; flex-direction: column; gap: 6px; }
 
     .nav-btn {
       display: flex; align-items: center; gap: 8px;
-      width: 100%; padding: 10px 12px;
+      width: 100%; padding: 9px 12px;
       border-radius: var(--radius-sm); border: 1px solid var(--accent-border);
       background: var(--accent-glow); color: var(--accent);
-      font-size: 13px; font-weight: 600; font-family: inherit;
+      font-size: 12px; font-weight: 600; font-family: inherit;
       cursor: pointer; text-align: right;
       transition: background .15s, transform .1s;
+      line-height: 1.3;
     }
-    .nav-btn:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    .nav-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
     .nav-btn:active { transform: scale(.98); }
-    .nav-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
-    .nav-btn .nav-ext { margin-right: auto; opacity: .65; width: 13px; height: 13px; }
+    .nav-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .nav-btn .nav-label { flex: 1; }
+    .nav-btn .nav-sub { font-size: 10px; font-weight: 400; opacity: .65; display: block; }
+    .nav-btn .nav-ext { opacity: .5; width: 12px; height: 12px; }
+
+    .nav-btn.from-prev {
+      border-color: color-mix(in srgb,var(--warning) 28%,transparent);
+      background: var(--warning-glow); color: var(--warning);
+    }
+    .nav-btn.from-prev:hover { background: color-mix(in srgb, var(--warning) 20%, transparent); }
+
+    /* General link button */
+    .link-btn {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb,var(--text-muted) 20%,transparent);
+      background: var(--bg-muted); color: var(--text-muted);
+      font-size: 12px; font-weight: 500; font-family: inherit;
+      text-decoration: none; transition: background .15s;
+    }
+    .link-btn:hover { background: color-mix(in srgb, var(--text-muted) 12%, transparent); color: var(--text); }
+    .link-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .link-btn .ext { opacity: .45; width: 11px; height: 11px; margin-right: auto; }
 
     /* ============================================================
-       TIP CARD (same base as activity-card)
+       TIP CARD
     ============================================================ */
-    .tip-card .card-check:hover { border-color: var(--warning); background: var(--warning-glow); }
+    .tip-preview {
+      font-size: 11px; color: var(--text-muted); margin-top: 5px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; line-height: 1.5;
+    }
 
     .tip-link-btn {
       display: flex; align-items: center; gap: 8px;
-      width: 100%; padding: 10px 12px;
-      border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
+      width: 100%; padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
       background: var(--warning-glow); color: var(--warning);
-      font-size: 13px; font-weight: 500; font-family: inherit;
+      font-size: 12px; font-weight: 500; font-family: inherit;
       text-decoration: none; transition: background .15s;
     }
-    .tip-link-btn:hover { background: color-mix(in srgb, var(--warning) 22%, transparent); }
-    .tip-link-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
-    .tip-link-btn .ext-icon { margin-right: auto; opacity: .65; width: 13px; height: 13px; }
-
-    .tip-preview { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
+    .tip-link-btn:hover { background: color-mix(in srgb, var(--warning) 20%, transparent); }
+    .tip-link-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .tip-link-btn .ext-icon { opacity: .5; width: 11px; height: 11px; margin-right: auto; }
 
     /* ============================================================
-       OPTIONS TAB (same cards, slight different header)
+       OPTIONS HEADER
     ============================================================ */
     .options-count-label {
       display: flex; align-items: center; gap: 7px;
       padding: 12px 16px 4px;
       font-size: 13px; color: var(--text-muted); font-weight: 500;
     }
-    .options-count-label svg { width: 15px; height: 15px; color: var(--warning); }
+    .options-count-label svg { width: 14px; height: 14px; color: var(--warning); }
 
     /* ============================================================
-       NEARBY / GPS TAB
+       NEARBY / GPS
     ============================================================ */
-    #tab-nearby {
+    #nearby-inner {
       padding: 28px 16px 32px;
-      display: none;
-      flex-direction: column; align-items: center; gap: 22px;
+      display: flex;
+      flex-direction: column; align-items: center; gap: 20px;
     }
-    #tab-nearby.active { display: flex; }
 
-    .nearby-hero {
-      text-align: center;
-    }
+    .nearby-hero { text-align: center; }
     .nearby-hero-icon {
       width: 64px; height: 64px; border-radius: var(--radius-xl);
       background: var(--accent-glow); border: 1px solid var(--accent-border);
@@ -504,9 +579,9 @@
       color: var(--accent); font-size: 15px; font-weight: 600; font-family: inherit;
       cursor: pointer; transition: background .15s, transform .1s;
     }
-    .gps-btn:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    .gps-btn:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
     .gps-btn:active { transform: scale(.96); }
-    .gps-btn.success { border-color: color-mix(in srgb, var(--success) 30%, transparent); background: var(--success-glow); color: var(--success); }
+    .gps-btn.success { border-color: color-mix(in srgb,var(--success) 30%,transparent); background: var(--success-glow); color: var(--success); }
     .gps-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
     .gps-btn svg { width: 20px; height: 20px; }
 
@@ -517,13 +592,13 @@
       gap: 10px; align-items: flex-start;
     }
     .gps-error.visible { display: flex; }
-    .gps-error svg { width: 18px; height: 18px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+    .gps-error svg { width: 17px; height: 17px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
     .gps-error p { font-size: 13px; color: var(--danger); line-height: 1.5; }
 
     .gps-coords {
       display: none;
       align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px;
-      background: var(--success-glow); border: 1px solid color-mix(in srgb, var(--success) 28%, transparent);
+      background: var(--success-glow); border: 1px solid color-mix(in srgb,var(--success) 28%,transparent);
       font-size: 11px; font-family: 'Courier New', monospace; color: var(--success);
     }
     .gps-coords.visible { display: flex; }
@@ -531,65 +606,52 @@
 
     .cat-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      width: 100%;
-      transition: opacity .3s;
+      width: 100%; transition: opacity .3s;
     }
     .cat-grid.disabled { opacity: .35; pointer-events: none; }
 
     .cat-btn {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; padding: 20px 10px; border-radius: var(--radius-xl);
+      gap: 8px; padding: 18px 10px; border-radius: var(--radius-xl);
       border: 1px solid; cursor: pointer; font-family: inherit;
-      font-size: 13px; font-weight: 500; text-align: center; line-height: 1.3;
+      font-size: 12px; font-weight: 500; text-align: center; line-height: 1.35;
       transition: opacity .15s, transform .1s;
     }
     .cat-btn:active { transform: scale(.96); }
     .cat-btn svg { width: 24px; height: 24px; }
-    .cat-btn .ext { width: 11px; height: 11px; opacity: .45; }
+    .cat-btn .ext { width: 11px; height: 11px; opacity: .4; }
     .cat-btn.food    { background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.22); color: #fb923c; }
     .cat-btn.train   { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.22); color: #60a5fa; }
     .cat-btn.conbini { background: rgba(34,197,94,.08);  border-color: rgba(34,197,94,.22);  color: #4ade80; }
     .cat-btn.toilet  { background: rgba(168,85,247,.08); border-color: rgba(168,85,247,.22); color: #c084fc; }
 
-    .gps-hint {
-      font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.65;
-    }
-    .gps-privacy {
-      font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.65; margin-top: auto;
-    }
-
-    /* Spin animation for loading */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { animation: spin .8s linear infinite; }
+    .gps-hint     { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.7; }
+    .gps-privacy  { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.7; margin-top: 4px; }
 
     /* ============================================================
        DEMO BOTTOM BANNER
     ============================================================ */
-    #demo-banner {
-      position: sticky; bottom: 0; z-index: 10;
-      padding: 0 16px 16px;
-    }
+    #demo-banner { position: sticky; bottom: 0; z-index: 10; padding: 0 14px 14px; }
     .demo-banner-inner {
       display: flex; align-items: center; gap: 12px;
-      padding: 12px 14px; border-radius: var(--radius-lg);
+      padding: 11px 14px; border-radius: var(--radius-lg);
       background: color-mix(in srgb, var(--warning) 8%, var(--bg));
-      border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
-      backdrop-filter: blur(8px); cursor: pointer;
-      transition: background .15s;
+      border: 1px solid color-mix(in srgb, var(--warning) 20%, transparent);
+      backdrop-filter: blur(8px); cursor: pointer; transition: background .15s;
     }
-    .demo-banner-inner:hover { background: color-mix(in srgb, var(--warning) 14%, var(--bg)); }
+    .demo-banner-inner:hover { background: color-mix(in srgb, var(--warning) 13%, var(--bg)); }
     .demo-banner-icon {
-      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      width: 30px; height: 30px; border-radius: var(--radius-sm);
       background: var(--warning-glow); flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
       border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
     }
     .demo-banner-icon svg { width: 15px; height: 15px; color: var(--warning); }
     .demo-banner-title { font-size: 12px; font-weight: 600; color: var(--warning); }
-    .demo-banner-sub   { font-size: 11px; color: color-mix(in srgb, var(--warning) 65%, transparent); }
+    .demo-banner-sub   { font-size: 11px; color: color-mix(in srgb, var(--warning) 60%, transparent); }
 
     /* ============================================================
-       HIGHLIGHT (search)
+       HIGHLIGHTS & MISC
     ============================================================ */
     mark {
       background: var(--accent-glow);
@@ -598,14 +660,14 @@
       font-style: normal;
     }
 
-    /* ============================================================
-       LOADING SPLASH
-    ============================================================ */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; }
+
+    /* Loading splash */
     #loading-splash {
       position: fixed; inset: 0; z-index: 999;
       background: var(--bg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
     }
     #loading-splash.gone { display: none; }
     .splash-icon {
@@ -627,6 +689,38 @@
   <p>TripMH טוען...</p>
 </div>
 
+<!-- Upload hint modal -->
+<div class="upload-hint hidden" id="upload-hint" role="dialog" aria-modal="true" aria-label="העלאת קבצים">
+  <div class="upload-hint-box">
+    <div class="upload-hint-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      העלאת קבצי CSV
+    </div>
+    <ul class="upload-hint-list">
+      <li>
+        <span class="badge badge-main">מסלול</span>
+        <span>שמרו כ-<strong>itinerary.csv</strong> (או כל שם עם "מסלול" / "itinerary")</span>
+      </li>
+      <li>
+        <span class="badge badge-tips">טיפים</span>
+        <span>שמרו כ-<strong>tips.csv</strong> (או כל שם עם "טיפ" / "tip")</span>
+      </li>
+      <li>
+        <span class="badge badge-options">אופציות</span>
+        <span>שמרו כ-<strong>options.csv</strong> (או כל שם עם "אופצי" / "option" / "חלופ")</span>
+      </li>
+    </ul>
+    <div class="upload-hint-cols">
+      <strong>עמודות נתמכות במסלול:</strong>
+      אייקון • יום • תאריך • שם המקום • מיקום במפה • תיאור ומה ניתן לעשות • תחבורה והגעה ליעד • אזור במסלול • טווח שעות מומלץ • זמן מוערך • עלות משוערת (₪) • איך ומתי להזמין • קישור • ניווט גוגל מפות (מהיעד הקודם)
+    </div>
+    <div class="hint-btn-row">
+      <button class="hint-pick" id="hint-pick-btn">בחר קבצים</button>
+      <button class="hint-cancel" id="hint-cancel-btn">ביטול</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
 
   <!-- HEADER -->
@@ -638,7 +732,7 @@
         </div>
         <div>
           <div class="logo-title">TripMH</div>
-          <span class="logo-demo" id="demo-label" style="display:none">נתוני הדגמה</span>
+          <span class="logo-sub" id="demo-label" style="display:none">נתוני הדגמה</span>
         </div>
       </div>
 
@@ -648,9 +742,13 @@
           <span id="progress-text">0/0</span>
         </div>
 
-        <button class="icon-btn" id="theme-btn" title="עבור למצב בהיר/כהה" aria-label="החלפת ערכת נושא">
+        <button class="icon-btn" id="theme-btn" title="החלפת ערכת נושא" aria-label="החלפת ערכת נושא">
           <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
           <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+
+        <button class="icon-btn" id="export-btn" title="ייצא גיבוי JSON" aria-label="ייצא גיבוי JSON" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </button>
 
         <button class="icon-btn danger" id="clear-btn" title="נקה נתונים" aria-label="נקה נתונים" style="display:none">
@@ -663,16 +761,14 @@
       </div>
     </div>
 
-    <!-- Search -->
     <div class="search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="חיפוש — עיר, מקום, מילת מפתח..." autocomplete="off" />
+      <input type="search" id="search-input" placeholder="חיפוש — מקום, אזור, מילת מפתח..." autocomplete="off" />
       <button class="search-clear" id="search-clear" aria-label="נקה חיפוש">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <!-- Error banner -->
     <div class="error-banner" id="error-banner" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <p id="error-text"></p>
@@ -681,7 +777,6 @@
       </button>
     </div>
 
-    <!-- Tab bar -->
     <nav id="tab-bar" role="tablist" aria-label="ניווט לשוניות">
       <button class="tab-btn active" data-tab="itinerary" role="tab" aria-selected="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -699,40 +794,31 @@
         <span class="tab-count" id="tab-count-tips"></span>
       </button>
       <button class="tab-btn" data-tab="nearby" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10 10 10 0 0 1-10-10 10 10 0 0 1 10-10"/><path d="M12 2c-2.76 4.1-4 7.4-4 10s1.24 5.9 4 10c2.76-4.1 4-7.4 4-10s-1.24-5.9-4-10"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         סביבי
         <span class="tab-count"></span>
       </button>
     </nav>
   </header>
 
-  <!-- CONTENT -->
   <main id="tab-content">
-
-    <!-- ITINERARY -->
     <div class="tab-panel active" id="panel-itinerary" role="tabpanel" aria-label="מסלול">
       <div id="itinerary-content"></div>
     </div>
-
-    <!-- OPTIONS -->
     <div class="tab-panel" id="panel-options" role="tabpanel" aria-label="אופציות">
       <div id="options-content"></div>
     </div>
-
-    <!-- TIPS -->
     <div class="tab-panel" id="panel-tips" role="tabpanel" aria-label="טיפים">
       <div id="tips-content"></div>
     </div>
-
-    <!-- NEARBY (GPS) -->
     <div class="tab-panel" id="panel-nearby" role="tabpanel" aria-label="סביבי">
-      <div id="tab-nearby" class="active">
+      <div id="nearby-inner">
         <div class="nearby-hero">
           <div class="nearby-hero-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="10"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </div>
           <h2>סביבי — GPS מהיר</h2>
-          <p>לחצו על כפתור הלווין לאיתור מיקום מדויק, ואז בחרו קטגוריה לפתיחת מפה מיידית.</p>
+          <p>לחצו לאיתור מיקום מדויק, ואז בחרו קטגוריה לפתיחת Google Maps מיידית.</p>
         </div>
 
         <button class="gps-btn" id="gps-btn" aria-label="אתר מיקום GPS">
@@ -748,7 +834,7 @@
         </div>
 
         <div class="gps-coords" id="gps-coords">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>
           <span id="gps-coords-text"></span>
         </div>
 
@@ -776,14 +862,11 @@
         </div>
 
         <p class="gps-hint" id="gps-hint">יש לאתר מיקום תחילה כדי להפעיל את הכפתורים</p>
-
-        <p class="gps-privacy">המיקום נשאר במכשירכם בל��ד ואינו נשלח לשרת.<br>לחיצה על כפתור פותחת את Google Maps בלבד.</p>
+        <p class="gps-privacy">המיקום נשאר במכשיר בלבד ואינו נשלח לשרת.<br>לחיצה על כפתור פותחת Google Maps בלבד.</p>
       </div>
     </div>
-
   </main>
 
-  <!-- Demo bottom banner -->
   <div id="demo-banner" style="display:none">
     <div class="demo-banner-inner" id="demo-banner-inner">
       <div class="demo-banner-icon">
@@ -791,45 +874,44 @@
       </div>
       <div>
         <div class="demo-banner-title">מוצגים נתוני הדגמה</div>
-        <div class="demo-banner-sub">לחצו להעלאת קובץ CSV אישי</div>
+        <div class="demo-banner-sub">לחצו להעלאת קבצי CSV אישיים</div>
       </div>
     </div>
   </div>
 
-</div><!-- /app -->
+</div>
 
-<!-- Hidden file input -->
-<input type="file" id="file-input" accept=".csv,text/csv" multiple style="display:none" aria-label="בחר קובץ CSV" />
+<input type="file" id="file-input" accept=".csv,text/csv" multiple style="display:none" aria-label="בחר קבצי CSV" />
 
 <script>
-/* ================================================================
-   TRIPMH — Pure Vanilla JS, zero dependencies
-   All logic self-contained in this file
-================================================================ */
-
 'use strict';
 
-// ---- LocalStorage keys ----
-const LS_COMPLETED = 'tripmh_completed_v1';
+/* ================================================================
+   CONSTANTS & STATE
+================================================================ */
+const LS_COMPLETED = 'tripmh_completed_v3';
 const LS_DARK      = 'tripmh_dark_v1';
-const LS_DATA      = 'tripmh_data_v1';
+const LS_DATA      = 'tripmh_data_v3';
 const LS_TAB       = 'tripmh_tab_v1';
+const LS_EXPANDED  = 'tripmh_expanded_v1';
+const LS_SEARCH    = 'tripmh_search_v1';
+const LS_META      = 'tripmh_meta_v1';   // { savedAt, fileNames, totalItems }
+const SS_EXPANDED  = 'tripmh_exp_session'; // session-level expanded cards
 
-// ---- App state ----
 let state = {
   activeTab: 'itinerary',
   searchQuery: '',
   isDark: true,
   isDemo: false,
-  data: null,          // { itinerary, options, tips, errors }
+  data: null,         // { itinerary:[], options:[], tips:[], errors:[] }
   completedIds: new Set(),
-  gpsCoords: null,     // { lat, lng, accuracy }
+  expandedIds: new Set(),   // cards currently expanded
+  gpsCoords: null,
 };
 
-// ================================================================
-//   UTILITIES
-// ================================================================
-
+/* ================================================================
+   UTILITIES
+================================================================ */
 function safeGet(key, fallback) {
   try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : fallback; }
   catch { return fallback; }
@@ -838,8 +920,118 @@ function safeSet(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
 }
 
-let _idCounter = 0;
-function genId() { return 'item_' + Date.now() + '_' + (++_idCounter); }
+/* ----------------------------------------------------------------
+   PERSISTENCE — save every meaningful state change immediately
+---------------------------------------------------------------- */
+function persistAll() {
+  safeSet(LS_DATA,      state.data);
+  safeSet(LS_COMPLETED, Array.from(state.completedIds));
+  safeSet(LS_EXPANDED,  Array.from(state.expandedIds));
+  safeSet(LS_SEARCH,    state.searchQuery);
+  safeSet(LS_TAB,       state.activeTab);
+}
+
+function persistCompleted() {
+  safeSet(LS_COMPLETED, Array.from(state.completedIds));
+}
+
+function persistExpanded() {
+  safeSet(LS_EXPANDED, Array.from(state.expandedIds));
+}
+
+function persistMeta(fileNames, totalItems) {
+  safeSet(LS_META, { savedAt: new Date().toISOString(), fileNames, totalItems });
+}
+
+/* Show a brief save-toast in the header */
+let _toastTimer = null;
+function showSaveToast(msg) {
+  let toast = document.getElementById('save-toast');
+  if (!toast) return;
+  toast.textContent = msg || 'נשמר';
+  toast.classList.add('visible');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+/* Restore all persisted state at boot */
+function restorePersistedState() {
+  // completedIds
+  state.completedIds = new Set(safeGet(LS_COMPLETED, []));
+  // expandedIds
+  state.expandedIds  = new Set(safeGet(LS_EXPANDED, []));
+  // search
+  const savedSearch = safeGet(LS_SEARCH, '');
+  if (savedSearch) {
+    state.searchQuery = savedSearch;
+    const inp = document.getElementById('search-input');
+    if (inp) {
+      inp.value = savedSearch;
+      document.getElementById('search-clear')?.classList.add('visible');
+    }
+  }
+  // tab
+  const savedTab = safeGet(LS_TAB, 'itinerary');
+  if (['itinerary','options','tips','nearby'].includes(savedTab)) state.activeTab = savedTab;
+  // data
+  const savedData = safeGet(LS_DATA, null);
+  if (savedData && (savedData.itinerary?.length || savedData.options?.length || savedData.tips?.length)) {
+    state.data   = savedData;
+    state.isDemo = false;
+    return true; // had saved data
+  }
+  return false; // no saved data
+}
+
+/* ----------------------------------------------------------------
+   EXPORT — save current data as a JSON backup the user can download
+---------------------------------------------------------------- */
+function exportBackup() {
+  try {
+    const meta = safeGet(LS_META, {});
+    const payload = {
+      version: 3,
+      exportedAt: new Date().toISOString(),
+      meta,
+      data: state.data,
+      completedIds: Array.from(state.completedIds),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: 'tripmh-backup-' + new Date().toISOString().slice(0,10) + '.json' });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showSaveToast('גיבוי הורד');
+  } catch(e) {
+    showError('שגיאה בייצוא: ' + String(e));
+  }
+}
+
+/* Import a previously exported JSON backup */
+async function importBackup(file) {
+  try {
+    const text = await file.text();
+    const payload = JSON.parse(text);
+    if (!payload.data || !payload.version) throw new Error('קובץ גיבוי לא תקין');
+    state.data = payload.data;
+    state.isDemo = false;
+    // Merge completed IDs — keep old ones, add restored
+    const restored = new Set(payload.completedIds || []);
+    restored.forEach(id => state.completedIds.add(id));
+    persistAll();
+    document.getElementById('demo-label').style.display = 'none';
+    document.getElementById('demo-banner').style.display = 'none';
+    document.getElementById('clear-btn').style.display   = 'flex';
+    document.getElementById('export-btn').style.display  = 'flex';
+    renderAll();
+    showSaveToast('גיבוי שוחזר');
+  } catch(e) {
+    showError('שגיאה בייבוא גיבוי: ' + String(e));
+  }
+}
+
+let _id = 0;
+function genId() { return 'i' + Date.now() + '_' + (++_id); }
 
 function esc(str) {
   return String(str || '')
@@ -850,8 +1042,7 @@ function esc(str) {
 function highlight(text, query) {
   if (!query || !text) return esc(text);
   const safe = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  return esc(text).replace(new RegExp('(' + safe.replace(/&amp;/g,'&').replace(/&lt;/g,'<') + ')', 'gi'),
-    '<mark>$1</mark>');
+  return esc(text).replace(new RegExp('(' + safe + ')', 'gi'), '<mark>$1</mark>');
 }
 
 function stripUrls(text) {
@@ -859,59 +1050,61 @@ function stripUrls(text) {
 }
 
 function extractLinks(text) {
-  const regex = /https?:\/\/[^\s,\u0000-\u001F"<>[\]`{|}\\^]+/gi;
-  const matches = text.match(regex) || [];
+  const matches = (text || '').match(/https?:\/\/[^\s,\u0000-\u001F"<>[\]`{|}\\^]+/gi) || [];
   return matches.map(url => {
     let label = 'פתח קישור';
-    if (url.includes('play.google') || url.includes('apps.apple')) label = 'הורד אפליקציה';
-    else if (url.includes('maps.google') || url.includes('goo.gl/maps')) label = 'פתח במפות';
-    else if (url.includes('chabad')) label = 'אתר חב"ד';
-    else if (url.includes('smartex') || url.includes('smart-ex')) label = 'SmartEX';
+    if (/play\.google|apps\.apple/i.test(url))     label = 'הורד אפליקציה';
+    else if (/maps\.google|goo\.gl\/maps/i.test(url)) label = 'פתח במפות';
+    else if (/chabad/i.test(url))                  label = 'אתר חב"ד';
+    else if (/smart-ex|smartex/i.test(url))        label = 'SmartEX';
+    else if (/booking\.com/i.test(url))            label = 'Booking.com';
+    else if (/airbnb/i.test(url))                  label = 'Airbnb';
+    else if (/tripadvisor/i.test(url))             label = 'TripAdvisor';
     return { label, url };
   });
 }
 
 function buildMapUrl(rawUrl, placeName, address) {
-  if (rawUrl) {
-    if (/\/0$/.test(rawUrl) || /\/$/.test(rawUrl)) {
-      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((placeName + ' ' + address).trim());
+  if (rawUrl && rawUrl.startsWith('http')) {
+    if (/\/0$|\/$/.test(rawUrl)) {
+      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((placeName + ' ' + (address||'')).trim());
     }
-    if (rawUrl.startsWith('http')) return rawUrl;
+    return rawUrl;
   }
-  if (placeName || address) {
-    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((placeName + ' ' + address).trim());
-  }
+  const q = [(placeName||''), (address||'')].filter(Boolean).join(' ').trim();
+  if (q) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
   return '';
 }
 
 function detectIcon(text) {
   const t = (text || '').toLowerCase();
-  if (t.match(/מסעד|אוכל|food|ramen|sushi|noodle/)) return '🍜';
-  if (t.match(/מוזיאון|museum/)) return '🏛️';
-  if (t.match(/מקדש|shrine|temple|jinja|torii/)) return '⛩️';
-  if (t.match(/פארק|גן|park|garden/)) return '🌿';
-  if (t.match(/קניות|שוק|market|mall|shop/)) return '🛍️';
-  if (t.match(/מלון|hotel|hostel|inn/)) return '🏨';
-  if (t.match(/תחנה|station|train|shinkansen|bullet/)) return '🚆';
-  if (t.match(/טיסה|flight|airport|narita|haneda|kansai/)) return '✈️';
-  if (t.match(/הר|mountain|fuji|yama/)) return '🗻';
-  if (t.match(/ים|חוף|beach|sea|ocean/)) return '🏖️';
-  if (t.match(/טיול|הליכה|hike|trail|trek/)) return '🥾';
-  if (t.match(/קפה|cafe|coffee|kissaten/)) return '☕';
-  if (t.match(/בר|bar|sake|izakaya/)) return '🍶';
-  if (t.match(/שבת|shabbat|shabbos/)) return '🕯️';
-  if (t.match(/כשר|kosher/)) return '✡️';
-  if (t.match(/חב"ד|chabad/)) return '🕍';
-  if (t.match(/אמנות|art|gallery|galler/)) return '🎨';
-  if (t.match(/אנימה|anime|manga|otaku/)) return '🎌';
-  if (t.match(/אונסן|onsen|spa|bath|sento/)) return '♨️';
+  if (t.match(/מסעד|אוכל|food|ramen|sushi|noodle|yakiniku|wagyu/)) return '🍜';
+  if (t.match(/מוזיאון|museum/))                                     return '🏛️';
+  if (t.match(/מקדש|shrine|temple|jinja|torii/))                    return '⛩️';
+  if (t.match(/פארק|גן|park|garden/))                               return '🌿';
+  if (t.match(/קניות|שוק|market|mall|shop|akihabara|harajuku/))     return '🛍️';
+  if (t.match(/מלון|hotel|hostel|inn|ryokan/))                      return '🏨';
+  if (t.match(/תחנה|station|train|shinkansen|bullet/))              return '🚆';
+  if (t.match(/טיסה|flight|airport|narita|haneda|kansai/))          return '✈️';
+  if (t.match(/הר|mountain|fuji|yama/))                             return '🗻';
+  if (t.match(/ים|חוף|beach|sea|ocean/))                            return '🏖️';
+  if (t.match(/טיול|הליכה|hike|trail|trek/))                        return '🥾';
+  if (t.match(/קפה|cafe|coffee|kissaten/))                          return '☕';
+  if (t.match(/בר|bar|sake|izakaya/))                               return '🍶';
+  if (t.match(/שבת|shabbat|shabbos/))                               return '🕯️';
+  if (t.match(/כשר|kosher/))                                        return '✡️';
+  if (t.match(/חב"ד|chabad/))                                       return '🕍';
+  if (t.match(/אמנות|art|gallery/))                                 return '🎨';
+  if (t.match(/אנימה|anime|manga|otaku/))                           return '🎌';
+  if (t.match(/אונסן|onsen|spa|bath|sento/))                        return '♨️';
+  if (t.match(/אוטובוס|bus|metro|subway/))                          return '🚌';
+  if (t.match(/טקס|ceremony|matsuri|festival/))                     return '🎎';
   return '📍';
 }
 
-// ================================================================
-//   CSV PARSER
-// ================================================================
-
+/* ================================================================
+   CSV PARSER
+================================================================ */
 function parseCSVRaw(text) {
   const rows = [];
   let i = 0, n = text.length;
@@ -940,201 +1133,382 @@ function parseCSVRaw(text) {
   return rows;
 }
 
-function normalizeHeader(h) { return h.trim().toLowerCase().replace(/\s+/g,' '); }
+function normalizeHeader(h) { return h.trim().toLowerCase().replace(/\s+/g,' ').replace(/[()（）]/g,'').trim(); }
 
 function rowsToObjects(rows) {
   if (rows.length < 2) return [];
   const headers = rows[0].map(normalizeHeader);
   return rows.slice(1).map(row => {
     const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+    headers.forEach((h, i) => { obj[h] = (row[i] || '').trim(); });
     return obj;
   });
 }
 
-function col(obj) {
-  const keys = Array.prototype.slice.call(arguments, 1);
-  for (const key of keys) {
-    const found = Object.keys(obj).find(k => k.includes(key.toLowerCase()));
-    if (found && obj[found]) return obj[found].trim();
+/* Fuzzy column getter — finds first key that includes any of the given terms */
+function col(obj, ...terms) {
+  const keys = Object.keys(obj);
+  for (const term of terms) {
+    const t = term.toLowerCase();
+    const found = keys.find(k => k.includes(t));
+    if (found !== undefined && obj[found]) return obj[found].trim();
   }
   return '';
 }
 
-function classifyRow(obj) {
+/* Detect file type by filename */
+function detectFileType(filename) {
+  const name = (filename || '').toLowerCase();
+  if (/tip|טיפ|hint|notes/.test(name))            return 'tips';
+  if (/opt|אופצי|חלופ|altern/.test(name))         return 'options';
+  if (/itinerary|מסלול|schedule|program/.test(name)) return 'itinerary';
+  return 'auto'; // fallback: classify per row
+}
+
+function parseItineraryRow(obj, idx) {
+  const icon        = col(obj, 'אייקון', 'icon', 'emoji');
+  const day         = col(obj, 'יום', 'day');
+  const date        = col(obj, 'תאריך', 'date');
+  const dayLabel    = [day, date].filter(Boolean).join(' • ') || 'ללא תאריך';
+
+  const placeName   = col(obj, 'שם המקום', 'מקום', 'place', 'name', 'יעד', 'destination') || ('יעד ' + (idx+1));
+  const mapPos      = col(obj, 'מיקום במפה', 'מיקום', 'position', 'location', 'address', 'כתובת');
+  const description = col(obj, 'תיאור ומה ניתן לעשות', 'תיאור', 'description', 'הסבר', 'פרטים', 'details');
+  const transport   = col(obj, 'תחבורה והגעה', 'תחבורה', 'transport', 'transit', 'הגעה', 'getting there');
+  const area        = col(obj, 'אזור במסלול', 'אזור', 'area', 'city', 'region', 'עיר');
+  const timeRange   = col(obj, 'טווח שעות מומלץ', 'טווח שעות', 'שעות', 'time range', 'hours', 'שעה');
+  const duration    = col(obj, 'זמן מוערך', 'זמן', 'duration', 'estimated time', 'משך');
+  const cost        = col(obj, 'עלות משוערת', 'עלות', 'cost', 'price', 'מחיר', 'כסף');
+  const booking     = col(obj, 'איך ומתי להזמין', 'הזמנה', 'booking', 'reservation', 'checkin', "צ'ק", 'book');
+  const link        = col(obj, 'קישור', 'link', 'url', 'website');
+  const navFromPrev = col(obj, 'ניווט גוגל מפות', 'ניווט', 'navigation', 'nav', 'google maps');
+
+  const mapUrl      = buildMapUrl(link, placeName, mapPos);
+  const navUrl      = buildMapUrl(navFromPrev, placeName, mapPos);
+
+  const requiresBooking = !!booking || /שריון|book|reserv/i.test(Object.values(obj).join(' '));
+  const resolvedIcon = icon || detectIcon(placeName + ' ' + description + ' ' + area);
+
+  return {
+    id: genId(), type: 'itinerary',
+    dayLabel, day, date,
+    placeName, mapPos, description, transport, area,
+    timeRange, duration, cost, booking, link, navFromPrev,
+    mapUrl, navUrl,
+    requiresBooking,
+    icon: resolvedIcon,
+    links: extractLinks(description + ' ' + link),
+  };
+}
+
+function parseOptionsRow(obj, idx) {
+  const base = parseItineraryRow(obj, idx);
+  return { ...base, type: 'option' };
+}
+
+function parseTipRow(obj, idx) {
+  const category = col(obj, 'קטגוריה', 'category', 'נושא', 'topic', 'ריכוז', 'סוג') || 'כללי';
+  const title    = col(obj, 'כותרת', 'title', 'שם', 'name', 'ריכוז') || ('טיפ ' + (idx+1));
+  const content  = col(obj, 'תוכן', 'content', 'הסבר', 'פרטים', 'description', 'details', 'הנחיות', 'טקסט', 'text')
+                || Object.values(obj).filter(Boolean).join(' | ');
+  return {
+    id: genId(), type: 'tip',
+    category, title, content,
+    links: extractLinks(content),
+  };
+}
+
+/* Auto-classify a row when file type is unknown */
+function autoClassifyRow(obj) {
   const keys = Object.keys(obj).map(k => k.toLowerCase());
-  const values = Object.values(obj).join(' ').toLowerCase();
-  if (keys.some(k => k.includes('ריכוז') || k.includes('קטגוריה') || k.includes('category') || k.includes('tip'))) return 'tip';
+  // If has category/tip-style columns — tip
+  if (keys.some(k => /קטגוריה|category|ריכוז|tip/.test(k))) return 'tip';
+  // If has day/date — itinerary or option
   const dayVal = col(obj, 'יום', 'day', 'תאריך', 'date');
-  if (dayVal.includes('אופציה') || dayVal.includes('option')) return 'option';
-  if (values.includes('אופציה') || values.includes('optional')) return 'option';
-  if (!dayVal || dayVal === '' || dayVal === '-') {
-    const hasTimeOrPlace = col(obj, 'שעה', 'time', 'טווח שעות', 'שם המקום', 'place');
-    return hasTimeOrPlace ? 'option' : 'tip';
+  if (!dayVal) {
+    const hasPlaceOrTime = col(obj, 'שם המקום', 'place', 'שעות', 'time');
+    return hasPlaceOrTime ? 'option' : 'tip';
   }
+  if (/אופצי|option|חלופ/i.test(dayVal)) return 'option';
   return 'itinerary';
 }
 
-function parseSingleCSV(text) {
+function parseSingleCSV(text, filename) {
   const errors = [], items = [];
-  try {
-    const rows = parseCSVRaw(text);
-    if (rows.length < 2) { errors.push('הקובץ ריק או לא תקין'); return { items, errors }; }
-    const objects = rowsToObjects(rows);
-    objects.forEach((obj, idx) => {
-      try {
-        const type = classifyRow(obj);
-        if (type === 'tip') {
-          const category = col(obj, 'קטגוריה', 'category', 'נושא', 'topic') || 'כללי';
-          const title = col(obj, 'כותרת', 'title', 'ריכוז') || col(obj, 'שם', 'name') || ('טיפ ' + (idx+1));
-          const content = col(obj, 'תוכן', 'content', 'הסבר', 'פרטים', 'description', 'details', 'הנחיות') || Object.values(obj).filter(Boolean).join(' | ');
-          items.push({ id: genId(), type: 'tip', category, title, content, links: extractLinks(content), rawRow: obj });
-        } else {
-          const day = col(obj, 'יום', 'day', 'תאריך', 'date');
-          const timeRange = col(obj, 'שעות', 'טווח שעות', 'זמן', 'time', 'שעה');
-          const placeName = col(obj, 'שם המקום', 'מקום', 'place', 'name', 'יעד', 'destination') || ('יעד ' + (idx+1));
-          const area = col(obj, 'אזור', 'עיר', 'area', 'city', 'region', 'מיקום');
-          const description = col(obj, 'תיאור', 'description', 'הסבר', 'פרטים', 'details', 'הערות');
-          const address = col(obj, 'כתובת', 'address');
-          const rawMapUrl = col(obj, 'קישור', 'link', 'map', 'מפה', 'url', 'maps');
-          const mapUrl = buildMapUrl(rawMapUrl, placeName, address);
-          const requiresBooking = /שריון|book|reserv/i.test(Object.values(obj).join(' '));
-          const icon = detectIcon(placeName + ' ' + description + ' ' + area);
-          items.push({ id: genId(), type, day, timeRange, placeName, area, description, address, mapUrl, requiresBooking, icon, rawRow: obj });
-        }
-      } catch(e) { errors.push('שורה ' + (idx+2) + ': ' + String(e)); }
-    });
-  } catch(e) { errors.push('שגיאה בפענוח: ' + String(e)); }
+  const rows = parseCSVRaw(text);
+  if (rows.length < 2) { errors.push('הקובץ ריק או חסרות שורות נתונים'); return { items, errors }; }
+  const objects = rowsToObjects(rows);
+  const fileType = detectFileType(filename);
+
+  objects.forEach((obj, idx) => {
+    try {
+      let type = fileType;
+      if (type === 'auto') type = autoClassifyRow(obj);
+
+      if (type === 'tip')         items.push(parseTipRow(obj, idx));
+      else if (type === 'option') items.push(parseOptionsRow(obj, idx));
+      else                        items.push(parseItineraryRow(obj, idx));
+    } catch(e) { errors.push('שורה ' + (idx+2) + ': ' + String(e)); }
+  });
+
   return { items, errors };
 }
 
 function parseCSVFiles(files) {
   const result = { itinerary: [], options: [], tips: [], errors: [] };
   files.forEach(f => {
-    const { items, errors } = parseSingleCSV(f.content);
+    const { items, errors } = parseSingleCSV(f.content, f.name);
     result.errors.push(...errors.map(e => '[' + f.name + '] ' + e));
     items.forEach(item => {
-      if (item.type === 'itinerary') result.itinerary.push(item);
-      else if (item.type === 'option') result.options.push(item);
-      else if (item.type === 'tip') result.tips.push(item);
+      if      (item.type === 'itinerary') result.itinerary.push(item);
+      else if (item.type === 'option')    result.options.push(item);
+      else if (item.type === 'tip')       result.tips.push(item);
     });
   });
-  result.itinerary.sort((a,b) => (a.day||a.date||'').localeCompare(b.day||b.date||'', 'he'));
+  // Sort itinerary: by day then date
+  result.itinerary.sort((a,b) => {
+    const ka = (a.day||'') + (a.date||'');
+    const kb = (b.day||'') + (b.date||'');
+    return ka.localeCompare(kb, 'he');
+  });
   return result;
 }
 
-// ================================================================
-//   SAMPLE DATA
-// ================================================================
-
+/* ================================================================
+   SAMPLE DATA (demo)
+================================================================ */
 function getSampleData() {
   return {
     itinerary: [
-      { id:'demo_1', type:'itinerary', day:'יום שני • 14/10/2026', timeRange:'09:00–11:30', placeName:'מקדש פושימי אינארי', area:'קיוטו', description:'מקדש שינטו מפורסם עם אלפי שערי טוריי כתומים. הכניסה חופשית, מומלץ להגיע מוקדם.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto', requiresBooking:false, icon:'⛩️', rawRow:{} },
-      { id:'demo_2', type:'itinerary', day:'יום שני • 14/10/2026', timeRange:'13:00–15:00', placeName:'שוק ניישיקי', area:'קיוטו', description:'שוק האוכל המסורתי של קיוטו — "המטבח של קיוטו". דגים, חמוצים, טופו ועוד.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto', requiresBooking:false, icon:'🛍️', rawRow:{} },
-      { id:'demo_3', type:'itinerary', day:'יום שלישי • 15/10/2026', timeRange:'10:00–12:00', placeName:'ארמון הקיסר', area:'טוקיו', description:'הארמון הקיסרי של יפן עם הגנים הציבוריים המדהימים.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Imperial+Palace+Tokyo', requiresBooking:false, icon:'🏛️', rawRow:{} },
-      { id:'demo_4', type:'itinerary', day:'יום שלישי • 15/10/2026', timeRange:'19:00–21:00', placeName:"שכונת שינג'וקו", area:'טוקיו', description:'אחת מהשכונות השוקקות ביותר — קניות, אוכל ובידור. מומלץ לשריין מקום במסעדה.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Shinjuku+Tokyo', requiresBooking:true, icon:'🍜', rawRow:{} },
-      { id:'demo_5', type:'itinerary', day:'יום רביעי • 16/10/2026', timeRange:'כל היום', placeName:"הר פוג'י", area:"פוג'י — יאמאנאשי", description:'עלייה להר הקדוש של יפן. דרוש ציוד חימום ומים בשפע. בדקו מזג אוויר מראש!', mapUrl:'https://www.google.com/maps/search/?api=1&query=Mount+Fuji+Japan', requiresBooking:false, icon:'🗻', rawRow:{} },
+      { id:'d1', type:'itinerary', dayLabel:'יום שני • 14/10/2026', day:'יום שני', date:'14/10/2026',
+        placeName:'מקדש פושימי אינארי', area:'קיוטו', icon:'⛩️',
+        timeRange:'09:00–11:30', duration:'2.5 שעות', cost:'חינם',
+        transport:'רכבת מיוקיו תחנת Fushimi Inari (Kintetsu)',
+        description:'מקדש שינטו מפורסם עם אלפי שערי טוריי כתומים. הכניסה חופשית. מומלץ להגיע מוקדם לפני ההמונים.',
+        booking:'', mapPos:'Fushimi Inari, Kyoto',
+        mapUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
+        navUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
+        navFromPrev:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
+        requiresBooking:false, links:[], },
+      { id:'d2', type:'itinerary', dayLabel:'יום שני • 14/10/2026', day:'יום שני', date:'14/10/2026',
+        placeName:'שוק ניישיקי', area:'קיוטו', icon:'🛍️',
+        timeRange:'13:00–15:00', duration:'2 שעות', cost:'₪50–120',
+        transport:'הליכה מרובע Kawaramachi, 10 דקות',
+        description:'שוק האוכל המסורתי של קיוטו — "המטבח של קיוטו". דגים, חמוצים, טופו ועוד. מתאים לקניות ואכילה.',
+        booking:'', mapPos:'Nishiki Market, Kyoto',
+        mapUrl:'https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto',
+        navUrl:'https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto',
+        navFromPrev:'', requiresBooking:false, links:[], },
+      { id:'d3', type:'itinerary', dayLabel:'יום שלישי • 15/10/2026', day:'יום שלישי', date:'15/10/2026',
+        placeName:"מגדל סקיטרי — שינג'וקו", area:'טוקיו', icon:'🏙️',
+        timeRange:'10:00–12:00', duration:'2 שעות', cost:'₪130',
+        transport:"רכבת JR לתחנת Shinjuku, יציאה מזרח",
+        description:"מגדל התצפית הגבוה ביפן — 634 מטר. קנו כרטיסים מראש אונליין לחיסכון ולמניעת תורים.",
+        booking:"הזמנה אונליין מראש — skytree.jp",
+        mapPos:'Tokyo Skytree, Sumida',
+        mapUrl:'https://www.google.com/maps/search/?api=1&query=Tokyo+Skytree',
+        navUrl:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Tokyo&destination=Tokyo+Skytree',
+        navFromPrev:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Tokyo&destination=Tokyo+Skytree',
+        requiresBooking:true, links:[{label:'הזמנת כרטיסים', url:'https://www.tokyo-skytree.jp/en/ticket/'}], },
+      { id:'d4', type:'itinerary', dayLabel:'יום רביעי • 16/10/2026', day:'יום רביעי', date:'16/10/2026',
+        placeName:"הר פוג'י", area:"פוג'י — יאמאנאשי", icon:'🗻',
+        timeRange:'כל היום', duration:'8–10 שעות', cost:'₪200 (כולל תחבורה)',
+        transport:"שינקנסן + אוטובוס מ-Kawaguchiko",
+        description:"עלייה להר הקדוש של יפן. יש לבדוק מזג אוויר 48 שעות לפני. ציוד חימום חובה.",
+        booking:'רכשו JR Pass מראש בישראל',
+        mapPos:'Mount Fuji, Japan',
+        mapUrl:'https://www.google.com/maps/search/?api=1&query=Mount+Fuji+Japan',
+        navUrl:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Station&destination=Kawaguchiko+Station',
+        navFromPrev:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Station&destination=Kawaguchiko+Station',
+        requiresBooking:false, links:[], },
     ],
     options: [
-      { id:'demo_opt_1', type:'option', placeName:'אטרקציית גיחה — קובה', area:'קובה', description:'יין כשר ייחודי ומסעדות כשרות. גיחה של יום מאוסקה.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Kobe+Japan', requiresBooking:false, icon:'🍷', rawRow:{} },
-      { id:'demo_opt_2', type:'option', placeName:'אונסן בהאקונה', area:'האקונה', description:"מרחצאות מים חמים עם נוף להר פוג'י. חוויה יפנית מסורתית.", mapUrl:'https://www.google.com/maps/search/?api=1&query=Hakone+Onsen', requiresBooking:true, icon:'♨️', rawRow:{} },
+      { id:'do1', type:'option', dayLabel:'', day:'', date:'',
+        placeName:'אונסן בהאקונה', area:'האקונה', icon:'♨️',
+        timeRange:'בוקר', duration:'3 שעות', cost:'₪180–250',
+        transport:"שינקנסן מטוקיו לעיר Odawara ואז Hakone Tozan",
+        description:"מרחצאות מים חמים עם נוף להר פוג'י. חוויה יפנית מסורתית. שימו לב — חלק מהמקומות אינם מקבלים קעקועים.",
+        booking:"מומלץ לשריין מקום בO'renji-ya או Hakone Yuryo",
+        mapPos:'Hakone Onsen, Kanagawa',
+        mapUrl:'https://www.google.com/maps/search/?api=1&query=Hakone+Onsen',
+        navUrl:'', navFromPrev:'', requiresBooking:true, links:[], },
+      { id:'do2', type:'option', dayLabel:'', day:'', date:'',
+        placeName:'אקיהברה — אנימה וגאג\'טים', area:'טוקיו', icon:'🎌',
+        timeRange:'14:00–18:00', duration:'4 שעות', cost:'₪0–300',
+        transport:"רכבת JR Yamanote לתחנת Akihabara",
+        description:'שכונת האלקטרוניקה ואנימה של טוקיו. מאנגה, פיגורות, רכיבים אלקטרוניים ועוד.',
+        booking:'', mapPos:'Akihabara, Tokyo',
+        mapUrl:'https://www.google.com/maps/search/?api=1&query=Akihabara+Tokyo',
+        navUrl:'', navFromPrev:'', requiresBooking:false, links:[], },
     ],
     tips: [
-      { id:'demo_tip_1', type:'tip', category:'תחבורה והגעה', title:'JR Pass — כרטיס רכבות', content:'רכשו JR Pass לפני הטיסה מישראל, זול יותר. מכסה את כל קווי JR כולל שינקנסן. הורידו את האפליקציה SmartEX להזמנת מושבים: https://smart-ex.jp/en/index.php', links:[{label:'SmartEX App', url:'https://smart-ex.jp/en/index.php'}], rawRow:{} },
-      { id:'demo_tip_2', type:'tip', category:'כשרות ושבת', title:'כשרות ביפן', content:'חב"ד טוקיו: https://www.chabadtokyo.com — ארוחות, שבת ומגמ"ד. ירושלים של יפן — קיוטו יש בה קהילה יהודית קטנה. הכינו בשר כשר מהארץ בשקיות ואקום.', links:[{label:'חב"ד טוקיו', url:'https://www.chabadtokyo.com'}], rawRow:{} },
-      { id:'demo_tip_3', type:'tip', category:'כשרות ושבת', title:'לוגיסטיקת שבת', content:'שבת נכנסת מוקדם מאוד! ודאו שהמלון מאפשר מפתח שבת. לא לסמוך על מעלית, בדקו אם יש מעלית שבת. ICE Suites בטוקיו מכיר שבת ויהודים.', links:[], rawRow:{} },
-      { id:'demo_tip_4', type:'tip', category:'אפליקציות חיוניות', title:'אפליקציות שחובה להוריד', content:'Google Translate (מצלמה לקריאת יפנית), Google Maps (הורידו מפות אופליין!), Suica / IC Card (תחבורה), Coke ON (מכונות שתייה): https://c.cocacola.co.jp/app/', links:[{label:'Coke ON App', url:'https://c.cocacola.co.jp/app/'}], rawRow:{} },
+      { id:'dt1', type:'tip', category:'תחבורה ו-JR Pass',
+        title:'JR Pass — קנו לפני הטיסה',
+        content:'רכשו JR Pass בישראל לפני הטיסה — זול יותר ב-20%. מכסה את כל קווי JR כולל שינקנסן Hikari ו-Nozomi. הורידו SmartEX לשריון מושב: https://smart-ex.jp/en/',
+        links:[{label:'SmartEX App', url:'https://smart-ex.jp/en/'}] },
+      { id:'dt2', type:'tip', category:'תחבורה ו-JR Pass',
+        title:'IC Card — כרטיס תחבורה',
+        content:'Suica או Pasmo — טעינה במכשיר כספומט בשדה התעופה. עובד בכל הרכבות, האוטובוסים, הקונביני ומכונות שתייה. שמרו ₪100 פיקדון.',
+        links:[] },
+      { id:'dt3', type:'tip', category:'כשרות ושבת',
+        title:'חב"ד טוקיו — שבת ואוכל',
+        content:'חב"ד טוקיו מציע ארוחות שבת, מגמ"ד ומידע מקומי. הירשמו מראש: https://www.chabadtokyo.com | ICE Suites Hotel מכיר שבת ויהודים.',
+        links:[{label:'חב"ד טוקיו', url:'https://www.chabadtokyo.com'}] },
+      { id:'dt4', type:'tip', category:'כשרות ושבת',
+        title:'לוגיסטיקת שבת',
+        content:'שבת נכנסת מוקדם! ודאו שהמלון מאפשר פתיחת דלת ב-key card ולא רק בכרטיס. בדקו אם יש מעלית שבת. הכינו אוכל קר מה-conbini לפני כניסת שבת.',
+        links:[] },
+      { id:'dt5', type:'tip', category:'אפליקציות חיוניות',
+        title:'4 אפליקציות חובה',
+        content:'1. Google Translate — מצלמה לקריאת יפנית\n2. Google Maps — הורידו מפות אופליין!\n3. Hyperdia — זמני רכבות מדויקים\n4. Coke ON — מכונות שתייה: https://c.cocacola.co.jp/app/',
+        links:[{label:'Coke ON App', url:'https://c.cocacola.co.jp/app/'}] },
     ],
     errors: []
   };
 }
 
-// ================================================================
-//   RENDERING
-// ================================================================
+/* ================================================================
+   SVG ICONS (inline)
+================================================================ */
+const SVG = {
+  check:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  clock:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  pin:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  shekel:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><text x="4" y="18" font-size="14" stroke="none" fill="currentColor">₪</text></svg>',
+  duration:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>',
+  bus:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>',
+  booking:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  navigate:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>',
+  nav2:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+  extlink:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  chevron:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  warn:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  link:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+};
 
-function renderCheckIcon() {
-  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6 9 17l-5-5"/></svg>';
-}
+/* ================================================================
+   RENDERING — ACTIVITY CARD (itinerary + options)
+================================================================ */
+function renderActivityCard(item, completed, q) {
+  const hasCost      = !!item.cost;
+  const hasDuration  = !!item.duration;
+  const hasTransport = !!item.transport;
+  const hasDesc      = !!item.description;
+  const hasBooking   = !!item.booking;
+  const hasMapUrl    = !!item.mapUrl;
+  const hasNavUrl    = !!item.navUrl;
+  const hasLinks     = item.links && item.links.length > 0;
+  const hasDetails   = hasDesc || hasBooking || hasMapUrl || hasNavUrl || hasLinks || !!item.mapPos;
 
-function renderActivityCard(item, completed, searchQuery) {
-  const q = searchQuery;
-  const hasDetails = !!(item.description || item.address || item.mapUrl);
+  // Cost badge — format ₪ prefix if not already there
+  let costDisplay = '';
+  if (hasCost) {
+    const c = item.cost.trim();
+    costDisplay = (c === 'חינם' || c === 'free' || c === 'Free') ? 'חינם'
+                : c.startsWith('₪') ? c
+                : '₪' + c;
+  }
 
-  return `<div class="card${completed ? ' done' : ''}" data-id="${esc(item.id)}" role="article" aria-label="${esc(item.placeName)}">
-    ${item.requiresBooking ? `<div class="card-booking-bar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span>דורש שריון מראש</span>
-    </div>` : ''}
+  return `<article class="card${completed ? ' done' : ''}" data-id="${esc(item.id)}" aria-label="${esc(item.placeName)}">
+    ${item.requiresBooking && !completed ? `<div class="card-booking-bar">${SVG.warn}<span>דורש שריון / הזמנה מראש</span></div>` : ''}
     <div class="card-body">
-      <button class="card-check" data-check="${esc(item.id)}" aria-label="${completed ? 'סמן כלא הושלם' : 'סמן כהושלם'}" aria-pressed="${completed}">
-        ${completed ? renderCheckIcon() : ''}
-      </button>
+      <button class="card-check" data-check="${esc(item.id)}"
+        aria-label="${completed ? 'סמן כלא הושלם' : 'סמן כהושלם'}"
+        aria-pressed="${completed}"
+        style="border-color:${completed ? 'var(--success)' : ''};background:${completed ? 'var(--success-glow)' : ''};color:${completed ? 'var(--success)' : 'transparent'}"
+      >${completed ? SVG.check : ''}</button>
       <div class="card-main">
         <div class="card-title-row">
           <div class="card-title-inner">
             <span class="card-icon" aria-hidden="true">${esc(item.icon || '📍')}</span>
             <h3 class="card-title">${highlight(item.placeName, q)}</h3>
           </div>
-          ${hasDetails ? `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>` : ''}
+          ${hasDetails ? `<span class="chevron">${SVG.chevron}</span>` : ''}
         </div>
-        <div class="card-tags">
-          ${item.timeRange ? `<span class="tag time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${esc(item.timeRange)}</span>` : ''}
-          ${item.area ? `<span class="tag area"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${highlight(item.area, q)}</span>` : ''}
+        <div class="card-badges">
+          ${item.timeRange ? `<span class="badge badge-time">${SVG.clock}${esc(item.timeRange)}</span>` : ''}
+          ${hasDuration    ? `<span class="badge badge-dur">${SVG.duration}${esc(item.duration)}</span>` : ''}
+          ${item.area      ? `<span class="badge badge-area">${SVG.pin}${highlight(item.area, q)}</span>` : ''}
+          ${hasCost        ? `<span class="badge badge-cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${esc(costDisplay)}</span>` : ''}
+          ${hasTransport   ? `<span class="badge badge-transport">${SVG.bus}${highlight(item.transport, q)}</span>` : ''}
         </div>
       </div>
     </div>
     ${hasDetails ? `<div class="card-details">
-      ${item.description ? `<p class="card-desc">${highlight(item.description, q)}</p>` : ''}
-      ${item.address ? `<p class="card-address"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${esc(item.address)}</p>` : ''}
-      ${item.mapUrl ? `<button class="nav-btn" data-nav="${esc(item.mapUrl)}" aria-label="פתח ניווט">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-        פתח ניווט ב-Google Maps
-        <svg class="nav-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      </button>` : ''}
+      <div class="details-divider"></div>
+      ${hasDesc ? `<p class="card-desc">${highlight(item.description, q)}</p>` : ''}
+      ${hasBooking ? `<div class="detail-row booking">${SVG.booking}<span class="dr-label">הזמנה</span><span class="dr-value">${highlight(item.booking, q)}</span></div>` : ''}
+      ${item.mapPos && item.mapPos !== item.placeName ? `<div class="detail-row address">${SVG.pin}<span class="dr-label">מיקום</span><span class="dr-value">${esc(item.mapPos)}</span></div>` : ''}
+      <div class="nav-btns">
+        ${hasMapUrl ? `<button class="nav-btn" data-nav="${esc(item.mapUrl)}" aria-label="פתח מיקום במפה">
+          ${SVG.navigate}
+          <span class="nav-label">פתח מיקום ב-Google Maps<span class="nav-sub">מיקום המקום</span></span>
+          <span class="nav-ext">${SVG.extlink}</span>
+        </button>` : ''}
+        ${hasNavUrl && item.navFromPrev ? `<button class="nav-btn from-prev" data-nav="${esc(item.navUrl)}" aria-label="ניווט מהיעד הקודם">
+          ${SVG.nav2}
+          <span class="nav-label">ניווט מהיעד הקודם<span class="nav-sub">Google Maps — הנחיות הגעה</span></span>
+          <span class="nav-ext">${SVG.extlink}</span>
+        </button>` : ''}
+      </div>
+      ${hasLinks ? item.links.map(l => `<a class="link-btn" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+        ${SVG.link}${esc(l.label)}<span class="ext">${SVG.extlink}</span>
+      </a>`).join('') : ''}
     </div>` : ''}
-  </div>`;
+  </article>`;
 }
 
-function renderTipCard(item, completed, searchQuery) {
-  const q = searchQuery;
+/* ================================================================
+   RENDERING — TIP CARD
+================================================================ */
+function renderTipCard(item, completed, q) {
   const displayContent = stripUrls(item.content);
-  return `<div class="card tip-card${completed ? ' done' : ''}" data-id="${esc(item.id)}" role="article" aria-label="${esc(item.title)}">
-    <div class="card-body" style="cursor:pointer" data-expand="${esc(item.id)}">
-      <button class="card-check" data-check="${esc(item.id)}" aria-label="${completed ? 'סמן כלא נקרא' : 'סמן כנקרא'}" aria-pressed="${completed}" style="border-color: ${completed ? 'var(--success)' : 'var(--border)'}; background: ${completed ? 'var(--success-glow)' : 'none'}; color: ${completed ? 'var(--success)' : 'transparent'}">
-        ${completed ? renderCheckIcon() : ''}
-      </button>
+  const hasLinks = item.links && item.links.length > 0;
+
+  return `<article class="card tip-card${completed ? ' done' : ''}" data-id="${esc(item.id)}" aria-label="${esc(item.title)}">
+    <div class="card-body">
+      <button class="card-check" data-check="${esc(item.id)}"
+        aria-label="${completed ? 'סמן כלא נקרא' : 'סמן כנקרא'}"
+        aria-pressed="${completed}"
+        style="border-color:${completed ? 'var(--success)' : ''};background:${completed ? 'var(--success-glow)' : ''};color:${completed ? 'var(--success)' : 'transparent'}"
+      >${completed ? SVG.check : ''}</button>
       <div class="card-main">
         <div class="card-title-row">
           <h3 class="card-title">${highlight(item.title, q)}</h3>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <span class="chevron">${SVG.chevron}</span>
         </div>
         ${displayContent ? `<p class="tip-preview">${esc(displayContent)}</p>` : ''}
       </div>
     </div>
     <div class="card-details">
-      ${displayContent ? `<p class="card-desc" style="white-space:pre-wrap">${highlight(displayContent, q)}</p>` : ''}
-      ${item.links && item.links.length > 0 ? item.links.map(link => `
-        <a class="tip-link-btn" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          ${esc(link.label)}
-          <svg class="ext-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>`).join('') : ''}
+      <div class="details-divider"></div>
+      ${displayContent ? `<p class="card-desc">${highlight(displayContent, q)}</p>` : ''}
+      ${hasLinks ? item.links.map(l => `<a class="tip-link-btn" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+        ${SVG.extlink}${esc(l.label)}<span class="ext-icon">${SVG.extlink}</span>
+      </a>`).join('') : ''}
     </div>
-  </div>`;
+  </article>`;
 }
 
-function renderEmpty(iconSvg, color, title, desc) {
+/* ================================================================
+   RENDERING — EMPTY STATE
+================================================================ */
+function renderEmpty(svgStr, color, title, desc) {
   return `<div class="empty-state">
-    <div class="empty-icon" style="background:color-mix(in srgb, ${color} 10%, transparent); border: 1px solid color-mix(in srgb, ${color} 20%, transparent)">
-      ${iconSvg}
+    <div class="empty-icon" style="background:color-mix(in srgb,${color} 10%,transparent);border:1px solid color-mix(in srgb,${color} 22%,transparent)">
+      ${svgStr}
     </div>
     <h3>${esc(title)}</h3>
     <p>${esc(desc)}</p>
   </div>`;
 }
+function noResultsHtml(q) {
+  return `<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &ldquo;${esc(q)}&rdquo;</p></div>`;
+}
 
+/* ================================================================
+   FILTER
+================================================================ */
 function filterActivity(items, q) {
   if (!q) return items;
   const lq = q.toLowerCase();
@@ -1142,11 +1516,12 @@ function filterActivity(items, q) {
     (i.placeName||'').toLowerCase().includes(lq) ||
     (i.area||'').toLowerCase().includes(lq) ||
     (i.description||'').toLowerCase().includes(lq) ||
-    (i.day||'').toLowerCase().includes(lq) ||
-    (i.timeRange||'').toLowerCase().includes(lq)
+    (i.dayLabel||'').toLowerCase().includes(lq) ||
+    (i.timeRange||'').toLowerCase().includes(lq) ||
+    (i.transport||'').toLowerCase().includes(lq) ||
+    (i.cost||'').toLowerCase().includes(lq)
   );
 }
-
 function filterTips(items, q) {
   if (!q) return items;
   const lq = q.toLowerCase();
@@ -1157,74 +1532,69 @@ function filterTips(items, q) {
   );
 }
 
+/* ================================================================
+   RENDER TABS
+================================================================ */
 function renderItinerary() {
   const el = document.getElementById('itinerary-content');
-  const items = (state.data && state.data.itinerary) || [];
+  const items = state.data?.itinerary || [];
   const q = state.searchQuery;
   const filtered = filterActivity(items, q);
 
   if (items.length === 0) {
     el.innerHTML = renderEmpty(
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
-      'var(--accent)', 'אין מסלול עדיין', 'העלו קובץ CSV עם לוח הזמנים שלכם בעזרת כפתור ה-+ בראש המסך'
+      'var(--accent)', 'אין מסלול עדיין',
+      'העלו קובץ itinerary.csv עם שורות הטיול בעזרת כפתור ה-+ למעלה'
     );
     return;
   }
-  if (filtered.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &quot;' + esc(q) + '&quot;</p></div>';
-    return;
-  }
+  if (filtered.length === 0) { el.innerHTML = noResultsHtml(q); return; }
 
-  // Group by day
   const map = new Map();
   filtered.forEach(item => {
-    const key = item.day || item.date || 'ללא תאריך';
+    const key = item.dayLabel || 'ללא תאריך';
     if (!map.has(key)) map.set(key, []);
     map.get(key).push(item);
   });
 
   let html = '';
-  map.forEach((activities, day) => {
-    const done = activities.filter(a => state.completedIds.has(a.id)).length;
+  map.forEach((activities, dayKey) => {
+    const done  = activities.filter(a => state.completedIds.has(a.id)).length;
     const total = activities.length;
-    const pct = total > 0 ? (done/total*100) : 0;
+    const pct   = total > 0 ? (done / total * 100) : 0;
     const allDone = done === total && total > 0;
 
-    html += `<div class="mb-2">
+    html += `<div>
       <div class="section-header">
         <div class="section-header-left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span class="section-header-title">${esc(day)}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--accent);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="section-header-title">${esc(dayKey)}</span>
         </div>
         <span class="section-badge${allDone ? ' all-done' : ''}">${done}/${total}</span>
       </div>
       <div class="progress-bar-wrap"><div class="progress-bar-fill${allDone ? ' done' : ''}" style="width:${pct}%"></div></div>
-      <div class="cards-list">
-        ${activities.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}
-      </div>
+      <div class="cards-list">${activities.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}</div>
     </div>`;
   });
-
   el.innerHTML = html;
 }
 
 function renderOptions() {
   const el = document.getElementById('options-content');
-  const items = (state.data && state.data.options) || [];
+  const items = state.data?.options || [];
   const q = state.searchQuery;
   const filtered = filterActivity(items, q);
 
   if (items.length === 0) {
     el.innerHTML = renderEmpty(
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--warning)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
-      'var(--warning)', 'אין אופציות עדיין', 'אופציות הן יעדים אלטרנטיביים וגיחות אופציונליות. העלו CSV עם שורות "אופציה" בעמודת היום.'
+      'var(--warning)', 'אין אופציות עדיין',
+      'העלו קובץ options.csv עם יעדים אלטרנטיביים וגיחות אופציונליות'
     );
     return;
   }
-  if (filtered.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &quot;' + esc(q) + '&quot;</p></div>';
-    return;
-  }
+  if (filtered.length === 0) { el.innerHTML = noResultsHtml(q); return; }
 
   el.innerHTML = `
     <div class="options-count-label">
@@ -1236,23 +1606,20 @@ function renderOptions() {
 
 function renderTips() {
   const el = document.getElementById('tips-content');
-  const items = (state.data && state.data.tips) || [];
+  const items = state.data?.tips || [];
   const q = state.searchQuery;
   const filtered = filterTips(items, q);
 
   if (items.length === 0) {
     el.innerHTML = renderEmpty(
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--success)"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
-      'var(--success)', 'אין טיפים עדיין', 'טיפים הם חוקי ברזל, הכנות, כשרות ולינקים חיוניים. העלו CSV עם עמודות "קטגוריה" או "ריכוז הנחיות".'
+      'var(--success)', 'אין טיפים עדיין',
+      'העלו קובץ tips.csv עם קטגוריות, הנחיות כשרות ולינקים חיוניים'
     );
     return;
   }
-  if (filtered.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &quot;' + esc(q) + '&quot;</p></div>';
-    return;
-  }
+  if (filtered.length === 0) { el.innerHTML = noResultsHtml(q); return; }
 
-  // Group by category
   const map = new Map();
   filtered.forEach(item => {
     const key = item.category || 'כללי';
@@ -1261,19 +1628,18 @@ function renderTips() {
   });
 
   let html = '';
-  map.forEach((tips, category) => {
+  map.forEach((tips, cat) => {
     html += `<div>
       <div class="section-header">
-        <div class="section-header-left tips">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--success)"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-          <span class="section-header-title">${esc(category)}</span>
+        <div class="section-header-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--success);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <span class="section-header-title">${esc(cat)}</span>
         </div>
         <span class="section-badge">${tips.length}</span>
       </div>
       <div class="cards-list">${tips.map(item => renderTipCard(item, state.completedIds.has(item.id), q)).join('')}</div>
     </div>`;
   });
-
   el.innerHTML = html;
 }
 
@@ -1283,36 +1649,37 @@ function renderAll() {
   renderTips();
   updateCounts();
   updateProgress();
+  // Restore expanded card states after DOM rebuild
+  if (state.expandedIds.size > 0) {
+    state.expandedIds.forEach(id => {
+      const card = document.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
+      if (card) card.classList.add('expanded');
+    });
+  }
 }
 
 function updateCounts() {
   const d = state.data;
-  const counts = {
-    itinerary: d ? d.itinerary.length : 0,
-    options:   d ? d.options.length : 0,
-    tips:      d ? d.tips.length : 0,
-  };
-  Object.entries(counts).forEach(([tab, count]) => {
+  [['itinerary', d?.itinerary?.length||0], ['options', d?.options?.length||0], ['tips', d?.tips?.length||0]].forEach(([tab, n]) => {
     const el = document.getElementById('tab-count-' + tab);
-    if (el) el.textContent = count > 0 ? count : '';
+    if (el) el.textContent = n > 0 ? n : '';
   });
 }
 
 function updateProgress() {
   const d = state.data;
-  if (!d) { document.getElementById('progress-pill').style.display = 'none'; return; }
-  const total = d.itinerary.length + d.options.length + d.tips.length;
-  if (total === 0) { document.getElementById('progress-pill').style.display = 'none'; return; }
-  const allItems = [...d.itinerary, ...d.options, ...d.tips];
-  const done = allItems.filter(i => state.completedIds.has(i.id)).length;
-  document.getElementById('progress-pill').style.display = 'flex';
-  document.getElementById('progress-text').textContent = done + '/' + total;
+  const pill = document.getElementById('progress-pill');
+  if (!d) { pill.style.display = 'none'; return; }
+  const all = [...(d.itinerary||[]), ...(d.options||[]), ...(d.tips||[])];
+  if (all.length === 0) { pill.style.display = 'none'; return; }
+  const done = all.filter(i => state.completedIds.has(i.id)).length;
+  pill.style.display = 'flex';
+  document.getElementById('progress-text').textContent = done + '/' + all.length;
 }
 
-// ================================================================
-//   SWITCH TABS
-// ================================================================
-
+/* ================================================================
+   TAB SWITCHING
+================================================================ */
 function setTab(tabId) {
   state.activeTab = tabId;
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1320,58 +1687,65 @@ function setTab(tabId) {
     btn.classList.toggle('active', active);
     btn.setAttribute('aria-selected', active);
   });
-  document.querySelectorAll('.tab-panel').forEach(panel => {
-    panel.classList.toggle('active', panel.id === 'panel-' + tabId);
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + tabId);
   });
-  try { localStorage.setItem(LS_TAB, tabId); } catch {}
+  safeSet(LS_TAB, tabId);
 }
 
-// ================================================================
-//   TOGGLE COMPLETE
-// ================================================================
-
+/* ================================================================
+   TOGGLE COMPLETE
+================================================================ */
 function toggleComplete(id) {
   if (state.completedIds.has(id)) state.completedIds.delete(id);
   else state.completedIds.add(id);
-  safeSet(LS_COMPLETED, Array.from(state.completedIds));
+  persistCompleted();
+  showSaveToast(state.completedIds.has(id) ? 'סומן כהושלם' : 'הוסר סימון');
   renderAll();
 }
 
-// ================================================================
-//   THEME
-// ================================================================
-
+/* ================================================================
+   THEME
+================================================================ */
 function applyTheme() {
-  document.documentElement.classList.toggle('dark', state.isDark);
+  document.documentElement.classList.toggle('dark',  state.isDark);
   document.documentElement.classList.toggle('light', !state.isDark);
   document.getElementById('theme-icon-sun').style.display  = state.isDark ? 'block' : 'none';
   document.getElementById('theme-icon-moon').style.display = state.isDark ? 'none'  : 'block';
   try { localStorage.setItem(LS_DARK, String(state.isDark)); } catch {}
 }
 
-// ================================================================
-//   DEMO / CLEAR
-// ================================================================
-
+/* ================================================================
+   DEMO / CLEAR
+================================================================ */
 function loadDemoData() {
   state.data = getSampleData();
   state.isDemo = true;
   document.getElementById('demo-label').style.display = 'block';
   document.getElementById('demo-banner').style.display = 'block';
-  document.getElementById('clear-btn').style.display = 'none';
+  document.getElementById('clear-btn').style.display   = 'none';
 }
 
 function clearData() {
-  try { localStorage.removeItem(LS_DATA); localStorage.removeItem(LS_COMPLETED); } catch {}
+  if (!confirm('למחוק את כל הנתונים ולחזור לנתוני הדגמה?')) return;
+  try {
+    [LS_DATA, LS_COMPLETED, LS_EXPANDED, LS_SEARCH, LS_META].forEach(k => localStorage.removeItem(k));
+  } catch {}
   state.completedIds = new Set();
+  state.expandedIds  = new Set();
+  state.searchQuery  = '';
+  const inp = document.getElementById('search-input');
+  if (inp) inp.value = '';
+  document.getElementById('search-clear')?.classList.remove('visible');
+  document.getElementById('export-btn').style.display = 'none';
   loadDemoData();
   renderAll();
+  showSaveToast('נתונים נמחקו');
 }
 
-// ================================================================
-//   FILE UPLOAD
-// ================================================================
-
+/* ================================================================
+   FILE UPLOAD
+================================================================ */
 function setUploading(on) {
   const btn = document.getElementById('upload-btn');
   if (on) {
@@ -1387,38 +1761,61 @@ async function handleFiles(files) {
   if (!files || files.length === 0) return;
   setUploading(true);
   hideError();
-
   try {
-    const fileContents = await Promise.all(
+    const loaded = await Promise.all(
       Array.from(files).map(f => f.text().then(content => ({ name: f.name, content })))
     );
-    const result = parseCSVFiles(fileContents);
-    state.data = result;
+    const result = parseCSVFiles(loaded);
+
+    // Build a name→id map of existing items so we can migrate completed marks
+    const prevNameToId = new Map();
+    if (state.data) {
+      [...(state.data.itinerary||[]), ...(state.data.options||[]), ...(state.data.tips||[])].forEach(item => {
+        const key = (item.placeName || item.title || '').trim().toLowerCase();
+        if (key) prevNameToId.set(key, item.id);
+      });
+    }
+
+    state.data   = result;
     state.isDemo = false;
-    state.completedIds = new Set();
-    safeSet(LS_DATA, result);
+
+    // Migrate completedIds: if new item has the same place name as a previously completed one, keep it
+    const newCompleted = new Set();
+    [...(result.itinerary||[]), ...(result.options||[]), ...(result.tips||[])].forEach(item => {
+      const key = (item.placeName || item.title || '').trim().toLowerCase();
+      const oldId = prevNameToId.get(key);
+      if (oldId && state.completedIds.has(oldId)) newCompleted.add(item.id);
+    });
+    state.completedIds = newCompleted;
+
+    // Save meta
+    const fileNames   = Array.from(files).map(f => f.name);
+    const totalItems  = (result.itinerary?.length||0) + (result.options?.length||0) + (result.tips?.length||0);
+    persistMeta(fileNames, totalItems);
+    persistAll();
 
     document.getElementById('demo-label').style.display = 'none';
     document.getElementById('demo-banner').style.display = 'none';
-    document.getElementById('clear-btn').style.display = 'flex';
+    document.getElementById('clear-btn').style.display   = 'flex';
+    document.getElementById('export-btn').style.display  = 'flex';
 
-    if (result.errors.length > 0) showError(result.errors.slice(0, 3).join(' • '));
+    if (result.errors.length > 0) showError(result.errors.slice(0,3).join(' • '));
 
-    if (result.itinerary.length > 0) setTab('itinerary');
-    else if (result.tips.length > 0) setTab('tips');
-    else if (result.options.length > 0) setTab('options');
+    if      (result.itinerary.length > 0) setTab('itinerary');
+    else if (result.tips.length > 0)      setTab('tips');
+    else if (result.options.length > 0)   setTab('options');
 
     renderAll();
+    showSaveToast('קבצים נטענו ונשמרו (' + totalItems + ' פריטים)');
   } catch(e) {
     showError('שגיאה בטעינת הקובץ: ' + String(e));
   }
   setUploading(false);
 }
 
-// ================================================================
-//   ERROR BANNER
-// ================================================================
-
+/* ================================================================
+   ERROR
+================================================================ */
 function showError(msg) {
   document.getElementById('error-banner').style.display = 'flex';
   document.getElementById('error-text').textContent = msg;
@@ -1427,20 +1824,17 @@ function hideError() {
   document.getElementById('error-banner').style.display = 'none';
 }
 
-// ================================================================
-//   GPS
-// ================================================================
-
+/* ================================================================
+   GPS
+================================================================ */
 function initGPS() {
-  const btn = document.getElementById('gps-btn');
-  btn.addEventListener('click', () => {
+  document.getElementById('gps-btn').addEventListener('click', () => {
     if (!navigator.geolocation) {
-      showGPSError('הדפדפן שלך אינו תומך ב-GPS. נסה Chrome או Safari.');
+      showGPSError('הדפדפן אינו תומך ב-GPS. נסה Chrome או Safari.');
       return;
     }
     setGPSLoading(true);
     clearGPSError();
-
     navigator.geolocation.getCurrentPosition(
       pos => {
         state.gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
@@ -1459,13 +1853,11 @@ function initGPS() {
     );
   });
 
-  // Category buttons
   document.getElementById('cat-grid').addEventListener('click', e => {
-    const catBtn = e.target.closest('.cat-btn');
-    if (!catBtn || !state.gpsCoords) return;
-    const query = catBtn.dataset.query;
+    const btn = e.target.closest('.cat-btn');
+    if (!btn || !state.gpsCoords) return;
     const { lat, lng } = state.gpsCoords;
-    const url = 'https://www.google.com/maps/search/' + encodeURIComponent(query) + '/@' + lat + ',' + lng + ',16z';
+    const url = 'https://www.google.com/maps/search/' + encodeURIComponent(btn.dataset.query) + '/@' + lat + ',' + lng + ',16z';
     window.open(url, '_blank', 'noopener,noreferrer');
   });
 }
@@ -1473,16 +1865,15 @@ function initGPS() {
 function setGPSLoading(on) {
   const btn = document.getElementById('gps-btn');
   btn.disabled = on;
-  document.getElementById('gps-icon-locate').style.display = on ? 'none' : (state.gpsCoords ? 'none' : 'block');
-  document.getElementById('gps-icon-spin').style.display   = on ? 'block' : 'none';
+  document.getElementById('gps-icon-locate').style.display  = on ? 'none' : (state.gpsCoords ? 'none'  : 'block');
+  document.getElementById('gps-icon-spin').style.display    = on ? 'block': 'none';
   document.getElementById('gps-icon-refresh').style.display = on ? 'none' : (state.gpsCoords ? 'block' : 'none');
-  document.getElementById('gps-btn-text').textContent = on ? 'מאתר...' : (state.gpsCoords ? 'רענן מיקום' : 'אתר מיקום GPS');
+  document.getElementById('gps-btn-text').textContent       = on ? 'מאתר...' : (state.gpsCoords ? 'רענן מיקום' : 'אתר מיקום GPS');
 }
 
 function showGPSSuccess() {
   const { lat, lng, accuracy } = state.gpsCoords;
-  const btn = document.getElementById('gps-btn');
-  btn.classList.add('success');
+  document.getElementById('gps-btn').classList.add('success');
   document.getElementById('gps-icon-locate').style.display  = 'none';
   document.getElementById('gps-icon-spin').style.display    = 'none';
   document.getElementById('gps-icon-refresh').style.display = 'block';
@@ -1492,7 +1883,6 @@ function showGPSSuccess() {
   document.getElementById('cat-grid').classList.remove('disabled');
   document.getElementById('gps-hint').style.display = 'none';
 }
-
 function showGPSError(msg) {
   document.getElementById('gps-error').classList.add('visible');
   document.getElementById('gps-error-text').textContent = msg;
@@ -1501,128 +1891,153 @@ function clearGPSError() {
   document.getElementById('gps-error').classList.remove('visible');
 }
 
-// ================================================================
-//   CARD INTERACTIONS (event delegation)
-// ================================================================
-
+/* ================================================================
+   CARD INTERACTIONS (event delegation)
+================================================================ */
 function initCardInteractions() {
   document.getElementById('tab-content').addEventListener('click', e => {
-    // Check button
+    // Check button — stop propagation so card doesn't expand/collapse
     const checkBtn = e.target.closest('[data-check]');
     if (checkBtn) {
       e.stopPropagation();
       toggleComplete(checkBtn.dataset.check);
       return;
     }
-
-    // Nav button
+    // External nav button
     const navBtn = e.target.closest('[data-nav]');
     if (navBtn) {
       e.stopPropagation();
       window.open(navBtn.dataset.nav, '_blank', 'noopener,noreferrer');
       return;
     }
-
-    // Tip expand (data-expand on the card-body)
-    const expandTrigger = e.target.closest('[data-expand]');
-    if (expandTrigger) {
-      const card = expandTrigger.closest('.card');
-      if (card) { card.classList.toggle('expanded'); return; }
-    }
-
-    // Activity card click — expand
-    const card = e.target.closest('.card');
-    if (card && !card.classList.contains('tip-card')) {
-      const details = card.querySelector('.card-details');
-      if (details) card.classList.toggle('expanded');
+    // Card body click — expand/collapse, persist state
+    const cardBody = e.target.closest('.card-body');
+    if (cardBody) {
+      const card = cardBody.closest('.card');
+      if (card) {
+        const details = card.querySelector('.card-details');
+        if (details) {
+          const willExpand = !card.classList.contains('expanded');
+          card.classList.toggle('expanded', willExpand);
+          const id = card.dataset.id;
+          if (id) {
+            if (willExpand) state.expandedIds.add(id);
+            else state.expandedIds.delete(id);
+            persistExpanded();
+          }
+        }
+      }
+      return;
     }
   });
 }
 
-// ================================================================
-//   INIT
-// ================================================================
+/* ================================================================
+   UPLOAD HINT MODAL
+================================================================ */
+function showUploadHint() {
+  document.getElementById('upload-hint').classList.remove('hidden');
+}
+function hideUploadHint() {
+  document.getElementById('upload-hint').classList.add('hidden');
+}
 
+/* ================================================================
+   INIT
+================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- Restore state from localStorage ---
+  // Restore theme
   const savedDark = localStorage.getItem(LS_DARK);
   state.isDark = savedDark !== null ? savedDark === 'true' : true;
   applyTheme();
 
-  const savedTab = localStorage.getItem(LS_TAB);
-  if (savedTab && ['itinerary','options','tips','nearby'].includes(savedTab)) state.activeTab = savedTab;
-
-  const savedCompleted = safeGet(LS_COMPLETED, []);
-  state.completedIds = new Set(savedCompleted);
-
-  const savedData = safeGet(LS_DATA, null);
-  if (savedData && (savedData.itinerary || savedData.options || savedData.tips)) {
-    state.data = savedData;
-    state.isDemo = false;
-    document.getElementById('clear-btn').style.display = 'flex';
+  // Restore all persisted state (tab, completedIds, expandedIds, search, data)
+  const hadData = restorePersistedState();
+  if (hadData) {
+    document.getElementById('clear-btn').style.display  = 'flex';
+    document.getElementById('export-btn').style.display = 'flex';
+    const meta = safeGet(LS_META, null);
+    if (meta?.savedAt) {
+      const d = new Date(meta.savedAt);
+      const label = document.getElementById('demo-label');
+      if (label) { label.textContent = 'שמור ' + d.toLocaleDateString('he-IL'); label.style.display = 'block'; }
+    }
   } else {
     loadDemoData();
   }
 
-  // --- Render ---
   setTab(state.activeTab);
   renderAll();
 
-  // --- Tab bar ---
+  // Tab bar
   document.getElementById('tab-bar').addEventListener('click', e => {
     const btn = e.target.closest('.tab-btn');
-    if (btn && btn.dataset.tab) setTab(btn.dataset.tab);
+    if (btn?.dataset.tab) setTab(btn.dataset.tab);
   });
 
-  // --- Search ---
+  // Search
   const searchInput = document.getElementById('search-input');
   const searchClear = document.getElementById('search-clear');
-
   searchInput.addEventListener('input', () => {
     state.searchQuery = searchInput.value;
     searchClear.classList.toggle('visible', !!searchInput.value);
+    safeSet(LS_SEARCH, state.searchQuery);
     renderAll();
   });
   searchClear.addEventListener('click', () => {
     searchInput.value = '';
     state.searchQuery = '';
     searchClear.classList.remove('visible');
+    safeSet(LS_SEARCH, '');
     renderAll();
   });
 
-  // --- Theme toggle ---
+  // Theme toggle
   document.getElementById('theme-btn').addEventListener('click', () => {
     state.isDark = !state.isDark;
     applyTheme();
   });
 
-  // --- Clear data ---
+  // Clear data
   document.getElementById('clear-btn').addEventListener('click', clearData);
 
-  // --- Upload ---
+  // Upload button — show hint modal
   const fileInput = document.getElementById('file-input');
-  document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
-  document.getElementById('demo-banner-inner').addEventListener('click', () => fileInput.click());
+  document.getElementById('upload-btn').addEventListener('click', showUploadHint);
+  document.getElementById('demo-banner-inner').addEventListener('click', showUploadHint);
+
+  // Hint modal buttons
+  document.getElementById('hint-pick-btn').addEventListener('click', () => {
+    hideUploadHint();
+    fileInput.click();
+  });
+  document.getElementById('hint-cancel-btn').addEventListener('click', hideUploadHint);
+  document.getElementById('upload-hint').addEventListener('click', e => {
+    if (e.target === document.getElementById('upload-hint')) hideUploadHint();
+  });
+
+  // File input change
   fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
 
-  // --- Error close ---
+  // Error close
   document.getElementById('error-close').addEventListener('click', hideError);
 
-  // --- Drag & drop ---
+  // Drag & drop
   document.getElementById('app').addEventListener('dragover', e => e.preventDefault());
   document.getElementById('app').addEventListener('drop', e => {
     e.preventDefault();
+    hideUploadHint();
     handleFiles(e.dataTransfer.files);
   });
 
-  // --- Card interactions ---
+  // Card interactions
   initCardInteractions();
 
-  // --- GPS ---
+  // GPS
   initGPS();
 
-  // --- Hide splash ---
+  // Hide loading splash
   document.getElementById('loading-splash').classList.add('gone');
 });
 </script>
