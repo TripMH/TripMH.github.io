@@ -171,21 +171,23 @@
     .upload-btn svg { width: 16px; height: 16px; }
     .upload-btn.loading { opacity: .6; cursor: not-allowed; }
 
-    /* Upload hint modal */
+    /* Modals (Hint & Edit) */
     .upload-hint {
       position: fixed; inset: 0; z-index: 100;
       background: rgba(0,0,0,.6);
       backdrop-filter: blur(4px);
-      display: flex; align-items: flex-end; justify-content: center;
-      padding-bottom: 24px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px 16px;
     }
     .upload-hint.hidden { display: none; }
     .upload-hint-box {
-      width: calc(100% - 32px); max-width: 448px;
+      width: 100%; max-width: 448px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       padding: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .upload-hint-title {
       font-size: 15px; font-weight: 700; color: var(--text);
@@ -219,6 +221,18 @@
     .hint-btn-row button:hover { opacity: .85; }
     .hint-pick { background: var(--accent); color: var(--bg); border: none; }
     .hint-cancel { background: var(--bg-muted); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* Edit Form Styles */
+    .edit-group { margin-bottom: 12px; }
+    .edit-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; font-weight: 600; }
+    .edit-input {
+      width: 100%; padding: 10px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--bg-muted);
+      color: var(--text); font-family: inherit; font-size: 13px;
+      outline: none; transition: border .2s;
+    }
+    .edit-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    textarea.edit-input { resize: vertical; min-height: 80px; }
 
     /* Search */
     .search-wrap { position: relative; padding: 0 16px 10px; }
@@ -259,6 +273,15 @@
     .error-close { background: none; border: none; cursor: pointer; color: var(--danger); opacity: .6; flex-shrink: 0; }
     .error-close:hover { opacity: 1; }
     .error-close svg { width: 13px; height: 13px; }
+
+    /* Toast */
+    #save-toast {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: var(--success); color: var(--bg); padding: 6px 16px; border-radius: 99px;
+      font-size: 12px; font-weight: 600; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    #save-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* Tab bar */
     #tab-bar { display: flex; border-bottom: 1px solid var(--border); }
@@ -362,7 +385,7 @@
       position: relative;
     }
 
-    /* Done state — grey out, strikethrough, keep visible */
+    /* Done state */
     .card.done {
       opacity: .48;
       filter: saturate(0.4);
@@ -376,7 +399,6 @@
     .card:not(.done):hover { border-color: var(--accent-border); }
     .card:not(.done):hover .card-check { border-color: var(--accent); }
 
-    /* Booking warning bar */
     .card-booking-bar {
       display: flex; align-items: center; gap: 6px;
       padding: 5px 12px;
@@ -386,7 +408,6 @@
     .card-booking-bar svg { width: 12px; height: 12px; color: var(--danger); flex-shrink: 0; }
     .card-booking-bar span { font-size: 11px; font-weight: 600; color: var(--danger); }
 
-    /* Card body (always visible) */
     .card-body {
       display: flex; align-items: flex-start; gap: 11px;
       padding: 13px 13px 12px;
@@ -394,7 +415,6 @@
       user-select: none;
     }
 
-    /* Check button */
     .card-check {
       flex-shrink: 0; margin-top: 1px;
       width: 24px; height: 24px; border-radius: 50%;
@@ -408,7 +428,6 @@
 
     .card-main { flex: 1; min-width: 0; }
 
-    /* Title row */
     .card-title-row {
       display: flex; align-items: flex-start;
       justify-content: space-between; gap: 8px;
@@ -427,7 +446,6 @@
     }
     .card.expanded .chevron { transform: rotate(180deg); }
 
-    /* PROMINENT BADGES (always visible) */
     .card-badges {
       display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px;
     }
@@ -456,13 +474,11 @@
       margin-bottom: 2px;
     }
 
-    /* Description */
     .card-desc {
       font-size: 13px; color: var(--text-muted); line-height: 1.7;
       white-space: pre-wrap;
     }
 
-    /* Detail rows (transport, booking info, address) */
     .detail-row {
       display: flex; align-items: flex-start; gap: 8px;
       font-size: 12px; color: var(--text-muted); line-height: 1.55;
@@ -480,7 +496,6 @@
     }
     .detail-row .dr-value { flex: 1; }
 
-    /* Navigation buttons */
     .nav-btns { display: flex; flex-direction: column; gap: 6px; }
 
     .nav-btn {
@@ -506,7 +521,6 @@
     }
     .nav-btn.from-prev:hover { background: color-mix(in srgb, var(--warning) 20%, transparent); }
 
-    /* General link button */
     .link-btn {
       display: flex; align-items: center; gap: 8px;
       width: 100%; padding: 9px 12px;
@@ -515,6 +529,7 @@
       background: var(--bg-muted); color: var(--text-muted);
       font-size: 12px; font-weight: 500; font-family: inherit;
       text-decoration: none; transition: background .15s;
+      cursor: pointer;
     }
     .link-btn:hover { background: color-mix(in srgb, var(--text-muted) 12%, transparent); color: var(--text); }
     .link-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
@@ -681,7 +696,6 @@
 </head>
 <body>
 
-<!-- Loading splash -->
 <div id="loading-splash">
   <div class="splash-icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -689,7 +703,8 @@
   <p>TripMH טוען...</p>
 </div>
 
-<!-- Upload hint modal -->
+<div id="save-toast">נשמר בהצלחה</div>
+
 <div class="upload-hint hidden" id="upload-hint" role="dialog" aria-modal="true" aria-label="העלאת קבצים">
   <div class="upload-hint-box">
     <div class="upload-hint-title">
@@ -699,20 +714,19 @@
     <ul class="upload-hint-list">
       <li>
         <span class="badge badge-main">מסלול</span>
-        <span>שמרו כ-<strong>itinerary.csv</strong> (או כל שם עם "מסלול" / "itinerary")</span>
-      </li>
-      <li>
-        <span class="badge badge-tips">טיפים</span>
-        <span>שמרו כ-<strong>tips.csv</strong> (או כל שם עם "טיפ" / "tip")</span>
+        <span>שמרו כ-<strong>מסלול ראשי.csv</strong> (או itinerary)</span>
       </li>
       <li>
         <span class="badge badge-options">אופציות</span>
-        <span>שמרו כ-<strong>options.csv</strong> (או כל שם עם "אופצי" / "option" / "חלופ")</span>
+        <span>שמרו כ-<strong>מסלול השלמה.csv</strong> (או options)</span>
+      </li>
+      <li>
+        <span class="badge badge-tips">טיפים</span>
+        <span>שמרו כ-<strong>טיפים.csv</strong> (או tips)</span>
       </li>
     </ul>
     <div class="upload-hint-cols">
-      <strong>עמודות נתמכות במסלול:</strong>
-      אייקון • יום • תאריך • שם המקום • מיקום במפה • תיאור ומה ניתן לעשות • תחבורה והגעה ליעד • אזור במסלול • טווח שעות מומלץ • זמן מוערך • עלות משוערת (₪) • איך ומתי להזמין • קישור • ניווט גוגל מפות (מהיעד הקודם)
+      המערכת יודעת כעת לזהות את הקבצים באופן חכם יותר לפי שמות העמודות גם אם שם הקובץ אינו מדויק.
     </div>
     <div class="hint-btn-row">
       <button class="hint-pick" id="hint-pick-btn">בחר קבצים</button>
@@ -721,9 +735,23 @@
   </div>
 </div>
 
+<div class="upload-hint hidden" id="edit-modal" role="dialog" aria-modal="true" aria-label="עריכת פריט">
+  <div class="upload-hint-box edit-box">
+    <div class="upload-hint-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      עריכת נתונים
+    </div>
+    <div id="edit-form-container" style="display: flex; flex-direction: column;">
+       </div>
+    <div class="hint-btn-row" style="margin-top: 15px;">
+      <button class="hint-pick" id="edit-save-btn">שמור שינויים</button>
+      <button class="hint-cancel" id="edit-cancel-btn">ביטול</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
 
-  <!-- HEADER -->
   <header id="app-header">
     <div class="header-top">
       <div class="logo">
@@ -895,8 +923,7 @@ const LS_DATA      = 'tripmh_data_v3';
 const LS_TAB       = 'tripmh_tab_v1';
 const LS_EXPANDED  = 'tripmh_expanded_v1';
 const LS_SEARCH    = 'tripmh_search_v1';
-const LS_META      = 'tripmh_meta_v1';   // { savedAt, fileNames, totalItems }
-const SS_EXPANDED  = 'tripmh_exp_session'; // session-level expanded cards
+const LS_META      = 'tripmh_meta_v1';
 
 let state = {
   activeTab: 'itinerary',
@@ -905,9 +932,11 @@ let state = {
   isDemo: false,
   data: null,         // { itinerary:[], options:[], tips:[], errors:[] }
   completedIds: new Set(),
-  expandedIds: new Set(),   // cards currently expanded
+  expandedIds: new Set(),
   gpsCoords: null,
 };
+
+let currentEditId = null;
 
 /* ================================================================
    UTILITIES
@@ -921,7 +950,7 @@ function safeSet(key, val) {
 }
 
 /* ----------------------------------------------------------------
-   PERSISTENCE — save every meaningful state change immediately
+   PERSISTENCE
 ---------------------------------------------------------------- */
 function persistAll() {
   safeSet(LS_DATA,      state.data);
@@ -943,7 +972,6 @@ function persistMeta(fileNames, totalItems) {
   safeSet(LS_META, { savedAt: new Date().toISOString(), fileNames, totalItems });
 }
 
-/* Show a brief save-toast in the header */
 let _toastTimer = null;
 function showSaveToast(msg) {
   let toast = document.getElementById('save-toast');
@@ -954,13 +982,9 @@ function showSaveToast(msg) {
   _toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
 }
 
-/* Restore all persisted state at boot */
 function restorePersistedState() {
-  // completedIds
   state.completedIds = new Set(safeGet(LS_COMPLETED, []));
-  // expandedIds
   state.expandedIds  = new Set(safeGet(LS_EXPANDED, []));
-  // search
   const savedSearch = safeGet(LS_SEARCH, '');
   if (savedSearch) {
     state.searchQuery = savedSearch;
@@ -970,21 +994,20 @@ function restorePersistedState() {
       document.getElementById('search-clear')?.classList.add('visible');
     }
   }
-  // tab
   const savedTab = safeGet(LS_TAB, 'itinerary');
   if (['itinerary','options','tips','nearby'].includes(savedTab)) state.activeTab = savedTab;
-  // data
+  
   const savedData = safeGet(LS_DATA, null);
   if (savedData && (savedData.itinerary?.length || savedData.options?.length || savedData.tips?.length)) {
     state.data   = savedData;
     state.isDemo = false;
-    return true; // had saved data
+    return true; 
   }
-  return false; // no saved data
+  return false; 
 }
 
 /* ----------------------------------------------------------------
-   EXPORT — save current data as a JSON backup the user can download
+   EXPORT
 ---------------------------------------------------------------- */
 function exportBackup() {
   try {
@@ -1001,32 +1024,9 @@ function exportBackup() {
     const a    = Object.assign(document.createElement('a'), { href: url, download: 'tripmh-backup-' + new Date().toISOString().slice(0,10) + '.json' });
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-    showSaveToast('גיבוי הורד');
+    showSaveToast('גיבוי הורד בהצלחה');
   } catch(e) {
     showError('שגיאה בייצוא: ' + String(e));
-  }
-}
-
-/* Import a previously exported JSON backup */
-async function importBackup(file) {
-  try {
-    const text = await file.text();
-    const payload = JSON.parse(text);
-    if (!payload.data || !payload.version) throw new Error('קובץ גיבוי לא תקין');
-    state.data = payload.data;
-    state.isDemo = false;
-    // Merge completed IDs — keep old ones, add restored
-    const restored = new Set(payload.completedIds || []);
-    restored.forEach(id => state.completedIds.add(id));
-    persistAll();
-    document.getElementById('demo-label').style.display = 'none';
-    document.getElementById('demo-banner').style.display = 'none';
-    document.getElementById('clear-btn').style.display   = 'flex';
-    document.getElementById('export-btn').style.display  = 'flex';
-    renderAll();
-    showSaveToast('גיבוי שוחזר');
-  } catch(e) {
-    showError('שגיאה בייבוא גיבוי: ' + String(e));
   }
 }
 
@@ -1079,26 +1079,26 @@ function buildMapUrl(rawUrl, placeName, address) {
 function detectIcon(text) {
   const t = (text || '').toLowerCase();
   if (t.match(/מסעד|אוכל|food|ramen|sushi|noodle|yakiniku|wagyu/)) return '🍜';
-  if (t.match(/מוזיאון|museum/))                                     return '🏛️';
-  if (t.match(/מקדש|shrine|temple|jinja|torii/))                    return '⛩️';
-  if (t.match(/פארק|גן|park|garden/))                               return '🌿';
-  if (t.match(/קניות|שוק|market|mall|shop|akihabara|harajuku/))     return '🛍️';
-  if (t.match(/מלון|hotel|hostel|inn|ryokan/))                      return '🏨';
-  if (t.match(/תחנה|station|train|shinkansen|bullet/))              return '🚆';
-  if (t.match(/טיסה|flight|airport|narita|haneda|kansai/))          return '✈️';
-  if (t.match(/הר|mountain|fuji|yama/))                             return '🗻';
-  if (t.match(/ים|חוף|beach|sea|ocean/))                            return '🏖️';
-  if (t.match(/טיול|הליכה|hike|trail|trek/))                        return '🥾';
-  if (t.match(/קפה|cafe|coffee|kissaten/))                          return '☕';
-  if (t.match(/בר|bar|sake|izakaya/))                               return '🍶';
-  if (t.match(/שבת|shabbat|shabbos/))                               return '🕯️';
-  if (t.match(/כשר|kosher/))                                        return '✡️';
-  if (t.match(/חב"ד|chabad/))                                       return '🕍';
-  if (t.match(/אמנות|art|gallery/))                                 return '🎨';
-  if (t.match(/אנימה|anime|manga|otaku/))                           return '🎌';
-  if (t.match(/אונסן|onsen|spa|bath|sento/))                        return '♨️';
-  if (t.match(/אוטובוס|bus|metro|subway/))                          return '🚌';
-  if (t.match(/טקס|ceremony|matsuri|festival/))                     return '🎎';
+  if (t.match(/מוזיאון|museum/))                                   return '🏛️';
+  if (t.match(/מקדש|shrine|temple|jinja|torii/))                   return '⛩️';
+  if (t.match(/פארק|גן|park|garden/))                              return '🌿';
+  if (t.match(/קניות|שוק|market|mall|shop|akihabara|harajuku/))    return '🛍️';
+  if (t.match(/מלון|hotel|hostel|inn|ryokan/))                     return '🏨';
+  if (t.match(/תחנה|station|train|shinkansen|bullet/))             return '🚆';
+  if (t.match(/טיסה|flight|airport|narita|haneda|kansai/))         return '✈️';
+  if (t.match(/הר|mountain|fuji|yama/))                            return '🗻';
+  if (t.match(/ים|חוף|beach|sea|ocean/))                           return '🏖️';
+  if (t.match(/טיול|הליכה|hike|trail|trek/))                       return '🥾';
+  if (t.match(/קפה|cafe|coffee|kissaten/))                         return '☕';
+  if (t.match(/בר|bar|sake|izakaya/))                              return '🍶';
+  if (t.match(/שבת|shabbat|shabbos/))                              return '🕯️';
+  if (t.match(/כשר|kosher/))                                       return '✡️';
+  if (t.match(/חב"ד|chabad/))                                      return '🕍';
+  if (t.match(/אמנות|art|gallery/))                                return '🎨';
+  if (t.match(/אנימה|anime|manga|otaku/))                          return '🎌';
+  if (t.match(/אונסן|onsen|spa|bath|sento/))                       return '♨️';
+  if (t.match(/אוטובוס|bus|metro|subway/))                         return '🚌';
+  if (t.match(/טקס|ceremony|matsuri|festival/))                    return '🎎';
   return '📍';
 }
 
@@ -1145,7 +1145,6 @@ function rowsToObjects(rows) {
   });
 }
 
-/* Fuzzy column getter — finds first key that includes any of the given terms */
 function col(obj, ...terms) {
   const keys = Object.keys(obj);
   for (const term of terms) {
@@ -1156,13 +1155,26 @@ function col(obj, ...terms) {
   return '';
 }
 
-/* Detect file type by filename */
+/* Improved detection for smarter file routing */
 function detectFileType(filename) {
   const name = (filename || '').toLowerCase();
-  if (/tip|טיפ|hint|notes/.test(name))            return 'tips';
-  if (/opt|אופצי|חלופ|altern/.test(name))         return 'options';
-  if (/itinerary|מסלול|schedule|program/.test(name)) return 'itinerary';
-  return 'auto'; // fallback: classify per row
+  if (/tip|טיפ|hint|notes/.test(name)) return 'tips';
+  if (/opt|אופצי|חלופ|altern|השלמה/.test(name)) return 'options';
+  if (/itinerary|ראשי|מסלול(?!.*השלמה)|schedule|program/.test(name)) return 'itinerary';
+  return 'auto'; 
+}
+
+function autoClassifyRow(obj) {
+  const keys = Object.keys(obj).map(k => k.toLowerCase());
+  if (keys.some(k => /קטגוריה|category|טיפ|tip/.test(k))) return 'tip';
+  
+  const dayVal = col(obj, 'יום', 'day', 'תאריך', 'date');
+  if (!dayVal) {
+    const hasPlaceOrTime = col(obj, 'שם המקום', 'place', 'שעות', 'time', 'אזור במסלול');
+    return hasPlaceOrTime ? 'option' : 'tip';
+  }
+  if (/אופצי|option|חלופ|השלמה/i.test(dayVal)) return 'option';
+  return 'itinerary';
 }
 
 function parseItineraryRow(obj, idx) {
@@ -1207,7 +1219,7 @@ function parseOptionsRow(obj, idx) {
 }
 
 function parseTipRow(obj, idx) {
-  const category = col(obj, 'קטגוריה', 'category', 'נושא', 'topic', 'ריכוז', 'סוג') || 'כללי';
+  const category = col(obj, 'קטגוריה', 'category', 'נושא', 'topic', 'סוג') || 'כללי';
   const title    = col(obj, 'כותרת', 'title', 'שם', 'name', 'ריכוז') || ('טיפ ' + (idx+1));
   const content  = col(obj, 'תוכן', 'content', 'הסבר', 'פרטים', 'description', 'details', 'הנחיות', 'טקסט', 'text')
                 || Object.values(obj).filter(Boolean).join(' | ');
@@ -1216,21 +1228,6 @@ function parseTipRow(obj, idx) {
     category, title, content,
     links: extractLinks(content),
   };
-}
-
-/* Auto-classify a row when file type is unknown */
-function autoClassifyRow(obj) {
-  const keys = Object.keys(obj).map(k => k.toLowerCase());
-  // If has category/tip-style columns — tip
-  if (keys.some(k => /קטגוריה|category|ריכוז|tip/.test(k))) return 'tip';
-  // If has day/date — itinerary or option
-  const dayVal = col(obj, 'יום', 'day', 'תאריך', 'date');
-  if (!dayVal) {
-    const hasPlaceOrTime = col(obj, 'שם המקום', 'place', 'שעות', 'time');
-    return hasPlaceOrTime ? 'option' : 'tip';
-  }
-  if (/אופצי|option|חלופ/i.test(dayVal)) return 'option';
-  return 'itinerary';
 }
 
 function parseSingleCSV(text, filename) {
@@ -1265,7 +1262,6 @@ function parseCSVFiles(files) {
       else if (item.type === 'tip')       result.tips.push(item);
     });
   });
-  // Sort itinerary: by day then date
   result.itinerary.sort((a,b) => {
     const ka = (a.day||'') + (a.date||'');
     const kb = (b.day||'') + (b.date||'');
@@ -1275,7 +1271,7 @@ function parseCSVFiles(files) {
 }
 
 /* ================================================================
-   SAMPLE DATA (demo)
+   SAMPLE DATA
 ================================================================ */
 function getSampleData() {
   return {
@@ -1285,96 +1281,30 @@ function getSampleData() {
         timeRange:'09:00–11:30', duration:'2.5 שעות', cost:'חינם',
         transport:'רכבת מיוקיו תחנת Fushimi Inari (Kintetsu)',
         description:'מקדש שינטו מפורסם עם אלפי שערי טוריי כתומים. הכניסה חופשית. מומלץ להגיע מוקדם לפני ההמונים.',
-        booking:'', mapPos:'Fushimi Inari, Kyoto',
+        booking:'', mapPos:'Fushimi Inari, Kyoto', link:'',
         mapUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
         navUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
         navFromPrev:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto',
         requiresBooking:false, links:[], },
-      { id:'d2', type:'itinerary', dayLabel:'יום שני • 14/10/2026', day:'יום שני', date:'14/10/2026',
-        placeName:'שוק ניישיקי', area:'קיוטו', icon:'🛍️',
-        timeRange:'13:00–15:00', duration:'2 שעות', cost:'₪50–120',
-        transport:'הליכה מרובע Kawaramachi, 10 דקות',
-        description:'שוק האוכל המסורתי של קיוטו — "המטבח של קיוטו". דגים, חמוצים, טופו ועוד. מתאים לקניות ואכילה.',
-        booking:'', mapPos:'Nishiki Market, Kyoto',
-        mapUrl:'https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto',
-        navUrl:'https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto',
-        navFromPrev:'', requiresBooking:false, links:[], },
-      { id:'d3', type:'itinerary', dayLabel:'יום שלישי • 15/10/2026', day:'יום שלישי', date:'15/10/2026',
-        placeName:"מגדל סקיטרי — שינג'וקו", area:'טוקיו', icon:'🏙️',
-        timeRange:'10:00–12:00', duration:'2 שעות', cost:'₪130',
-        transport:"רכבת JR לתחנת Shinjuku, יציאה מזרח",
-        description:"מגדל התצפית הגבוה ביפן — 634 מטר. קנו כרטיסים מראש אונליין לחיסכון ולמניעת תורים.",
-        booking:"הזמנה אונליין מראש — skytree.jp",
-        mapPos:'Tokyo Skytree, Sumida',
-        mapUrl:'https://www.google.com/maps/search/?api=1&query=Tokyo+Skytree',
-        navUrl:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Tokyo&destination=Tokyo+Skytree',
-        navFromPrev:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Tokyo&destination=Tokyo+Skytree',
-        requiresBooking:true, links:[{label:'הזמנת כרטיסים', url:'https://www.tokyo-skytree.jp/en/ticket/'}], },
-      { id:'d4', type:'itinerary', dayLabel:'יום רביעי • 16/10/2026', day:'יום רביעי', date:'16/10/2026',
-        placeName:"הר פוג'י", area:"פוג'י — יאמאנאשי", icon:'🗻',
-        timeRange:'כל היום', duration:'8–10 שעות', cost:'₪200 (כולל תחבורה)',
-        transport:"שינקנסן + אוטובוס מ-Kawaguchiko",
-        description:"עלייה להר הקדוש של יפן. יש לבדוק מזג אוויר 48 שעות לפני. ציוד חימום חובה.",
-        booking:'רכשו JR Pass מראש בישראל',
-        mapPos:'Mount Fuji, Japan',
-        mapUrl:'https://www.google.com/maps/search/?api=1&query=Mount+Fuji+Japan',
-        navUrl:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Station&destination=Kawaguchiko+Station',
-        navFromPrev:'https://www.google.com/maps/dir/?api=1&origin=Shinjuku+Station&destination=Kawaguchiko+Station',
-        requiresBooking:false, links:[], },
     ],
-    options: [
-      { id:'do1', type:'option', dayLabel:'', day:'', date:'',
-        placeName:'אונסן בהאקונה', area:'האקונה', icon:'♨️',
-        timeRange:'בוקר', duration:'3 שעות', cost:'₪180–250',
-        transport:"שינקנסן מטוקיו לעיר Odawara ואז Hakone Tozan",
-        description:"מרחצאות מים חמים עם נוף להר פוג'י. חוויה יפנית מסורתית. שימו לב — חלק מהמקומות אינם מקבלים קעקועים.",
-        booking:"מומלץ לשריין מקום בO'renji-ya או Hakone Yuryo",
-        mapPos:'Hakone Onsen, Kanagawa',
-        mapUrl:'https://www.google.com/maps/search/?api=1&query=Hakone+Onsen',
-        navUrl:'', navFromPrev:'', requiresBooking:true, links:[], },
-      { id:'do2', type:'option', dayLabel:'', day:'', date:'',
-        placeName:'אקיהברה — אנימה וגאג\'טים', area:'טוקיו', icon:'🎌',
-        timeRange:'14:00–18:00', duration:'4 שעות', cost:'₪0–300',
-        transport:"רכבת JR Yamanote לתחנת Akihabara",
-        description:'שכונת האלקטרוניקה ואנימה של טוקיו. מאנגה, פיגורות, רכיבים אלקטרוניים ועוד.',
-        booking:'', mapPos:'Akihabara, Tokyo',
-        mapUrl:'https://www.google.com/maps/search/?api=1&query=Akihabara+Tokyo',
-        navUrl:'', navFromPrev:'', requiresBooking:false, links:[], },
-    ],
+    options: [],
     tips: [
       { id:'dt1', type:'tip', category:'תחבורה ו-JR Pass',
         title:'JR Pass — קנו לפני הטיסה',
-        content:'רכשו JR Pass בישראל לפני הטיסה — זול יותר ב-20%. מכסה את כל קווי JR כולל שינקנסן Hikari ו-Nozomi. הורידו SmartEX לשריון מושב: https://smart-ex.jp/en/',
-        links:[{label:'SmartEX App', url:'https://smart-ex.jp/en/'}] },
-      { id:'dt2', type:'tip', category:'תחבורה ו-JR Pass',
-        title:'IC Card — כרטיס תחבורה',
-        content:'Suica או Pasmo — טעינה במכשיר כספומט בשדה התעופה. עובד בכל הרכבות, האוטובוסים, הקונביני ומכונות שתייה. שמרו ₪100 פיקדון.',
-        links:[] },
-      { id:'dt3', type:'tip', category:'כשרות ושבת',
-        title:'חב"ד טוקיו — שבת ואוכל',
-        content:'חב"ד טוקיו מציע ארוחות שבת, מגמ"ד ומידע מקומי. הירשמו מראש: https://www.chabadtokyo.com | ICE Suites Hotel מכיר שבת ויהודים.',
-        links:[{label:'חב"ד טוקיו', url:'https://www.chabadtokyo.com'}] },
-      { id:'dt4', type:'tip', category:'כשרות ושבת',
-        title:'לוגיסטיקת שבת',
-        content:'שבת נכנסת מוקדם! ודאו שהמלון מאפשר פתיחת דלת ב-key card ולא רק בכרטיס. בדקו אם יש מעלית שבת. הכינו אוכל קר מה-conbini לפני כניסת שבת.',
-        links:[] },
-      { id:'dt5', type:'tip', category:'אפליקציות חיוניות',
-        title:'4 אפליקציות חובה',
-        content:'1. Google Translate — מצלמה לקריאת יפנית\n2. Google Maps — הורידו מפות אופליין!\n3. Hyperdia — זמני רכבות מדויקים\n4. Coke ON — מכונות שתייה: https://c.cocacola.co.jp/app/',
-        links:[{label:'Coke ON App', url:'https://c.cocacola.co.jp/app/'}] },
+        content:'רכשו JR Pass בישראל לפני הטיסה — זול יותר ב-20%. מכסה את כל קווי JR. הורידו SmartEX: https://smart-ex.jp/en/',
+        links:[{label:'SmartEX App', url:'https://smart-ex.jp/en/'}] }
     ],
     errors: []
   };
 }
 
 /* ================================================================
-   SVG ICONS (inline)
+   SVG ICONS
 ================================================================ */
 const SVG = {
   check:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   clock:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
   pin:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
-  shekel:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><text x="4" y="18" font-size="14" stroke="none" fill="currentColor">₪</text></svg>',
   duration:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>',
   bus:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M8 5V3"/><path d="M16 5V3"/></svg>',
   booking:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
@@ -1384,10 +1314,11 @@ const SVG = {
   chevron:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
   warn:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
   link:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  edit:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
 };
 
 /* ================================================================
-   RENDERING — ACTIVITY CARD (itinerary + options)
+   RENDERING
 ================================================================ */
 function renderActivityCard(item, completed, q) {
   const hasCost      = !!item.cost;
@@ -1398,18 +1329,16 @@ function renderActivityCard(item, completed, q) {
   const hasMapUrl    = !!item.mapUrl;
   const hasNavUrl    = !!item.navUrl;
   const hasLinks     = item.links && item.links.length > 0;
-  const hasDetails   = hasDesc || hasBooking || hasMapUrl || hasNavUrl || hasLinks || !!item.mapPos;
+  const hasDetails   = hasDesc || hasBooking || hasMapUrl || hasNavUrl || hasLinks || !!item.mapPos || true; // Always true to show Edit
 
-  // Cost badge — format ₪ prefix if not already there
   let costDisplay = '';
   if (hasCost) {
     const c = item.cost.trim();
     costDisplay = (c === 'חינם' || c === 'free' || c === 'Free') ? 'חינם'
-                : c.startsWith('₪') ? c
-                : '₪' + c;
+                : c.startsWith('₪') ? c : '₪' + c;
   }
 
-  return `<article class="card${completed ? ' done' : ''}" data-id="${esc(item.id)}" aria-label="${esc(item.placeName)}">
+  return `<article class="card${completed ? ' done' : ''}" data-id="${esc(item.id)}">
     ${item.requiresBooking && !completed ? `<div class="card-booking-bar">${SVG.warn}<span>דורש שריון / הזמנה מראש</span></div>` : ''}
     <div class="card-body">
       <button class="card-check" data-check="${esc(item.id)}"
@@ -1429,7 +1358,7 @@ function renderActivityCard(item, completed, q) {
           ${item.timeRange ? `<span class="badge badge-time">${SVG.clock}${esc(item.timeRange)}</span>` : ''}
           ${hasDuration    ? `<span class="badge badge-dur">${SVG.duration}${esc(item.duration)}</span>` : ''}
           ${item.area      ? `<span class="badge badge-area">${SVG.pin}${highlight(item.area, q)}</span>` : ''}
-          ${hasCost        ? `<span class="badge badge-cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${esc(costDisplay)}</span>` : ''}
+          ${hasCost        ? `<span class="badge badge-cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${esc(costDisplay)}</span>` : ''}
           ${hasTransport   ? `<span class="badge badge-transport">${SVG.bus}${highlight(item.transport, q)}</span>` : ''}
         </div>
       </div>
@@ -1440,32 +1369,27 @@ function renderActivityCard(item, completed, q) {
       ${hasBooking ? `<div class="detail-row booking">${SVG.booking}<span class="dr-label">הזמנה</span><span class="dr-value">${highlight(item.booking, q)}</span></div>` : ''}
       ${item.mapPos && item.mapPos !== item.placeName ? `<div class="detail-row address">${SVG.pin}<span class="dr-label">מיקום</span><span class="dr-value">${esc(item.mapPos)}</span></div>` : ''}
       <div class="nav-btns">
-        ${hasMapUrl ? `<button class="nav-btn" data-nav="${esc(item.mapUrl)}" aria-label="פתח מיקום במפה">
+        ${hasMapUrl ? `<button class="nav-btn" data-nav="${esc(item.mapUrl)}">
           ${SVG.navigate}
           <span class="nav-label">פתח מיקום ב-Google Maps<span class="nav-sub">מיקום המקום</span></span>
           <span class="nav-ext">${SVG.extlink}</span>
         </button>` : ''}
-        ${hasNavUrl && item.navFromPrev ? `<button class="nav-btn from-prev" data-nav="${esc(item.navUrl)}" aria-label="ניווט מהיעד הקודם">
-          ${SVG.nav2}
-          <span class="nav-label">ניווט מהיעד הקודם<span class="nav-sub">Google Maps — הנחיות הגעה</span></span>
-          <span class="nav-ext">${SVG.extlink}</span>
-        </button>` : ''}
       </div>
-      ${hasLinks ? item.links.map(l => `<a class="link-btn" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+      ${hasLinks ? item.links.map(l => `<a class="link-btn" href="${esc(l.url)}" target="_blank" rel="noopener">
         ${SVG.link}${esc(l.label)}<span class="ext">${SVG.extlink}</span>
       </a>`).join('') : ''}
+      <button class="link-btn edit-btn" data-edit="${esc(item.id)}" style="margin-top:4px; justify-content:center;">
+        ${SVG.edit} ערוך נתונים
+      </button>
     </div>` : ''}
   </article>`;
 }
 
-/* ================================================================
-   RENDERING — TIP CARD
-================================================================ */
 function renderTipCard(item, completed, q) {
   const displayContent = stripUrls(item.content);
   const hasLinks = item.links && item.links.length > 0;
 
-  return `<article class="card tip-card${completed ? ' done' : ''}" data-id="${esc(item.id)}" aria-label="${esc(item.title)}">
+  return `<article class="card tip-card${completed ? ' done' : ''}" data-id="${esc(item.id)}">
     <div class="card-body">
       <button class="card-check" data-check="${esc(item.id)}"
         aria-label="${completed ? 'סמן כלא נקרא' : 'סמן כנקרא'}"
@@ -1483,16 +1407,16 @@ function renderTipCard(item, completed, q) {
     <div class="card-details">
       <div class="details-divider"></div>
       ${displayContent ? `<p class="card-desc">${highlight(displayContent, q)}</p>` : ''}
-      ${hasLinks ? item.links.map(l => `<a class="tip-link-btn" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+      ${hasLinks ? item.links.map(l => `<a class="tip-link-btn" href="${esc(l.url)}" target="_blank" rel="noopener">
         ${SVG.extlink}${esc(l.label)}<span class="ext-icon">${SVG.extlink}</span>
       </a>`).join('') : ''}
+      <button class="link-btn edit-btn" data-edit="${esc(item.id)}" style="margin-top:8px; justify-content:center;">
+        ${SVG.edit} ערוך נתונים
+      </button>
     </div>
   </article>`;
 }
 
-/* ================================================================
-   RENDERING — EMPTY STATE
-================================================================ */
 function renderEmpty(svgStr, color, title, desc) {
   return `<div class="empty-state">
     <div class="empty-icon" style="background:color-mix(in srgb,${color} 10%,transparent);border:1px solid color-mix(in srgb,${color} 22%,transparent)">
@@ -1502,13 +1426,11 @@ function renderEmpty(svgStr, color, title, desc) {
     <p>${esc(desc)}</p>
   </div>`;
 }
+
 function noResultsHtml(q) {
-  return `<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &ldquo;${esc(q)}&rdquo;</p></div>`;
+  return `<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור “${esc(q)}”</p></div>`;
 }
 
-/* ================================================================
-   FILTER
-================================================================ */
 function filterActivity(items, q) {
   if (!q) return items;
   const lq = q.toLowerCase();
@@ -1516,10 +1438,7 @@ function filterActivity(items, q) {
     (i.placeName||'').toLowerCase().includes(lq) ||
     (i.area||'').toLowerCase().includes(lq) ||
     (i.description||'').toLowerCase().includes(lq) ||
-    (i.dayLabel||'').toLowerCase().includes(lq) ||
-    (i.timeRange||'').toLowerCase().includes(lq) ||
-    (i.transport||'').toLowerCase().includes(lq) ||
-    (i.cost||'').toLowerCase().includes(lq)
+    (i.dayLabel||'').toLowerCase().includes(lq)
   );
 }
 function filterTips(items, q) {
@@ -1532,9 +1451,6 @@ function filterTips(items, q) {
   );
 }
 
-/* ================================================================
-   RENDER TABS
-================================================================ */
 function renderItinerary() {
   const el = document.getElementById('itinerary-content');
   const items = state.data?.itinerary || [];
@@ -1544,8 +1460,8 @@ function renderItinerary() {
   if (items.length === 0) {
     el.innerHTML = renderEmpty(
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
-      'var(--accent)', 'אין מסלול עדיין',
-      'העלו קובץ itinerary.csv עם שורות הטיול בעזרת כפתור ה-+ למעלה'
+      'var(--accent)', 'אין מסלול ראשי עדיין',
+      'העלו קובץ CSV של המסלול שלכם בעזרת כפתור הפלוס למעלה'
     );
     return;
   }
@@ -1568,7 +1484,7 @@ function renderItinerary() {
     html += `<div>
       <div class="section-header">
         <div class="section-header-left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--accent);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--accent);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span class="section-header-title">${esc(dayKey)}</span>
         </div>
         <span class="section-badge${allDone ? ' all-done' : ''}">${done}/${total}</span>
@@ -1588,9 +1504,9 @@ function renderOptions() {
 
   if (items.length === 0) {
     el.innerHTML = renderEmpty(
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--warning)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
-      'var(--warning)', 'אין אופציות עדיין',
-      'העלו קובץ options.csv עם יעדים אלטרנטיביים וגיחות אופציונליות'
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:38px;height:38px;color:var(--warning)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+      'var(--warning)', 'אין מסלולי השלמה',
+      'העלו קובץ אופציות ומסלולי השלמה (options.csv)'
     );
     return;
   }
@@ -1598,7 +1514,7 @@ function renderOptions() {
 
   el.innerHTML = `
     <div class="options-count-label">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       ${filtered.length} אופציות זמינות
     </div>
     <div class="cards-list">${filtered.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}</div>`;
@@ -1612,9 +1528,9 @@ function renderTips() {
 
   if (items.length === 0) {
     el.innerHTML = renderEmpty(
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--success)"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
-      'var(--success)', 'אין טיפים עדיין',
-      'העלו קובץ tips.csv עם קטגוריות, הנחיות כשרות ולינקים חיוניים'
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:38px;height:38px;color:var(--success)"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+      'var(--success)', 'אין טיפים',
+      'העלו קובץ טיפים ומידע כללי לטיול'
     );
     return;
   }
@@ -1632,7 +1548,7 @@ function renderTips() {
     html += `<div>
       <div class="section-header">
         <div class="section-header-left">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--success);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:var(--success);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           <span class="section-header-title">${esc(cat)}</span>
         </div>
         <span class="section-badge">${tips.length}</span>
@@ -1649,7 +1565,7 @@ function renderAll() {
   renderTips();
   updateCounts();
   updateProgress();
-  // Restore expanded card states after DOM rebuild
+  
   if (state.expandedIds.size > 0) {
     state.expandedIds.forEach(id => {
       const card = document.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
@@ -1677,9 +1593,6 @@ function updateProgress() {
   document.getElementById('progress-text').textContent = done + '/' + all.length;
 }
 
-/* ================================================================
-   TAB SWITCHING
-================================================================ */
 function setTab(tabId) {
   state.activeTab = tabId;
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1693,9 +1606,6 @@ function setTab(tabId) {
   safeSet(LS_TAB, tabId);
 }
 
-/* ================================================================
-   TOGGLE COMPLETE
-================================================================ */
 function toggleComplete(id) {
   if (state.completedIds.has(id)) state.completedIds.delete(id);
   else state.completedIds.add(id);
@@ -1704,9 +1614,6 @@ function toggleComplete(id) {
   renderAll();
 }
 
-/* ================================================================
-   THEME
-================================================================ */
 function applyTheme() {
   document.documentElement.classList.toggle('dark',  state.isDark);
   document.documentElement.classList.toggle('light', !state.isDark);
@@ -1715,9 +1622,6 @@ function applyTheme() {
   try { localStorage.setItem(LS_DARK, String(state.isDark)); } catch {}
 }
 
-/* ================================================================
-   DEMO / CLEAR
-================================================================ */
 function loadDemoData() {
   state.data = getSampleData();
   state.isDemo = true;
@@ -1740,7 +1644,7 @@ function clearData() {
   document.getElementById('export-btn').style.display = 'none';
   loadDemoData();
   renderAll();
-  showSaveToast('נתונים נמחקו');
+  showSaveToast('הנתונים נמחקו');
 }
 
 /* ================================================================
@@ -1750,10 +1654,10 @@ function setUploading(on) {
   const btn = document.getElementById('upload-btn');
   if (on) {
     btn.classList.add('loading');
-    btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+    btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
   } else {
     btn.classList.remove('loading');
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
   }
 }
 
@@ -1767,28 +1671,25 @@ async function handleFiles(files) {
     );
     const result = parseCSVFiles(loaded);
 
-    // Build a name→id map of existing items so we can migrate completed marks
-    const prevNameToId = new Map();
+    const prevIdMap = new Map();
     if (state.data) {
       [...(state.data.itinerary||[]), ...(state.data.options||[]), ...(state.data.tips||[])].forEach(item => {
         const key = (item.placeName || item.title || '').trim().toLowerCase();
-        if (key) prevNameToId.set(key, item.id);
+        if (key) prevIdMap.set(key, item.id);
       });
     }
 
     state.data   = result;
     state.isDemo = false;
 
-    // Migrate completedIds: if new item has the same place name as a previously completed one, keep it
     const newCompleted = new Set();
     [...(result.itinerary||[]), ...(result.options||[]), ...(result.tips||[])].forEach(item => {
       const key = (item.placeName || item.title || '').trim().toLowerCase();
-      const oldId = prevNameToId.get(key);
+      const oldId = prevIdMap.get(key);
       if (oldId && state.completedIds.has(oldId)) newCompleted.add(item.id);
     });
     state.completedIds = newCompleted;
 
-    // Save meta
     const fileNames   = Array.from(files).map(f => f.name);
     const totalItems  = (result.itinerary?.length||0) + (result.options?.length||0) + (result.tips?.length||0);
     persistMeta(fileNames, totalItems);
@@ -1802,26 +1703,214 @@ async function handleFiles(files) {
     if (result.errors.length > 0) showError(result.errors.slice(0,3).join(' • '));
 
     if      (result.itinerary.length > 0) setTab('itinerary');
-    else if (result.tips.length > 0)      setTab('tips');
     else if (result.options.length > 0)   setTab('options');
+    else if (result.tips.length > 0)      setTab('tips');
 
     renderAll();
-    showSaveToast('קבצים נטענו ונשמרו (' + totalItems + ' פריטים)');
+    showSaveToast('קבצים נטענו בהצלחה (' + totalItems + ' פריטים)');
   } catch(e) {
     showError('שגיאה בטעינת הקובץ: ' + String(e));
   }
   setUploading(false);
 }
 
-/* ================================================================
-   ERROR
-================================================================ */
 function showError(msg) {
   document.getElementById('error-banner').style.display = 'flex';
   document.getElementById('error-text').textContent = msg;
 }
-function hideError() {
-  document.getElementById('error-banner').style.display = 'none';
+function hideError() { document.getElementById('error-banner').style.display = 'none'; }
+
+/* ================================================================
+   EDIT ITEM LOGIC
+================================================================ */
+function openEditModal(id) {
+  let item = state.data.itinerary.find(i => i.id === id) || 
+             state.data.options.find(i => i.id === id) || 
+             state.data.tips.find(i => i.id === id);
+  if (!item) return;
+
+  currentEditId = id;
+  const container = document.getElementById('edit-form-container');
+  let html = '';
+
+  if (item.type === 'tip') {
+    html = `
+      <div class="edit-group">
+        <label class="edit-label">כותרת הטיפ</label>
+        <input type="text" class="edit-input" id="edit-title" value="${esc(item.title)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">קטגוריה</label>
+        <input type="text" class="edit-input" id="edit-category" value="${esc(item.category)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">תוכן</label>
+        <textarea class="edit-input" id="edit-content">${esc(item.content)}</textarea>
+      </div>
+    `;
+  } else {
+    html = `
+      <div class="edit-group">
+        <label class="edit-label">שם המקום</label>
+        <input type="text" class="edit-input" id="edit-placeName" value="${esc(item.placeName)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">יום ותאריך (למשל: יום ראשון • 15/10)</label>
+        <input type="text" class="edit-input" id="edit-dayLabel" value="${esc(item.dayLabel)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">תיאור</label>
+        <textarea class="edit-input" id="edit-description">${esc(item.description)}</textarea>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="edit-group">
+          <label class="edit-label">אזור / עיר</label>
+          <input type="text" class="edit-input" id="edit-area" value="${esc(item.area)}">
+        </div>
+        <div class="edit-group">
+          <label class="edit-label">טווח שעות</label>
+          <input type="text" class="edit-input" id="edit-timeRange" value="${esc(item.timeRange)}">
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="edit-group">
+          <label class="edit-label">זמן מוערך</label>
+          <input type="text" class="edit-input" id="edit-duration" value="${esc(item.duration)}">
+        </div>
+        <div class="edit-group">
+          <label class="edit-label">עלות משוערת</label>
+          <input type="text" class="edit-input" id="edit-cost" value="${esc(item.cost)}">
+        </div>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">תחבורה והגעה</label>
+        <input type="text" class="edit-input" id="edit-transport" value="${esc(item.transport)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">איך ומתי להזמין</label>
+        <input type="text" class="edit-input" id="edit-booking" value="${esc(item.booking)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">מיקום במפה / כתובת (לניווט)</label>
+        <input type="text" class="edit-input" id="edit-mapPos" value="${esc(item.mapPos)}">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">קישור (אתר)</label>
+        <input type="text" class="edit-input" id="edit-link" value="${esc(item.link)}">
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function saveEditModal() {
+  if (!currentEditId) return;
+
+  let item = state.data.itinerary.find(i => i.id === currentEditId) || 
+             state.data.options.find(i => i.id === currentEditId) || 
+             state.data.tips.find(i => i.id === currentEditId);
+
+  if (!item) return;
+
+  const val = (id) => document.getElementById(id)?.value || '';
+
+  if (item.type === 'tip') {
+    item.title = val('edit-title');
+    item.category = val('edit-category') || 'כללי';
+    item.content = val('edit-content');
+    item.links = extractLinks(item.content);
+  } else {
+    item.placeName = val('edit-placeName');
+    item.dayLabel = val('edit-dayLabel');
+    item.description = val('edit-description');
+    item.area = val('edit-area');
+    item.timeRange = val('edit-timeRange');
+    item.duration = val('edit-duration');
+    item.cost = val('edit-cost');
+    item.transport = val('edit-transport');
+    item.booking = val('edit-booking');
+    item.mapPos = val('edit-mapPos');
+    item.link = val('edit-link');
+
+    item.mapUrl = buildMapUrl(item.link, item.placeName, item.mapPos);
+    item.requiresBooking = !!item.booking || /שריון|book|reserv/i.test(item.description + ' ' + item.booking);
+    item.links = extractLinks(item.description + ' ' + item.link);
+    item.icon = detectIcon(item.placeName + ' ' + item.description + ' ' + item.area);
+  }
+
+  // שמירה מלאה למערכת
+  persistAll();
+  renderAll();
+  
+  document.getElementById('edit-modal').classList.add('hidden');
+  currentEditId = null;
+  showSaveToast('השינויים נשמרו בהצלחה');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+  currentEditId = null;
+}
+
+/* ================================================================
+   CARD INTERACTIONS
+================================================================ */
+function initCardInteractions() {
+  document.getElementById('tab-content').addEventListener('click', e => {
+    
+    // Check Complete
+    const checkBtn = e.target.closest('[data-check]');
+    if (checkBtn) {
+      e.stopPropagation();
+      toggleComplete(checkBtn.dataset.check);
+      return;
+    }
+
+    // Edit Button
+    const editBtn = e.target.closest('[data-edit]');
+    if (editBtn) {
+      e.stopPropagation();
+      openEditModal(editBtn.dataset.edit);
+      return;
+    }
+
+    // Nav Links
+    const navBtn = e.target.closest('[data-nav]');
+    if (navBtn) {
+      e.stopPropagation();
+      window.open(navBtn.dataset.nav, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Expand/Collapse Card
+    const cardBody = e.target.closest('.card-body');
+    if (cardBody) {
+      const card = cardBody.closest('.card');
+      if (card) {
+        const details = card.querySelector('.card-details');
+        if (details) {
+          const willExpand = !card.classList.contains('expanded');
+          card.classList.toggle('expanded', willExpand);
+          const id = card.dataset.id;
+          if (id) {
+            if (willExpand) state.expandedIds.add(id);
+            else state.expandedIds.delete(id);
+            persistExpanded();
+          }
+        }
+      }
+      return;
+    }
+  });
+
+  // Edit Modal Buttons
+  document.getElementById('edit-save-btn').addEventListener('click', saveEditModal);
+  document.getElementById('edit-cancel-btn').addEventListener('click', closeEditModal);
+  document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('edit-modal')) closeEditModal();
+  });
 }
 
 /* ================================================================
@@ -1887,72 +1976,20 @@ function showGPSError(msg) {
   document.getElementById('gps-error').classList.add('visible');
   document.getElementById('gps-error-text').textContent = msg;
 }
-function clearGPSError() {
-  document.getElementById('gps-error').classList.remove('visible');
-}
+function clearGPSError() { document.getElementById('gps-error').classList.remove('visible'); }
 
-/* ================================================================
-   CARD INTERACTIONS (event delegation)
-================================================================ */
-function initCardInteractions() {
-  document.getElementById('tab-content').addEventListener('click', e => {
-    // Check button — stop propagation so card doesn't expand/collapse
-    const checkBtn = e.target.closest('[data-check]');
-    if (checkBtn) {
-      e.stopPropagation();
-      toggleComplete(checkBtn.dataset.check);
-      return;
-    }
-    // External nav button
-    const navBtn = e.target.closest('[data-nav]');
-    if (navBtn) {
-      e.stopPropagation();
-      window.open(navBtn.dataset.nav, '_blank', 'noopener,noreferrer');
-      return;
-    }
-    // Card body click — expand/collapse, persist state
-    const cardBody = e.target.closest('.card-body');
-    if (cardBody) {
-      const card = cardBody.closest('.card');
-      if (card) {
-        const details = card.querySelector('.card-details');
-        if (details) {
-          const willExpand = !card.classList.contains('expanded');
-          card.classList.toggle('expanded', willExpand);
-          const id = card.dataset.id;
-          if (id) {
-            if (willExpand) state.expandedIds.add(id);
-            else state.expandedIds.delete(id);
-            persistExpanded();
-          }
-        }
-      }
-      return;
-    }
-  });
-}
-
-/* ================================================================
-   UPLOAD HINT MODAL
-================================================================ */
-function showUploadHint() {
-  document.getElementById('upload-hint').classList.remove('hidden');
-}
-function hideUploadHint() {
-  document.getElementById('upload-hint').classList.add('hidden');
-}
+function showUploadHint() { document.getElementById('upload-hint').classList.remove('hidden'); }
+function hideUploadHint() { document.getElementById('upload-hint').classList.add('hidden'); }
 
 /* ================================================================
    INIT
 ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Restore theme
   const savedDark = localStorage.getItem(LS_DARK);
   state.isDark = savedDark !== null ? savedDark === 'true' : true;
   applyTheme();
 
-  // Restore all persisted state (tab, completedIds, expandedIds, search, data)
   const hadData = restorePersistedState();
   if (hadData) {
     document.getElementById('clear-btn').style.display  = 'flex';
@@ -1961,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (meta?.savedAt) {
       const d = new Date(meta.savedAt);
       const label = document.getElementById('demo-label');
-      if (label) { label.textContent = 'שמור ' + d.toLocaleDateString('he-IL'); label.style.display = 'block'; }
+      if (label) { label.textContent = 'שמור • ' + d.toLocaleDateString('he-IL'); label.style.display = 'block'; }
     }
   } else {
     loadDemoData();
@@ -1970,13 +2007,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setTab(state.activeTab);
   renderAll();
 
-  // Tab bar
+  // Events
   document.getElementById('tab-bar').addEventListener('click', e => {
     const btn = e.target.closest('.tab-btn');
     if (btn?.dataset.tab) setTab(btn.dataset.tab);
   });
 
-  // Search
   const searchInput = document.getElementById('search-input');
   const searchClear = document.getElementById('search-clear');
   searchInput.addEventListener('input', () => {
@@ -1993,21 +2029,18 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAll();
   });
 
-  // Theme toggle
   document.getElementById('theme-btn').addEventListener('click', () => {
     state.isDark = !state.isDark;
     applyTheme();
   });
 
-  // Clear data
+  document.getElementById('export-btn').addEventListener('click', exportBackup);
   document.getElementById('clear-btn').addEventListener('click', clearData);
 
-  // Upload button — show hint modal
   const fileInput = document.getElementById('file-input');
   document.getElementById('upload-btn').addEventListener('click', showUploadHint);
   document.getElementById('demo-banner-inner').addEventListener('click', showUploadHint);
 
-  // Hint modal buttons
   document.getElementById('hint-pick-btn').addEventListener('click', () => {
     hideUploadHint();
     fileInput.click();
@@ -2017,13 +2050,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === document.getElementById('upload-hint')) hideUploadHint();
   });
 
-  // File input change
   fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
-
-  // Error close
   document.getElementById('error-close').addEventListener('click', hideError);
 
-  // Drag & drop
   document.getElementById('app').addEventListener('dragover', e => e.preventDefault());
   document.getElementById('app').addEventListener('drop', e => {
     e.preventDefault();
@@ -2031,13 +2060,9 @@ document.addEventListener('DOMContentLoaded', () => {
     handleFiles(e.dataTransfer.files);
   });
 
-  // Card interactions
   initCardInteractions();
-
-  // GPS
   initGPS();
 
-  // Hide loading splash
   document.getElementById('loading-splash').classList.add('gone');
 });
 </script>
