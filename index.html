@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TripMH - מרכז שליטה לוגיסטי</title>
-    <!-- Tailwind CSS for modern responsive utility styling -->
+    <!-- Tailwind CSS with custom configuration -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,7 +21,7 @@
         }
     </script>
     <style>
-        /* Modern subtle scrollbar */
+        /* Smooth custom transitions */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -34,20 +34,17 @@
             border-radius: 3px;
         }
         
-        /* Sticky day header shadow & positioning */
         .sticky-day {
             position: sticky;
-            top: 125px; /* Adjust based on total top nav height */
+            top: 125px;
             z-index: 30;
         }
 
-        /* Safe separation of hit areas */
         .hit-target {
             min-height: 44px;
             min-width: 44px;
         }
 
-        /* Custom transition for accordion */
         .accordion-content {
             transition: max-height 0.25s cubic-bezier(0, 1, 0, 1);
             max-height: 0;
@@ -84,8 +81,8 @@
                     <button onclick="toggleTheme()" class="p-2 text-slate-500 dark:text-amber-400 bg-slate-100 dark:bg-slate-800 rounded-lg hit-target" id="themeBtn">
                         🌙
                     </button>
-                    <!-- CSV Upload Hidden Input & Custom Button -->
-                    <label class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer flex items-center justify-center font-bold hit-target text-sm">
+                    <!-- CSV Upload -->
+                    <label class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer flex items-center justify-center font-bold hit-target text-sm transition-colors">
                         ➕ טען קובץ
                         <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
                     </label>
@@ -121,32 +118,14 @@
         </nav>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Content Area -->
     <main class="max-w-md mx-auto px-4 mt-4" id="mainContent">
         <!-- Render targets go here dynamically -->
     </main>
 
-    <!-- App Scripts and Logic -->
+    <!-- App Logic -->
     <script>
-        // Default Sample Data to ensure instant functionality on initial load
-        const SAMPLE_ITINERARY = [
-            { id: "i1", day: "יום שני • 12/10", time: "09:00", place: "שוק טוקיו - טסוקיג'י", area: "Tokyo", booking: "לא", desc: "סיור טעימות שוק בוקר תוסס. מומלץ להצטייד במזומן מראש.", link: "https://www.google.com/maps/search/?api=1&query=Tsukiji+Outer+Market" },
-            { id: "i2", day: "יום שני • 12/10", time: "14:00", place: "TeamLab Planets", area: "Toyosu", booking: "כן", desc: "מיצג אמנות דיגיטלי אינטראקטיבי יוצא דופן. חובה להגיע עם מכנסיים שניתן לקפל מעל הברך עקב הליכה במים.", link: "https://www.google.com/maps/search/?api=1&query=teamLab+Planets" },
-            { id: "i3", day: "יום שלישי • 13/10", time: "10:00", place: "מקדש סנסו-ג'י", area: "Asakusa", booking: "לא", desc: "המקדש העתיק ביותר בטוקיו. מדרחוב קניות מסורתי מרשים מוביל לכניסה.", link: "https://www.google.com/maps/search/?api=1&query=Sensō-ji" },
-            { id: "i4", day: "יום שלישי • 13/10", time: "19:00", place: "תצפית שיבויה סקיי", area: "Shibuya", booking: "כן", desc: "תצפית 360 מעלות מרהיבה על כל טוקיו ומעבר החצייה המפורסם.", link: "https://maps.google.com/?q=Shibuya+Sky/0" } // Sample of slightly broken link ending in /0
-        ];
-
-        const SAMPLE_OPTIONS = [
-            { id: "o1", place: "טיול יום להר פוג'י", area: "Hakone", desc: "במקרה של ראות טובה, ניתן לנסוע באמצעות רכבת השינקנסן ישירות לאזור האגמים.", link: "" },
-            { id: "o2", place: "מוזיאון הרכבות הלאומי", area: "Omiya", desc: "אלטרנטיבה מצוינת ליום גשום עם הדמיות נסיעה וקרונות היסטוריים.", link: "https://www.google.com/maps/search/?api=1&query=The+Railway+Museum" }
-        ];
-
-        const SAMPLE_TIPS = [
-            { id: "t1", category: "כשרות ושבת", title: "מפתח פתרונות הלכתיים בחו\"ל", desc: "לפני השבת יש לוודא כי מפתחות החדר אינם אלקטרוניים, או לבקש מהקבלה פתרון שאינו כרוך בהפעלה חשמלית. מומלץ להחזיק צילום מודפס של הדרכון בכיס.", link: "" },
-            { id: "t2", category: "תחבורה והגעה", title: "טעינת כרטיס Suica / Pasmo באייפון", desc: "ניתן להוסיף כרטיס דיגיטלי ישירות לארנק ה-Apple Wallet ללא צורך בכרטיס פיזי, ולטעון אותו ישירות באמצעות כרטיס אשראי תומך.", link: "https://www.apple.com/apple-pay/" }
-        ];
-
-        // Core Application State
+        // Core Application State (Initialized empty to handle any trip)
         let state = {
             theme: 'dark',
             activeTab: 'itinerary',
@@ -157,51 +136,44 @@
                 options: [],
                 tips: []
             },
-            checkedItems: {}, // stores checked status indexed by item ID
-            expandedCards: {} // tracks accordion states
+            checkedItems: {}, 
+            expandedCards: {} 
         };
 
         // Initialize Application
         function init() {
-            // Load theme configuration
             if (localStorage.getItem('theme')) {
                 state.theme = localStorage.getItem('theme');
             } else {
-                state.theme = 'dark'; // Default configuration for high-stress contrast / OLED energy saving
+                state.theme = 'dark'; // High-stress contrast default configuration
             }
             applyTheme();
 
-            // Load persisted state data
             try {
-                const storedData = localStorage.getItem('tripmh_data');
-                const storedChecked = localStorage.getItem('tripmh_checked');
+                const storedData = localStorage.getItem('tripmh_data_custom');
+                const storedChecked = localStorage.getItem('tripmh_checked_custom');
                 
                 if (storedData) {
                     state.data = JSON.parse(storedData);
                 } else {
-                    // Load fallback presets
-                    state.data.itinerary = SAMPLE_ITINERARY;
-                    state.data.options = SAMPLE_OPTIONS;
-                    state.data.tips = SAMPLE_TIPS;
-                    saveDataToStorage();
+                    state.data = { itinerary: [], options: [], tips: [] };
                 }
 
                 if (storedChecked) {
                     state.checkedItems = JSON.parse(storedChecked);
                 }
             } catch (e) {
-                console.error("שגיאה בטעינת זיכרון מקומי. שחזור ברירות מחדל מתבצע.", e);
+                console.error("שגיאה בטעינת הזיכרון המקומי. האפליקציה אותחלה כריקה.", e);
                 clearAppStorage();
             }
 
-            // Set default active tab
             switchTab(state.activeTab);
         }
 
         // Persist App Data
         function saveDataToStorage() {
             try {
-                localStorage.setItem('tripmh_data', JSON.stringify(state.data));
+                localStorage.setItem('tripmh_data_custom', JSON.stringify(state.data));
             } catch (e) {
                 console.error("שגיאה בשמירת נתוני האפליקציה", e);
             }
@@ -209,7 +181,7 @@
 
         function saveCheckedToStorage() {
             try {
-                localStorage.setItem('tripmh_checked', JSON.stringify(state.checkedItems));
+                localStorage.setItem('tripmh_checked_custom', JSON.stringify(state.checkedItems));
             } catch (e) {
                 console.error("שגיאה בשמירת מצב סימון", e);
             }
@@ -240,7 +212,6 @@
                 return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`;
             }
             let clean = rawLink.trim();
-            // Check for obvious placeholders, dummy local addresses or trailing garbage like /0
             if (clean.endsWith('/0')) {
                 clean = clean.substring(0, clean.length - 2);
             }
@@ -252,10 +223,9 @@
 
         // Parsing links inside textual tips to extract wide call-to-action download buttons
         function formatTextWithLinks(text) {
-            if (!text) return '';
+            if (!text) return { text: '', buttons: '' };
             const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
             
-            // Check if there is an exact URL matching to present outside the description
             const matches = text.match(urlPattern);
             let cleanedText = text;
             let actionButtonsHTML = '';
@@ -302,7 +272,6 @@
         function switchTab(tabId) {
             state.activeTab = tabId;
             
-            // UI Visual update on navigation elements
             const tabs = ['itinerary', 'options', 'tips', 'around'];
             tabs.forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
@@ -337,7 +306,7 @@
 
         // Handle item check / uncheck state
         function toggleCheckItem(id, event) {
-            event.stopPropagation(); // Avoid triggering accordion toggle on checkbox hit
+            event.stopPropagation(); 
             state.checkedItems[id] = !state.checkedItems[id];
             saveCheckedToStorage();
             
@@ -353,7 +322,7 @@
             }
         }
 
-        // Robust CSV Parser (handles embedded commas and quotes properly)
+        // Robust CSV Parser
         function robustCSVParse(text) {
             let lines = [];
             let row = [""];
@@ -389,7 +358,6 @@
             const parsedLines = robustCSVParse(text);
             if (parsedLines.length < 2) return;
 
-            // Extract, clean and normalize headers
             const headers = parsedLines[0].map(h => h.trim().toLowerCase());
             
             let itineraryList = [];
@@ -400,19 +368,17 @@
                 const row = parsedLines[i];
                 if (row.length === 0 || (row.length === 1 && row[0] === "")) continue;
 
-                // Create a helper mapping of columns to keys
                 let entry = {};
                 headers.forEach((header, idx) => {
                     entry[header] = row[idx] ? row[idx].trim() : '';
                 });
 
-                // Generate Unique ID
                 const entryId = 'csv_' + i + '_' + Date.now().toString().slice(-4);
 
                 // Semantic Heuristics Detection
-                const isTip = headers.some(h => h.includes('הנחיה') || h.includes('קטגוריה') || h.includes('טיפ'));
+                const isTip = headers.some(h => h.includes('הנחיה') || h.includes('קטגוריה') || h.includes('טיפ') || h.includes('ריכוז'));
                 const dayValue = entry['יום'] || entry['day'] || '';
-                const isOption = dayValue.includes('אופציה') || !dayValue;
+                const isOption = dayValue.includes('אופציה') || (!dayValue && (entry['יעד'] || entry['פעילות'] || entry['שם המקום']) && !entry['שעה']);
 
                 if (isTip) {
                     tipsList.push({
@@ -433,7 +399,7 @@
                 } else {
                     itineraryList.push({
                         id: entryId,
-                        day: dayValue,
+                        day: dayValue || 'מסלול כללי',
                         time: entry['שעה'] || entry['זמן'] || '--:--',
                         place: entry['יעד'] || entry['שם המקום'] || entry['פעילות'] || 'פעילות ללא שם',
                         area: entry['אזור'] || entry['מיקום'] || '',
@@ -444,7 +410,6 @@
                 }
             }
 
-            // Fallback safety checks
             if (itineraryList.length > 0) state.data.itinerary = itineraryList;
             if (optionsList.length > 0) state.data.options = optionsList;
             if (tipsList.length > 0) state.data.tips = tipsList;
@@ -454,7 +419,6 @@
             alert("קובץ הנתונים נקרא ומוין בהצלחה ללשוניות!");
         }
 
-        // File Selection Listener
         function handleCSVUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -470,7 +434,7 @@
             reader.readAsText(file, "UTF-8");
         }
 
-        // Master Render Router
+        // Render functions with Empty State Support
         function renderActiveTab() {
             const container = document.getElementById('mainContent');
             container.innerHTML = '';
@@ -491,8 +455,31 @@
             }
         }
 
-        // 📍 Render Tab: Itinerary
+        // Helper to output instructions when no data exists
+        function renderEmptyState(container, tabName) {
+            container.innerHTML = `
+                <div class="bg-white dark:bg-darkCard rounded-2xl p-6 border border-slate-200 dark:border-darkBorder shadow-sm text-center my-6">
+                    <span class="text-4xl block mb-2">📁</span>
+                    <h3 class="text-base font-bold mb-2">אין נתוני ${tabName} מוטענים</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                        האפליקציה פועלת במצב אופליין מלא. לחץ על כפתור <b>➕ טען קובץ</b> למעלה והעלה קובץ CSV של הטיול שלך.
+                    </p>
+                    <div class="text-right text-xs bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+                        <span class="font-bold block mb-1">💡 עמודות מומלצות ב-CSV:</span>
+                        <p class="mb-1"><b>מסלול ואופציות:</b> יום, שעה, יעד, אזור, הערות, קישור לניווט, שריון</p>
+                        <p><b>טיפים:</b> קטגוריה, כותרת, תוכן, קישור</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 📍 Render Itinerary
         function renderItinerary(container) {
+            if (state.data.itinerary.length === 0) {
+                renderEmptyState(container, "מסלול");
+                return;
+            }
+
             const search = state.searchFilter;
             let filtered = state.data.itinerary.filter(item => {
                 return !search || 
@@ -507,7 +494,6 @@
                 return;
             }
 
-            // Grouping by Sticky Days
             let daysMap = {};
             filtered.forEach(item => {
                 if (!daysMap[item.day]) daysMap[item.day] = [];
@@ -515,13 +501,11 @@
             });
 
             Object.keys(daysMap).forEach(dayName => {
-                // Day Divider
                 const dayHeader = document.createElement('div');
                 dayHeader.className = "sticky-day bg-slate-50/90 dark:bg-darkBg/90 backdrop-blur-sm py-2 px-1 text-sm font-bold text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-darkBorder mb-3";
                 dayHeader.innerHTML = `🗓️ ${dayName}`;
                 container.appendChild(dayHeader);
 
-                // Daily Activity Grouping
                 daysMap[dayName].forEach(item => {
                     const isChecked = state.checkedItems[item.id] || false;
                     const cleanLink = sanitizeMapLink(item.place, item.link);
@@ -534,12 +518,10 @@
 
                     card.innerHTML = `
                         <div class="flex items-start justify-between gap-3">
-                            <!-- Checkbox Target Area -->
                             <button onclick="toggleCheckItem('${item.id}', event)" class="hit-target flex items-center justify-center text-xl mt-0.5">
                                 <span id="check-icon-${item.id}">${isChecked ? '🟢' : '⚪'}</span>
                             </button>
 
-                            <!-- Core Event Info -->
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 flex-wrap mb-1">
                                     <span class="text-xs font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-600 dark:text-slate-300">${item.time}</span>
@@ -549,11 +531,9 @@
                                 <h3 class="text-base font-bold">${item.place}</h3>
                             </div>
 
-                            <!-- Expand Toggle Indicator -->
                             <span id="chevron-${item.id}" class="text-xs text-slate-400 mt-1.5">${state.expandedCards[item.id] ? '▲' : '▼'}</span>
                         </div>
 
-                        <!-- Accordion collapsible details drawer -->
                         <div id="desc-${item.id}" class="accordion-content mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-sm ${state.expandedCards[item.id] ? 'expanded' : ''}">
                             <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">${item.desc || 'אין תיאור מורחב עבור יעד זה.'}</p>
                             <a href="${cleanLink}" target="_blank" onclick="event.stopPropagation();" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm hit-target">
@@ -566,8 +546,13 @@
             });
         }
 
-        // ⭐ Render Tab: Options
+        // ⭐ Render Options
         function renderOptions(container) {
+            if (state.data.options.length === 0) {
+                renderEmptyState(container, "אופציות");
+                return;
+            }
+
             const search = state.searchFilter;
             let filtered = state.data.options.filter(item => {
                 return !search || 
@@ -618,8 +603,13 @@
             });
         }
 
-        // 💡 Render Tab: Tips & Checklists
+        // 💡 Render Tips
         function renderTips(container) {
+            if (state.data.tips.length === 0) {
+                renderEmptyState(container, "טיפים");
+                return;
+            }
+
             const search = state.searchFilter;
             let filtered = state.data.tips.filter(item => {
                 return !search || 
@@ -633,7 +623,6 @@
                 return;
             }
 
-            // Group by category
             let categoryMap = {};
             filtered.forEach(item => {
                 if (!categoryMap[item.category]) categoryMap[item.category] = [];
@@ -680,7 +669,7 @@
             });
         }
 
-        // 🗺️ Render Tab: Location GPS Dashboard (Around Me)
+        // 🗺️ Render GPS Panel
         function renderAroundMe(container) {
             container.innerHTML = `
                 <div class="bg-white dark:bg-darkCard rounded-2xl p-5 border border-slate-200 dark:border-darkBorder shadow-sm text-center mb-4">
@@ -695,10 +684,8 @@
                     <div id="gpsCoords" class="mt-2 text-xs text-slate-400 hidden"></div>
                 </div>
 
-                <!-- Geo Grid: Dynamic Buttons -->
                 <div class="grid grid-cols-2 gap-3" id="geoGrid">
-                    <!-- Placeholder covers until GPS gets locked or fallback defaults applied -->
-                    <button onclick="openMapQuery('מסעדות כשרות')" class="geo-btn opacity-60 flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center hit-target transition-all">
+                    <button onclick="openMapQuery('מסעדות')" class="geo-btn opacity-60 flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center hit-target transition-all">
                         <span class="text-2xl mb-1">🍜</span>
                         <span class="text-xs font-bold">מסעדות בסביבה</span>
                     </button>
@@ -721,7 +708,6 @@
             `;
         }
 
-        // Trigger Geolocation API
         function triggerGPS() {
             const gpsBtn = document.getElementById('gpsBtn');
             const gpsCoords = document.getElementById('gpsCoords');
@@ -745,7 +731,6 @@
                     gpsCoords.classList.remove('hidden');
                     gpsCoords.innerText = `קואורדינטות: ${state.userLocation.lat.toFixed(5)}, ${state.userLocation.lon.toFixed(5)}`;
                     
-                    // Enable full layout visibility
                     const geoButtons = document.querySelectorAll('.geo-btn');
                     geoButtons.forEach(btn => {
                         btn.classList.remove('opacity-60');
@@ -758,10 +743,7 @@
                     gpsBtn.classList.add('bg-slate-700');
                 },
                 (error) => {
-                    console.warn("איכון GPS נכשל, מבצע חיפוש כללי על בסיס מפה נוכחית.", error);
-                    alert("לא ניתן היה לאכן מיקום מדויק. האפליקציה תבצע חיפוש כללי סביב המיקום המוגדר במפה.");
-                    
-                    // Allow use with default general query parameters
+                    alert("לא ניתן היה לאכן מיקום מדויק. האפליקציה תבצע חיפוש כללי סביב המיקום הנוכחי שלך במפות.");
                     const geoButtons = document.querySelectorAll('.geo-btn');
                     geoButtons.forEach(btn => {
                         btn.classList.remove('opacity-60');
@@ -780,7 +762,6 @@
             }
         }
 
-        // Generate Live Map Intent query
         function openMapQuery(keyword) {
             let url = '';
             if (state.userLocation) {
@@ -791,27 +772,22 @@
             window.open(url, '_blank');
         }
 
-        // Clean slate management
         function confirmReset() {
-            if (confirm("האם אתה בטוח שברצונך לאפס את האפליקציה ולמחוק את כל השינויים וקבצי ה-CSV שהועלו?")) {
+            if (confirm("האם ברצונך לאפס את האפליקציה ולמחוק את כל הנתונים השמורים?")) {
                 clearAppStorage();
             }
         }
 
         function clearAppStorage() {
-            localStorage.removeItem('tripmh_data');
-            localStorage.removeItem('tripmh_checked');
+            localStorage.removeItem('tripmh_data_custom');
+            localStorage.removeItem('tripmh_checked_custom');
             state.checkedItems = {};
             state.expandedCards = {};
-            state.data.itinerary = SAMPLE_ITINERARY;
-            state.data.options = SAMPLE_OPTIONS;
-            state.data.tips = SAMPLE_TIPS;
-            saveDataToStorage();
-            switchTab('itinerary');
-            alert("הנתונים אופסו בהצלחה לגרסת ברירת המחדל.");
+            state.data = { itinerary: [], options: [], tips: [] };
+            renderActiveTab();
+            alert("כל הנתונים נמחקו. המערכת מוכנה לקבלת קובץ חדש.");
         }
 
-        // Execute initial loading sequence
         window.onload = init;
     </script>
 </body>
