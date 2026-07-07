@@ -2,550 +2,689 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>TripMH - Travel App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TripMH - מרכז שליטה</title>
     <style>
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #3b82f6;
-            --border: #334155;
-            --card-bg: #1e293b;
-            --success: #10b981;
-            --danger: #ef4444;
+            /* צבעים - מצב כהה (ברירת מחדל לחיסכון בסוללה ב-OLED) */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f5f5f5;
+            --text-muted: #a0a0a0;
+            --primary: #4fc3f7;
+            --success: #81c784;
+            --danger: #e57373;
+            --border: #333333;
+            --nav-bg: #1a1a1a;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         [data-theme="light"] {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --accent: #2563eb;
-            --border: #e2e8f0;
+            --bg-color: #f5f7fa;
             --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --primary: #3182ce;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --border: #e2e8f0;
+            --nav-bg: #ffffff;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        body { background-color: var(--bg-primary); color: var(--text-primary); padding-bottom: 100px; overflow-x: hidden; user-select: none; }
-        p, span, div.detail-text, div.card-title, div.db-stat { user-select: text; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+            padding-bottom: 80px; /* מרווח לתפריט התחתון */
+            overflow-x: hidden;
+        }
 
-        header { background-color: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .app-title { font-size: 1.6rem; font-weight: 900; color: var(--text-primary); letter-spacing: -0.5px; }
-        .app-title span { color: var(--accent); }
-        .header-actions { display: flex; gap: 8px; }
+        /* סרגל עליון וחיפוש */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--border);
+        }
 
-        .btn-icon { background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: transform 0.1s ease; display: flex; align-items: center; gap: 6px; }
-        .btn-icon:disabled { opacity: 0.3; pointer-events: none; }
-        .btn-icon:active { transform: scale(0.92); }
-        .btn-danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
-        .search-container { position: relative; margin-bottom: 15px; }
-        .search-bar { width: 100%; padding: 14px 45px 14px 15px; border-radius: 10px; border: 1px solid var(--border); background-color: var(--bg-primary); color: var(--text-primary); font-size: 1rem; }
-        .search-bar:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
-        .search-icon-right { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
-        .clear-search { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: var(--border); border: none; color: var(--text-primary); font-size: 0.8rem; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; }
+        .header-top h1 { font-size: 1.5rem; color: var(--primary); }
         
-        .tabs { display: flex; gap: 5px; }
-        .tab { flex: 1; padding: 12px 0; text-align: center; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; font-weight: 800; font-size: 0.9rem; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
-        .tab.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        .controls { display: flex; gap: 15px; }
+        .icon-btn { 
+            background: none; border: none; font-size: 1.5rem; color: var(--text-main); 
+            cursor: pointer; padding: 5px;
+        }
 
-        main { padding: 15px; max-width: 800px; margin: 0 auto; }
+        .search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
-        .empty-state { text-align: center; padding: 40px 20px; background: var(--bg-secondary); border-radius: 16px; border: 1px dashed var(--border); margin-top: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .empty-state h2 { margin-bottom: 12px; font-size: 1.4rem; color: var(--accent); }
-        .empty-state p { color: var(--text-secondary); font-size: 1rem; line-height: 1.6; margin-bottom: 25px; }
+        .search-bar input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-size: 1rem;
+        }
 
-        .db-status-box { background: var(--bg-primary); padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; text-align: right; }
-        .db-stat { font-size: 0.9rem; margin-bottom: 6px; display: flex; justify-content: space-between; }
-        .db-stat span { font-weight: bold; }
+        .clear-search {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+        }
 
-        .upload-btn { background: var(--accent); color: white; border: none; padding: 16px 28px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: transform 0.1s; width: 100%; max-width: 280px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .upload-btn:active { transform: scale(0.96); }
-        .btn-demo { background: var(--bg-primary); border: 2px solid var(--border); color: var(--text-primary); }
+        /* העלאת קבצים מוסתרת */
+        #csv-upload { display: none; }
 
-        .day-divider { position: sticky; top: 145px; background: var(--bg-primary); padding: 10px 15px; margin: 20px -15px 15px -15px; border-bottom: 3px solid var(--accent); color: var(--text-primary); font-weight: 900; font-size: 1.2rem; z-index: 90; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        /* ניווט תחתון */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--nav-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
 
-        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s; }
-        .card.completed { opacity: 0.5; border-right: 6px solid var(--success); }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--primary); }
+        .nav-item span.icon { font-size: 1.5rem; }
+
+        /* תוכן וכרטיסיות */
+        .tab-content { display: none; padding: 15px; }
+        .tab-content.active { display: block; }
+
+        .day-divider {
+            position: sticky;
+            top: 120px; /* מתחת לחיפוש */
+            background-color: var(--primary);
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 6px;
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+            z-index: 90;
+            box-shadow: var(--shadow);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .card.completed {
+            opacity: 0.5;
+            border-right: 5px solid var(--success);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-main-info { flex: 1; margin-right: 15px; }
+        .card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
+        .card-time { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; }
         
-        .card-header { display: flex; gap: 15px; align-items: center; cursor: pointer; }
-        .card-icon { font-size: 2rem; background: var(--bg-primary); width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 14px; border: 1px solid var(--border); flex-shrink: 0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); }
-        .card-content { flex-grow: 1; padding-left: 45px; }
-        .card-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; color: var(--text-primary); line-height: 1.3; }
-        .card-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; }
-        .tag { background: var(--bg-primary); color: var(--text-secondary); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); font-weight: 700; }
-        .tag.highlight { color: var(--accent); border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.1); }
-        .tag.alert { color: var(--danger); border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1); }
+        .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+        .tag {
+            background-color: var(--border);
+            color: var(--text-main);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .tag.warning { background-color: var(--danger); color: white; font-weight: bold; }
 
-        .checkbox-wrapper { position: absolute; top: 50%; left: 16px; transform: translateY(-50%); z-index: 10; padding: 10px; }
-        .card-details-open-state .checkbox-wrapper { top: 46px; transform: none; }
-        .checkbox-custom { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg-primary); appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); transition: 0.1s; }
-        .checkbox-custom:active { transform: scale(0.85); }
-        .checkbox-custom:checked { background: var(--success); border-color: var(--success); }
-        .checkbox-custom:checked::after { content: '✓'; color: white; font-weight: 900; font-size: 18px; }
-
-        .card-details { display: none; margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--border); animation: fadeIn 0.2s; }
-        .card-details.open { display: block; }
-        .detail-row { margin-bottom: 14px; }
-        .detail-label { font-size: 0.8rem; color: var(--accent); font-weight: 900; margin-bottom: 4px; text-transform: uppercase; }
-        .detail-text { font-size: 1rem; line-height: 1.6; white-space: pre-wrap; color: var(--text-primary); }
-        .detail-link { color: #fff; background: var(--accent); text-decoration: none; font-weight: 800; display: inline-block; padding: 10px 16px; border-radius: 10px; margin-top: 5px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
-
-        .btn-nav-live { background-color: var(--success); color: white; padding: 14px; border-radius: 12px; border: none; font-size: 1.05rem; font-weight: 900; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); margin-top: 15px; }
-        .btn-expand { background-color: var(--bg-primary); color: var(--text-primary); border: 2px solid var(--border); width: 100%; padding: 14px; border-radius: 12px; font-weight: 800; margin-top: 10px; cursor: pointer; }
-
-        .fab-container { position: fixed; bottom: 25px; right: 25px; z-index: 1000; }
-        .fab-btn { background: var(--accent); color: white; border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 2rem; box-shadow: 0 5px 20px rgba(59, 130, 246, 0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .fab-btn:active { transform: scale(0.9); }
-
-        #loaderOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
-        .loader-spinner { border: 5px solid rgba(255,255,255,0.1); border-top: 5px solid var(--accent); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        .loader-text { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
-        .loader-subtext { color: var(--text-secondary); font-size: 0.9rem; }
-
-        .geo-panel { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid var(--border); text-align: center; margin-top: 10px; }
-        .geo-status { font-size: 0.95rem; color: var(--text-secondary); margin-top: 12px; min-height: 20px; }
-        .geo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; opacity: 0.4; pointer-events: none; transition: 0.3s ease; }
-        .geo-grid.active { opacity: 1; pointer-events: auto; }
-        .geo-btn { background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); padding: 18px 10px; border-radius: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .geo-btn span { font-size: 2rem; }
-        .btn-locate { background: var(--accent); color: white; padding: 16px; border-radius: 30px; font-weight: 800; font-size: 1.1rem; width: 100%; border: none; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .pulsing { animation: pulse 1s infinite; }
-
-        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(150px); background: var(--success); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 800; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: 0.4s; z-index: 2000; }
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        #toast.error { background: var(--danger); }
+        .checkbox-container {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
         
-        .file-upload-hidden { display: none; }
+        .card.completed .checkbox-container {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+        .card.completed .checkbox-container::after {
+            content: '✓'; color: white; font-size: 1.2rem;
+        }
+
+        /* פרטים מורחבים */
+        .card-details {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .card.expanded .card-details { display: block; animation: slideDown 0.3s ease; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .expand-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--primary);
+            padding: 10px 0 0 0;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-link, .btn-action {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* מסך סביבי (GPS) */
+        .geo-panel {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .geo-status { margin-bottom: 20px; font-size: 1.1rem; color: var(--text-muted); }
+        
+        .geo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            pointer-events: none; /* חסום עד קבלת מיקום */
+            opacity: 0.5;
+        }
+
+        .geo-grid.active {
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        .geo-btn {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .geo-btn .icon { font-size: 2.5rem; }
+
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-top">
-            <div class="app-title">Trip<span>MH</span></div>
-            <div class="header-actions">
-                <button class="btn-icon" onclick="toggleTheme()" id="themeBtn">☀️ בהיר</button>
-                <button class="btn-icon btn-danger" onclick="clearAllData()" id="clearBtn">🗑️ איפוס</button>
+            <h1>TripMH</h1>
+            <div class="controls">
+                <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+                <label class="icon-btn" for="csv-upload">➕</label>
+                <input type="file" id="csv-upload" accept=".csv" onchange="handleFileUpload(event)">
             </div>
         </div>
-
-        <div class="search-container">
-            <span class="search-icon-right">🔍</span>
-            <input type="text" id="searchInput" class="search-bar" placeholder="חפש מיקום, אטרקציה, טיפ..." oninput="handleSearch()">
-            <button id="clearSearchBtn" class="clear-search" onclick="clearSearch()">✕</button>
-        </div>
-
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('route', this)">📍 מסלול</div>
-            <div class="tab" onclick="switchTab('options', this)">⭐ אופציות</div>
-            <div class="tab" onclick="switchTab('tips', this)">💡 טיפים</div>
-            <div class="tab" onclick="switchTab('nearby', this)">🗺️ סביבי</div>
+        <div class="search-bar">
+            <button class="clear-search" id="clear-search" onclick="clearSearch()">✕</button>
+            <input type="text" id="search-input" placeholder="חיפוש מהיר (עיר, יעד, הערה)..." onkeyup="filterCards()">
         </div>
     </header>
 
-    <main id="appContent">
-        </main>
+    <main>
+        <div id="tab-itinerary" class="tab-content active"></div>
+        <div id="tab-options" class="tab-content"></div>
+        <div id="tab-tips" class="tab-content"></div>
+        <div id="tab-around" class="tab-content">
+            <div class="geo-panel">
+                <button class="btn-action" onclick="locateUser()" style="margin-bottom: 20px; font-size: 1.2rem; padding: 15px;">
+                    📍 אכן מיקום נוכחי
+                </button>
+                <div class="geo-status" id="geo-status">ממתין לאיכון...</div>
+                
+                <div class="geo-grid" id="geo-grid">
+                    <button class="geo-btn" onclick="searchNearby('מסעדות')">
+                        <span class="icon">🍜</span> מסעדות קרובות
+                    </button>
+                    <button class="geo-btn" onclick="searchNearby('תחנת רכבת')">
+                        <span class="icon">🚆</span> תחנת רכבת
+                    </button>
+                    <button class="geo-btn" onclick="searchNearby('Convenience Store')">
+                        <span class="icon">🏪</span> Conbini / חנות נוחות
+                    </button>
+                    <button class="geo-btn" onclick="searchNearby('Public Restroom')">
+                        <span class="icon">🚻</span> שירותים ציבוריים
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <div class="fab-container">
-        <button class="fab-btn" onclick="triggerUpload()">＋</button>
-    </div>
-
-    <input type="file" id="csvFileInput" class="file-upload-hidden" accept=".csv" multiple onchange="processFiles(event)">
-
-    <div id="toast">הפעולה בוצעה בהצלחה</div>
-
-    <div id="loaderOverlay">
-        <div class="loader-spinner"></div>
-        <div class="loader-text">מנוע הסיווג החכם מעבד נתונים...</div>
-        <div class="loader-subtext">קורא שורות, מסווג קטגוריות ובונה מפות ניווט אופליין.</div>
-    </div>
+    <nav>
+        <div class="nav-item active" onclick="switchTab('itinerary', this)">
+            <span class="icon">📍</span>
+            <span>מסלול</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('options', this)">
+            <span class="icon">⭐</span>
+            <span>אופציות</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tips', this)">
+            <span class="icon">💡</span>
+            <span>טיפים</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('around', this)">
+            <span class="icon">🗺️</span>
+            <span>סביבי</span>
+        </div>
+    </nav>
 
     <script>
-        // --- 1. Safe Local Storage Retrieval ---
-        function safeGetItem(key) {
-            try {
-                const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : [];
-            } catch (e) {
-                console.error("Storage parse error for key " + key, e);
-                return [];
-            }
-        }
-
-        let appData = {
-            route: safeGetItem('tripMH_route'),
-            tips: safeGetItem('tripMH_tips'),
-            options: safeGetItem('tripMH_options'),
-            checkedItems: (function(){ try { return JSON.parse(localStorage.getItem('tripMH_checked')) || {}; } catch(e){ return {}; } })()
-        };
-        
-        let currentTab = 'route';
+        // === הגדרות ומצב מערכת ===
+        let appData = { itinerary: [], options: [], tips: [] };
         let userLocation = null;
 
-        function updateHeaderButtons() {
-            const hasData = appData.route.length > 0 || appData.tips.length > 0 || appData.options.length > 0;
-            const clearBtn = document.getElementById('clearBtn');
-            if (clearBtn) clearBtn.disabled = !hasData;
+        // טעינה ראשונית מ-LocalStorage
+        window.onload = () => {
+            try {
+                // טעינת ערכת נושא
+                const savedTheme = localStorage.getItem('tripmh-theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                // טעינת נתונים
+                const savedData = localStorage.getItem('tripmh-data');
+                if (savedData) {
+                    appData = JSON.parse(savedData);
+                    renderAllTabs();
+                } else {
+                    document.getElementById('tab-itinerary').innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-muted);">לא נטענו נתונים. לחץ על כפתור ➕ למעלה להעלאת קובץ CSV.</p>';
+                }
+            } catch (e) {
+                console.error("Crash prevented on load:", e);
+                localStorage.removeItem('tripmh-data'); // ניקוי זיכרון פגום
+            }
+        };
+
+        // === פונקציות ממשק משתמש ===
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('tripmh-theme', newTheme);
         }
 
-        // --- 2. Search Logic ---
-        function handleSearch() {
-            const input = document.getElementById('searchInput');
-            document.getElementById('clearSearchBtn').style.display = input.value.length > 0 ? 'flex' : 'none';
-            if(currentTab === 'nearby') { switchTab('route', document.querySelectorAll('.tab')[0]); }
-            renderData();
-        }
-
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('clearSearchBtn').style.display = 'none';
-            renderData();
-        }
-
-        function switchTab(tabName, el) {
-            currentTab = tabName;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            if(el) el.classList.add('active');
-            renderData();
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            el.classList.add('active');
             window.scrollTo(0,0);
         }
 
-        // --- 3. CSV Semantic Parser Engine ---
-        function parseCSV(csvText) {
-            const rows = []; let row = []; let inQuotes = false; let val = '';
-            for (let i = 0; i < csvText.length; i++) {
-                let char = csvText[i], nextChar = csvText[i + 1];
-                if (char === '"' && inQuotes && nextChar === '"') { val += '"'; i++; }
-                else if (char === '"') { inQuotes = !inQuotes; }
-                else if (char === ',' && !inQuotes) { row.push(val.trim()); val = ''; }
-                else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
-                    if (char === '\r') i++; 
-                    row.push(val.trim());
-                    if (row.join('').trim() !== '') rows.push(row);
-                    row = []; val = '';
-                } else { val += char; }
-            }
-            if (val || row.length > 0) { row.push(val.trim()); rows.push(row); }
-            return rows;
+        function toggleCard(buttonElement) {
+            const card = buttonElement.closest('.card');
+            card.classList.toggle('expanded');
+            buttonElement.innerHTML = card.classList.contains('expanded') ? '👁️ הסתר פרטים' : '👁️ פתח פרטים';
         }
 
-        function triggerUpload() { document.getElementById('csvFileInput').click(); }
-
-        function processFiles(event) {
-            const files = event.target.files;
-            if (!files.length) return;
-
-            document.getElementById('loaderOverlay').style.display = 'flex';
-
-            let filesProcessed = 0;
-            let tempRoute = [], tempTips = [], tempOptions = [];
-
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const parsed = parseCSV(e.target.result);
-                        if (parsed.length > 0) {
-                            const headers = parsed[0].map(h => h.replace(/"/g, '').trim());
-                            const headerStrLower = headers.join(',').toLowerCase();
-                            const dataRows = parsed.slice(1);
-                            
-                            const formatted = dataRows.map(row => {
-                                let obj = {};
-                                headers.forEach((h, idx) => { obj[h] = row[idx] ? row[idx].replace(/^"|"$/g, '').trim() : ''; });
-                                return obj;
-                            });
-
-                            if (headerStrLower.includes('ריכוז הנחיות') || headerStrLower.includes('קטגוריה')) {
-                                tempTips.push(...formatted);
-                            } else if (headerStrLower.includes('טווח שעות') || headerStrLower.includes('שם המקום')) {
-                                formatted.forEach(item => {
-                                    const day = (item['יום'] || '').toLowerCase();
-                                    const date = (item['תאריך'] || '').toLowerCase();
-                                    if (day.includes('אופציה') || date.includes('-') || !date.includes('/')) {
-                                        tempOptions.push(item);
-                                    } else {
-                                        tempRoute.push(item);
-                                    }
-                                });
-                            } else {
-                                tempRoute.push(...formatted);
-                            }
-                        }
-                    } catch (err) {
-                        console.error("File processing crash avoided:", err);
-                    }
-
-                    filesProcessed++;
-                    if (filesProcessed === files.length) {
-                        setTimeout(() => {
-                            if(tempRoute.length) { appData.route = [...appData.route, ...tempRoute]; localStorage.setItem('tripMH_route', JSON.stringify(appData.route)); }
-                            if(tempTips.length) { appData.tips = [...appData.tips, ...tempTips]; localStorage.setItem('tripMH_tips', JSON.stringify(appData.tips)); }
-                            if(tempOptions.length) { appData.options = [...appData.options, ...tempOptions]; localStorage.setItem('tripMH_options', JSON.stringify(appData.options)); }
-                            
-                            document.getElementById('loaderOverlay').style.display = 'none';
-                            showToast("הקבוצה פוענחה ומוכנה אופליין!");
-                            renderData();
-                        }, 600);
-                    }
-                };
-                reader.readAsText(file);
-            });
-            event.target.value = '';
-        }
-
-        function loadDemoData() {
-            document.getElementById('loaderOverlay').style.display = 'flex';
-            setTimeout(() => {
-                appData.route = [
-                    {"אייקון":"🛬","יום":"01 (שלישי)","תאריך":"13/10/2026","שם המקום":"נמל התעופה האנדה - טרמינל 3","מיקום במפה":"Haneda Airport Terminal 3, Tokyo, Japan","תיאור ומה ניתן לעשות":"נחיתה והתארגנות ראשונית.\n• איסוף כבודה ומעבר במכס.\n• הצגת קודי QR של Visit Japan Web.","תחבורה והגעה ליעד":"יציאה משער המקבלים.","טווח שעות מומלץ":"22:20","עלות משוערת (₪)":"שולם","איך ומתי להזמין (צ'ק-אין/אאוט)":"🚨 למלא טפסים שבוע מראש"},
-                    {"אייקון":"🏪","יום":"01 (שלישי)","תאריך":"13/10/2026","שם המקום":"7-Eleven Haneda","מיקום במפה":"7-Eleven Haneda Airport, Tokyo, Japan","תיאור ומה ניתן לעשות":"הצטיידות במזומנים (כספומט 7-Bank) ומים מינרליים.","תחבורה והגעה ליעד":"אולם קומה 2.","טווח שעות מומלץ":"23:50","עלות משוערת (₪)":"לפי צריכה","איך ומתי להזמין (צ'ק-אין/אאוט)":""}
-                ];
-                appData.tips = [
-                    {"אייקון":"💡","קטגוריה":"1. הכנות והתנהלות","ריכוז הנחיות וטיפים (מסוכם לפי נושא)":"חוקי ברזל ליפן:\n• העבר טלפון למצב רטט (Manner Mode) ברכבות - אסור לדבר בנייד כלל.\n• אין פחים ברחובות, הסתובב תמיד עם שקית קטנה בתיק.\n• אל תשכח מגבת ידיים קטנה בכיס כי אין נייר בשירותים ציבוריים.","אפליקציות וקישורים רלוונטיים":"https://www.google.com/maps"}
-                ];
-                localStorage.setItem('tripMH_route', JSON.stringify(appData.route));
-                localStorage.setItem('tripMH_tips', JSON.stringify(appData.tips));
-                document.getElementById('loaderOverlay').style.display = 'none';
-                showToast("נתוני דוגמה נטענו בהצלחה!");
-                renderData();
-            }, 500);
-        }
-
-        function clearAllData() {
-            if(confirm("האם למחוק את כל הנתונים השמורים? האפליקציה תתאפס לחלוטין.")) {
-                localStorage.clear();
-                appData = { route: [], tips: [], options: [], checkedItems: {} };
-                renderData();
-                showToast("האפליקציה אופסה.");
-            }
-        }
-
-        // --- 4. Interactivity Handlers ---
-        function toggleCheck(id) {
-            appData.checkedItems[id] = !appData.checkedItems[id];
-            localStorage.setItem('tripMH_checked', JSON.stringify(appData.checkedItems));
-            const card = document.getElementById(`card-${id}`);
-            if (card) { appData.checkedItems[id] ? card.classList.add('completed') : card.classList.remove('completed'); }
-        }
-
-        function toggleDetails(id) {
-            const card = document.getElementById(`card-${id}`);
-            const details = document.getElementById(`details-${id}`);
-            const btn = document.getElementById(`btn-expand-${id}`);
-            if (details.classList.contains('open')) {
-                details.classList.remove('open');
-                card.classList.remove('card-details-open-state');
-                btn.innerHTML = '👁️ פתח פרטים ואפשרויות ניווט';
-            } else {
-                details.classList.add('open');
-                card.classList.add('card-details-open-state');
-                btn.innerHTML = '⬆️ סגור פרטים';
-            }
-        }
-
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = isError ? 'error show' : 'show';
-            setTimeout(() => toast.classList.remove('show', 'error'), 3000);
-        }
-
-        function getMapLink(name, address) {
-            const query = (address || name) ? `${name} ${address}` : name;
-            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-        }
-
-        // --- 5. GPS Core Engine ---
-        function locateUser() {
-            const statusEl = document.getElementById('geoStatus');
-            const btnLocate = document.getElementById('btnLocate');
-            if (!navigator.geolocation) { showToast("GPS אינו נתמך במכשיר.", true); return; }
+        function toggleCheck(cardId, event) {
+            event.stopPropagation(); // מונע פתיחת כרטיסייה בלחיצה על הצ'קבוקס
+            const card = document.getElementById(cardId);
+            card.classList.toggle('completed');
             
-            statusEl.textContent = "מתחבר ללוויינים ומאתר...";
-            btnLocate.classList.add('pulsing');
-
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                    btnLocate.classList.remove('pulsing');
-                    btnLocate.style.backgroundColor = 'var(--success)';
-                    btnLocate.innerHTML = '✅ המיקום הנוכחי שלך סונכרן!';
-                    statusEl.textContent = "המיקום נקלט בבטחה. בחר יעד סביבך:";
-                    document.getElementById('geoGrid').classList.add('active');
-                    
-                    const nearUrl = (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}&center=${userLocation.lat},${userLocation.lng}`;
-                    document.getElementById('linkFood').href = nearUrl("Restaurants");
-                    document.getElementById('linkTrain').href = nearUrl("Train Station");
-                    document.getElementById('link711').href = nearUrl("7-Eleven");
-                    document.getElementById('linkWc').href = nearUrl("Public Toilet");
-                },
-                (err) => {
-                    btnLocate.classList.remove('pulsing');
-                    showToast("איתור נכשל. אנא אשר הרשאת מיקום בדפדפן.", true);
-                    statusEl.textContent = "שגיאת GPS. אנא אשר גישה בהגדרות המכשיר.";
-                },
-                { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-            );
+            // שמירת מצב ב-LocalStorage
+            let checkedItems = JSON.parse(localStorage.getItem('tripmh-checked') || '[]');
+            if (card.classList.contains('completed')) {
+                checkedItems.push(cardId);
+            } else {
+                checkedItems = checkedItems.filter(id => id !== cardId);
+            }
+            localStorage.setItem('tripmh-checked', JSON.stringify(checkedItems));
         }
 
-        // --- 6. Core Layout Render Engine ---
-        function renderData() {
-            updateHeaderButtons();
-            const container = document.getElementById('appContent');
-            const searchQ = document.getElementById('searchInput').value.toLowerCase();
-
-            if(currentTab === 'nearby') {
-                container.innerHTML = `
-                    <div class="geo-panel">
-                        <h2>🗺️ איתור מהיר סביבי</h2>
-                        <p style="font-size:0.95rem; color:var(--text-secondary); margin-top:5px; margin-bottom:20px;">מוצא נקודות עניין חיוניות ברדיוס שלך ללא צורך בהקלדה - מעולה ללחץ בשטח.</p>
-                        <button id="btnLocate" class="btn-locate" onclick="locateUser()">📍 לחץ לסנכרון מיקום ב-GPS</button>
-                        <div id="geoStatus" class="geo-status"></div>
-                        <div id="geoGrid" class="geo-grid">
-                            <a id="linkFood" href="#" target="_blank" class="geo-btn"><span>🍜</span>מסעדות קרובות</a>
-                            <a id="linkTrain" href="#" target="_blank" class="geo-btn"><span>🚆</span>תחנת רכבת</a>
-                            <a id="link711" href="#" target="_blank" class="geo-btn"><span>🏪</span>חנות נוחות (7-11)</a>
-                            <a id="linkWc" href="#" target="_blank" class="geo-btn"><span>🚻</span>שירותים ציבוריים</a>
-                        </div>
-                    </div>
-                `;
-                return;
+        // === מנוע עיבוד CSV חכם (Robust CSV Parser) ===
+        function parseCSV(text) {
+            let result = [];
+            let row = [];
+            let inQuotes = false;
+            let currentStr = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    if (inQuotes && text[i+1] === '"') { currentStr += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentStr.trim()); currentStr = '';
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (char === '\r' && text[i+1] === '\n') i++;
+                    row.push(currentStr.trim()); currentStr = '';
+                    if (row.join('').length > 0) result.push(row);
+                    row = [];
+                } else {
+                    currentStr += char;
+                }
             }
-
-            const dataToRender = appData[currentTab];
-
-            if (!dataToRender || dataToRender.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <h2>אפליקציית TripMH מוכנה 🇯🇵</h2>
-                        <p>לחץ על מקש הפלוס העגול (＋) שבצד שמאל למטה כדי לטעון קבצי CSV, או לחץ על הכפתור למטה כדי לנסות את המערכת עם נתוני דוגמה מובנים.</p>
-                        <button class="upload-btn btn-demo" onclick="loadDemoData()">💡 טען מסלול דוגמה לבדיקה</button>
-                        
-                        <div style="margin-top:25px; padding-top:20px; border-top:1px solid var(--border); text-align:right; font-size:0.85rem; color:var(--text-secondary);">
-                            <div style="font-weight:bold; margin-bottom:5px; color:var(--text-primary);">📊 סטטוס בסיס נתונים מקומי (אופליין):</div>
-                            <div class="db-stat">שורות מסלול: <span>${appData.route.length}</span></div>
-                            <div class="db-stat">שורות אופציות והשלמות: <span>${appData.options.length}</span></div>
-                            <div class="db-stat">שורות דגשים וטיפים: <span>${appData.tips.length}</span></div>
-                        </div>
-                    </div>
-                `;
-                return;
+            if (currentStr || row.length > 0) {
+                row.push(currentStr.trim());
+                if (row.join('').length > 0) result.push(row);
             }
+            return result;
+        }
 
-            let html = ''; let currentDayHeader = '';
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            dataToRender.forEach((item, index) => {
-                const uniqueId = `${currentTab}-${index}`;
-                const searchableText = Object.values(item).join(' ').toLowerCase();
-                if (searchQ && !searchableText.includes(searchQ)) return;
-
-                if (currentTab === 'route' || currentTab === 'options') {
-                    const icon = item['אייקון'] || '📍';
-                    const day = item['יום'] || '';
-                    const title = item['שם המקום'] || '';
-                    const time = item['טווח שעות מומלץ'] || '';
-                    const area = item['אזור במסלול'] || '';
-                    const desc = item['תיאור ומה ניתן לעשות'] || '';
-                    const transport = item['תחבורה והגעה ליעד'] || '';
-                    const address = item['מיקום במפה'] || '';
-                    const cost = item['עלות משוערת (₪)'] || '';
-                    const bookingInfo = item['איך ומתי להזמין (צ'ק-אין/אאוט)'] || '';
-                    const csvLink = item['קישור'] || '';
-
-                    if (day && day !== currentDayHeader && currentTab === 'route') {
-                        html += `<div class="day-divider">${day} ${item['תאריך'] ? ' • ' + item['תאריך'] : ''}</div>`;
-                        currentDayHeader = day;
-                    }
-
-                    const isChecked = appData.checkedItems[uniqueId] ? 'checked' : '';
-                    const completedClass = isChecked ? 'completed' : '';
-
-                    html += `
-                    <div class="card ${completedClass}" id="card-${uniqueId}">
-                        <div class="checkbox-wrapper" onclick="event.stopPropagation();">
-                            <input type="checkbox" class="checkbox-custom" ${isChecked} onchange="toggleCheck('${uniqueId}')">
-                        </div>
-                        <div class="card-header" onclick="toggleDetails('${uniqueId}')">
-                            <div class="card-icon">${icon}</div>
-                            <div class="card-content">
-                                <div class="card-title">${title}</div>
-                                <div class="card-meta">
-                                    ${time ? `<span class="tag highlight">🕒 ${time}</span>` : ''}
-                                    ${area ? `<span class="tag">🗺️ ${area}</span>` : ''}
-                                    ${bookingInfo && bookingInfo.includes('🚨') ? `<span class="tag alert">🚨 שריון חובה</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card-details" id="details-${uniqueId}">
-                            ${desc ? `<div class="detail-row"><div class="detail-label">פעילות והנחיות</div><div class="detail-text">${desc}</div></div>` : ''}
-                            ${transport ? `<div class="detail-row"><div class="detail-label">דרכי הגעה ותחבורה</div><div class="detail-text">🚆 ${transport}</div></div>` : ''}
-                            ${cost ? `<div class="detail-row"><div class="detail-label">עלות משוערת</div><div class="detail-text">💳 ${cost}</div></div>` : ''}
-                            ${bookingInfo ? `<div class="detail-row"><div class="detail-label">הזמנות ומנהלה</div><div class="detail-text">${bookingInfo}</div></div>` : ''}
-                            ${csvLink && csvLink.startsWith('http') ? `<div class="detail-row"><div class="detail-label">אתר חיצוני רלוונטי</div><a href="${csvLink}" target="_blank" class="detail-link">🌐 פתח קישור מקור</a></div>` : ''}
-                            
-                            <a href="${getMapLink(title, address)}" target="_blank" class="btn-nav-live">🗺️ פתח ניווט ב-Google Maps</a>
-                            <button class="btn-expand" id="btn-expand-${uniqueId}" onclick="toggleDetails('${uniqueId}')">⬆ ? סגור פרטים</button>
-                        </div>
-                    </div>`;
-                } 
-                else if (currentTab === 'tips') {
-                    const icon = item['אייקון'] || '💡';
-                    const category = item['קטגוריה'] || 'כללי';
-                    const desc = item['ריכוז הנחיות וטיפים (מסוכם לפי נושא)'] || '';
-                    const linksRaw = item['אפליקציות וקישורים רלוונטיים'] || '';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const rows = parseCSV(text);
+                    if (rows.length < 2) return alert("הקובץ ריק או לא תקין.");
                     
-                    let formattedLinks = linksRaw;
-                    if(linksRaw) {
-                         formattedLinks = linksRaw.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="detail-link">📥 פתח קישור הורדה</a>');
-                    }
+                    const headers = rows[0].map(h => h.replace(/['"]/g, '').trim());
+                    processData(headers, rows.slice(1));
+                } catch (err) {
+                    console.error("Crash prevented in CSV parser:", err);
+                    alert("אירעה שגיאה בקריאת הקובץ. ודא שזהו קובץ CSV תקין.");
+                }
+            };
+            reader.readAsText(file);
+        }
 
-                    const isChecked = appData.checkedItems[uniqueId] ? 'checked' : '';
-                    const completedClass = isChecked ? 'completed' : '';
+        function processData(headers, rows) {
+            // אלגוריתם סיווג אוטומטי (Semantic Heuristics)
+            let newItinerary = [];
+            let newOptions = [];
+            let newTips = [];
 
-                    html += `
-                    <div class="card ${completedClass}" id="card-${uniqueId}">
-                        <div class="checkbox-wrapper" onclick="event.stopPropagation();">
-                            <input type="checkbox" class="checkbox-custom" ${isChecked} onchange="toggleCheck('${uniqueId}')">
-                        </div>
-                        <div class="card-header" onclick="toggleDetails('${uniqueId}')">
-                            <div class="card-icon">${icon}</div>
-                            <div class="card-content">
-                                <div class="card-title">${category}</div>
-                            </div>
-                        </div>
-                        <div class="card-details" id="details-${uniqueId}">
-                            <div class="detail-row">
-                                <div class="detail-text">${desc}</div>
-                            </div>
-                            ${formattedLinks ? `
-                            <div class="detail-row" style="margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
-                                <div class="detail-label">קישורים ואפליקציות שימושיות</div>
-                                <div class="detail-text" style="display:flex; flex-direction:column; gap:8px;">${formattedLinks}</div>
-                            </div>` : ''}
-                            <button class="btn-expand" id="btn-expand-${uniqueId}" onclick="toggleDetails('${uniqueId}')">⬆️ סגור</button>
-                        </div>
-                    </div>`;
+            // זיהוי עמודות דינמי (חיפוש מילים מרכזיות בכותרות)
+            const getColIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
+            
+            const colCategory = getColIdx(["קטגוריה", "ריכוז", "נושא"]);
+            const colDay = getColIdx(["יום", "תאריך"]);
+            const colTime = getColIdx(["שעות", "שעה"]);
+            const colName = getColIdx(["שם", "יעד", "מקום", "טיפ", "הנחיה"]);
+            const colDesc = getColIdx(["תיאור", "פירוט"]);
+            const colArea = getColIdx(["אזור", "עיר"]);
+            const colLink = getColIdx(["קישור", "ניווט", "לינק"]);
+            const colReserve = getColIdx(["שריון", "הזמנה"]);
+
+            rows.forEach((row, index) => {
+                if (row.length < 2) return; // דילוג על שורות ריקות
+
+                const item = {
+                    id: 'item_' + Date.now() + '_' + index,
+                    category: colCategory > -1 ? row[colCategory] : '',
+                    day: colDay > -1 ? row[colDay] : '',
+                    time: colTime > -1 ? row[colTime] : '',
+                    name: colName > -1 ? row[colName] : 'ללא שם',
+                    desc: colDesc > -1 ? row[colDesc] : '',
+                    area: colArea > -1 ? row[colArea] : '',
+                    link: colLink > -1 ? row[colLink] : '',
+                    reserve: colReserve > -1 ? (row[colReserve].includes("כן") || row[colReserve].includes("V") || row[colReserve].includes("true")) : false,
+                    rawText: row.join(' ').toLowerCase() // לטובת חיפוש
+                };
+
+                // לוגיקת סיווג
+                if (item.category && !item.time && !item.day) {
+                    newTips.push(item);
+                } else if (item.day && (item.day.includes("אופצי") || item.day.includes("חלופ") || item.day.includes("גיבוי"))) {
+                    newOptions.push(item);
+                } else if (item.day || item.time) {
+                    newItinerary.push(item);
+                } else {
+                    // ברירת מחדל לאופציות אם אין שיוך מובהק
+                    newOptions.push(item);
                 }
             });
 
-            container.innerHTML = html || '<div class="empty-state"><h3>לא נמצאו תוצאות מתאימות לחיפוש 🔍</h3></div>';
+            appData = { itinerary: newItinerary, options: newOptions, tips: newTips };
+            localStorage.setItem('tripmh-data', JSON.stringify(appData));
+            alert("הנתונים נטענו וסווגו בהצלחה!");
+            renderAllTabs();
         }
 
-        renderData();
+        // === יצירת שאילתות ניווט וטיפול בקישורים חכמים ===
+        function generateMapLink(name, rawLink) {
+            // זיהוי קישור שבור או פלסבו
+            if (!rawLink || rawLink.endsWith("/0") || rawLink.length < 5) {
+                return `https://maps.google.com/?q=${encodeURIComponent(name)}`;
+            }
+            return rawLink;
+        }
+
+        function extractUrlsToButtons(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            let buttonsHtml = '';
+            let cleanText = text.replace(urlRegex, (url) => {
+                buttonsHtml += `<a href="${url}" target="_blank" class="btn-action" style="background-color: var(--success); margin-bottom: 10px;">📥 פתח קישור מצורף</a>`;
+                return ''; // מחיקת הקישור מהטקסט הרגיל
+            });
+            return { cleanText, buttonsHtml };
+        }
+
+        // === רנדור המידע (Rendering) ===
+        function createCardHTML(item) {
+            const checkedItems = JSON.parse(localStorage.getItem('tripmh-checked') || '[]');
+            const isChecked = checkedItems.includes(item.id) ? 'completed' : '';
+            
+            const mapLink = generateMapLink(item.name, item.link);
+            const mapBtn = item.category ? '' : `<a href="${mapLink}" target="_blank" class="btn-link">🗺️ פתח מפה / נווט</a>`;
+            
+            const extracted = extractUrlsToButtons(item.desc);
+            
+            let tagsHtml = '';
+            if (item.area) tagsHtml += `<span class="tag">📍 ${item.area}</span>`;
+            if (item.reserve) tagsHtml += `<span class="tag warning">🚨 דורש שריון</span>`;
+
+            return `
+                <div class="card ${isChecked}" id="${item.id}" data-search="${item.rawText}">
+                    <div class="card-header" onclick="toggleCard(this.parentElement.querySelector('.expand-btn'))">
+                        <div class="card-main-info">
+                            <div class="card-title">${item.name}</div>
+                            ${item.time ? `<div class="card-time">🕒 ${item.time}</div>` : ''}
+                            <div class="tags">${tagsHtml}</div>
+                        </div>
+                        <div class="checkbox-container" onclick="toggleCheck('${item.id}', event)"></div>
+                    </div>
+                    <div class="card-details">
+                        <p>${extracted.cleanText.replace(/\n/g, '<br>')}</p>
+                        ${extracted.buttonsHtml}
+                        ${mapBtn}
+                    </div>
+                    <button class="expand-btn" onclick="toggleCard(this)">👁️ פתח פרטים</button>
+                </div>
+            `;
+        }
+
+        function renderAllTabs() {
+            // רנדור מסלול (כולל כותרות ימים דביקות)
+            const itContainer = document.getElementById('tab-itinerary');
+            itContainer.innerHTML = '';
+            let currentDay = '';
+            appData.itinerary.forEach(item => {
+                if (item.day !== currentDay) {
+                    itContainer.innerHTML += `<div class="day-divider">${item.day}</div>`;
+                    currentDay = item.day;
+                }
+                itContainer.innerHTML += createCardHTML(item);
+            });
+
+            // רנדור אופציות
+            const opContainer = document.getElementById('tab-options');
+            opContainer.innerHTML = appData.options.map(createCardHTML).join('');
+
+            // רנדור טיפים (ללא צורך בניווט, חלוקה לפי קטגוריות)
+            const tipsContainer = document.getElementById('tab-tips');
+            tipsContainer.innerHTML = '';
+            let currentCategory = '';
+            
+            // מיון טיפים לפי קטגוריה
+            let sortedTips = [...appData.tips].sort((a,b) => a.category.localeCompare(b.category));
+            
+            sortedTips.forEach(item => {
+                if (item.category !== currentCategory && item.category) {
+                    tipsContainer.innerHTML += `<div class="day-divider" style="background-color: var(--text-muted);">${item.category}</div>`;
+                    currentCategory = item.category;
+                }
+                tipsContainer.innerHTML += createCardHTML(item);
+            });
+        }
+
+        // === מערכת חיפוש מהיר (Omni-Search) ===
+        function filterCards() {
+            const input = document.getElementById('search-input');
+            const filter = input.value.toLowerCase();
+            const clearBtn = document.getElementById('clear-search');
+            
+            clearBtn.style.display = filter.length > 0 ? 'block' : 'none';
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const text = card.getAttribute('data-search');
+                if (text.includes(filter)) {
+                    card.style.display = "";
+                    // אם מחפשים, פתח אוטומטית כרטיסיות רלוונטיות
+                    if(filter.length > 2 && !card.classList.contains('expanded')) {
+                       card.querySelector('.expand-btn').click();
+                    }
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // הסתרת/הצגת כותרות ימים ריקות
+            document.querySelectorAll('.day-divider').forEach(div => {
+                let next = div.nextElementSibling;
+                let hasVisibleCard = false;
+                while(next && !next.classList.contains('day-divider')) {
+                    if(next.style.display !== "none") {
+                        hasVisibleCard = true;
+                        break;
+                    }
+                    next = next.nextElementSibling;
+                }
+                div.style.display = hasVisibleCard ? "block" : "none";
+            });
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            input.value = '';
+            filterCards();
+        }
+
+        // === מנגנון מיקום (GPS Location-Based Panel) ===
+        function locateUser() {
+            const statusLabel = document.getElementById('geo-status');
+            const grid = document.getElementById('geo-grid');
+            
+            statusLabel.innerText = "מאכן מיקום, אנא המתן...";
+            
+            if (!navigator.geolocation) {
+                statusLabel.innerText = "שירותי מיקום אינם נתמכים בדפדפן זה.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    statusLabel.innerText = "📍 המיקום אותר בהצלחה! בחר יעד לחיפוש סביבך:";
+                    statusLabel.style.color = "var(--success)";
+                    grid.classList.add('active'); // פתיחת נעילת הכפתורים
+                },
+                (error) => {
+                    console.error("GPS Error:", error);
+                    statusLabel.innerText = "❌ שגיאה בקבלת המיקום. ודא שה-GPS דלוק ויש הרשאה לדפדפן.";
+                    statusLabel.style.color = "var(--danger)";
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        function searchNearby(query) {
+            if (!userLocation) return alert("יש לאכן מיקום תחילה.");
+            
+            // מחולל שאילתת אינטנט (Intent) לפתיחת Google Maps עם חיפוש מבוסס מיקום ה-GPS האחרון שנדגם
+            const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${userLocation.lat},${userLocation.lng},15z`;
+            window.open(url, '_blank');
+        }
     </script>
 </body>
 </html>
