@@ -1,794 +1,1630 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TripMH - מרכז שליטה לוגיסטי</title>
-    <!-- Tailwind CSS with custom configuration -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#090d16',
-                        darkCard: '#131926',
-                        darkBorder: '#1e293b'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Smooth custom transitions */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
-        
-        .sticky-day {
-            position: sticky;
-            top: 125px;
-            z-index: 30;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a0d12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="TripMH — מדריך נסיעה אופליין, CSV, GPS וניווט" />
+  <title>TripMH — מדריך הנסיעה שלך</title>
 
-        .hit-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
+  <!-- Lucide icons via CDN (tiny subset loaded as SVG strings inline) -->
+  <style>
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .accordion-content {
-            transition: max-height 0.25s cubic-bezier(0, 1, 0, 1);
-            max-height: 0;
-            overflow: hidden;
-        }
-        .accordion-content.expanded {
-            max-height: 2000px;
-            transition: max-height 0.4s ease-in-out;
-        }
-    </style>
+    /* ============================================================
+       DESIGN TOKENS — DARK (default)
+    ============================================================ */
+    :root {
+      --bg:           #0c0f14;
+      --bg-elevated:  #131820;
+      --bg-card:      #161c25;
+      --bg-muted:     #1c2230;
+      --border:       rgba(255,255,255,0.08);
+      --text:         #e8ecf2;
+      --text-muted:   #6b7a94;
+      --text-dim:     #3d4a60;
+
+      --accent:       #22d3ee;          /* cyan */
+      --accent-glow:  rgba(34,211,238,0.13);
+      --accent-border:rgba(34,211,238,0.28);
+      --success:      #4ade80;          /* green */
+      --success-glow: rgba(74,222,128,0.12);
+      --warning:      #fbbf24;          /* amber */
+      --warning-glow: rgba(251,191,36,0.12);
+      --danger:       #f87171;          /* red */
+      --danger-glow:  rgba(248,113,113,0.12);
+
+      --radius-sm: 8px;
+      --radius:    12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      --header-h: 120px; /* approximate sticky header height */
+    }
+
+    /* ============================================================
+       LIGHT THEME OVERRIDES
+    ============================================================ */
+    html.light {
+      --bg:           #f4f6fa;
+      --bg-elevated:  #eaecf1;
+      --bg-card:      #ffffff;
+      --bg-muted:     #edf0f5;
+      --border:       rgba(0,0,0,0.09);
+      --text:         #111827;
+      --text-muted:   #6b7280;
+      --text-dim:     #9ca3af;
+
+      --accent:       #0891b2;
+      --accent-glow:  rgba(8,145,178,0.10);
+      --accent-border:rgba(8,145,178,0.25);
+      --success:      #16a34a;
+      --success-glow: rgba(22,163,74,0.10);
+      --warning:      #d97706;
+      --warning-glow: rgba(217,119,6,0.10);
+      --danger:       #dc2626;
+      --danger-glow:  rgba(220,38,38,0.10);
+    }
+
+    /* ============================================================
+       GLOBAL TYPOGRAPHY
+    ============================================================ */
+    html {
+      font-family: 'Segoe UI', 'Heebo', 'Arial', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      min-height: 100dvh;
+      overflow-x: hidden;
+      direction: rtl;
+    }
+
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+    html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+
+    /* ============================================================
+       APP SHELL
+    ============================================================ */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    #app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 8px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-glow);
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--accent-border);
+    }
+    .logo-icon svg { width: 18px; height: 18px; color: var(--accent); }
+    .logo-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .logo-demo  { font-size: 10px; font-weight: 600; color: var(--warning); display: block; }
+
+    .header-actions { display: flex; align-items: center; gap: 6px; }
+
+    .pill-counter {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px;
+      background: var(--bg-muted); font-size: 11px;
+      font-family: 'Courier New', monospace; color: var(--text-muted);
+    }
+    .pill-counter .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--success);
+    }
+
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      border: none; background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: color .15s, background .15s;
+    }
+    .icon-btn:hover { color: var(--text); background: var(--bg-muted); }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .icon-btn.danger:hover { color: var(--danger); background: var(--danger-glow); }
+
+    .upload-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      border: none; cursor: pointer;
+      background: var(--accent); color: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .15s, transform .1s;
+      box-shadow: 0 2px 8px rgba(34,211,238,.2);
+    }
+    .upload-btn:hover { opacity: .88; }
+    .upload-btn:active { transform: scale(.9); }
+    .upload-btn svg { width: 16px; height: 16px; }
+    .upload-btn.loading { opacity: .6; cursor: not-allowed; }
+
+    /* Search */
+    .search-wrap {
+      position: relative;
+      padding: 0 16px 10px;
+    }
+    .search-icon {
+      position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; color: var(--text-muted); pointer-events: none;
+    }
+    #search-input {
+      width: 100%; height: 40px;
+      padding: 0 38px 0 34px;
+      border-radius: var(--radius); border: 1px solid transparent;
+      background: var(--bg-muted); color: var(--text);
+      font-size: 14px; font-family: inherit;
+      outline: none; transition: border .2s;
+      direction: rtl;
+    }
+    #search-input::placeholder { color: var(--text-muted); }
+    #search-input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .search-clear {
+      position: absolute; left: 28px; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 20px; border-radius: 50%;
+      border: none; background: var(--border); cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      color: var(--text-muted);
+    }
+    .search-clear.visible { display: flex; }
+    .search-clear svg { width: 11px; height: 11px; }
+
+    /* Error banner */
+    .error-banner {
+      margin: 0 16px 8px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      background: var(--danger-glow); border: 1px solid rgba(248,113,113,.22);
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .error-banner svg { width: 15px; height: 15px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+    .error-banner p  { font-size: 12px; color: var(--danger); line-height: 1.5; }
+    .error-close {
+      margin-right: auto; background: none; border: none; cursor: pointer;
+      color: var(--danger); opacity: .6; flex-shrink: 0;
+    }
+    .error-close:hover { opacity: 1; }
+    .error-close svg { width: 13px; height: 13px; }
+
+    /* Tab bar */
+    #tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+      padding: 9px 4px 8px;
+      border: none; background: none; cursor: pointer;
+      font-size: 11px; font-weight: 500;
+      color: var(--text-muted); position: relative;
+      transition: color .15s; font-family: inherit;
+    }
+    .tab-btn svg { width: 16px; height: 16px; }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn .tab-count {
+      font-size: 9px; font-family: 'Courier New', monospace;
+      color: var(--text-dim); margin-top: -2px;
+    }
+    .tab-btn.active .tab-count { color: color-mix(in srgb, var(--accent) 65%, transparent); }
+    .tab-btn.active::after {
+      content: ''; position: absolute;
+      bottom: 0; left: 6px; right: 6px;
+      height: 2px; border-radius: 2px;
+      background: var(--accent);
+    }
+
+    /* ============================================================
+       MAIN CONTENT
+    ============================================================ */
+    #tab-content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ============================================================
+       EMPTY STATE
+    ============================================================ */
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 72px 24px; text-align: center;
+    }
+    .empty-icon {
+      width: 72px; height: 72px; border-radius: var(--radius-xl);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .empty-icon svg { width: 38px; height: 38px; }
+    .empty-state h3 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .empty-state p  { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 280px; }
+
+    /* ============================================================
+       DAY / CATEGORY STICKY HEADERS
+    ============================================================ */
+    .section-header {
+      position: sticky;
+      top: 0; /* Will be overridden by JS if needed */
+      z-index: 10;
+      padding: 8px 16px;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-header-left { display: flex; align-items: center; gap: 8px; }
+    .section-header-left svg { width: 15px; height: 15px; color: var(--accent); flex-shrink: 0; }
+    .section-header-left.tips svg { color: var(--success); }
+    .section-header-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .section-badge {
+      font-size: 10px; font-family: 'Courier New', monospace;
+      padding: 2px 8px; border-radius: 99px;
+      background: var(--bg-muted); color: var(--text-muted);
+    }
+    .section-badge.all-done { background: var(--success-glow); color: var(--success); }
+
+    .progress-bar-wrap {
+      height: 2px; background: var(--border); border-radius: 2px;
+      overflow: hidden; margin-top: 5px;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 2px;
+      background: var(--accent); transition: width .5s ease;
+    }
+    .progress-bar-fill.done { background: var(--success); }
+
+    /* ============================================================
+       CARDS CONTAINER
+    ============================================================ */
+    .cards-list {
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    /* ============================================================
+       ACTIVITY CARD
+    ============================================================ */
+    .card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      overflow: hidden;
+      transition: border-color .2s, opacity .2s;
+      cursor: pointer;
+      position: relative;
+    }
+    .card:hover { border-color: var(--accent-border); }
+    .card.done {
+      opacity: .52;
+    }
+    .card.done::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-right: 3px solid var(--success);
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .card-booking-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: var(--danger-glow);
+      border-bottom: 1px solid rgba(248,113,113,.18);
+    }
+    .card-booking-bar svg { width: 13px; height: 13px; color: var(--danger); }
+    .card-booking-bar span { font-size: 11px; font-weight: 600; color: var(--danger); }
+
+    .card-body {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px;
+    }
+
+    .card-check {
+      flex-shrink: 0; margin-top: 2px;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s;
+      color: transparent;
+    }
+    .card-check svg { width: 14px; height: 14px; }
+    .card-check:hover { border-color: var(--accent); background: var(--accent-glow); }
+    .card.done .card-check {
+      border-color: var(--success); background: var(--success-glow);
+      color: var(--success);
+    }
+
+    .card-main { flex: 1; min-width: 0; }
+
+    .card-title-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 8px;
+    }
+    .card-title-inner { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+    .card-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+    .card-title {
+      font-size: 15px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+    .card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
+
+    .chevron {
+      width: 16px; height: 16px; flex-shrink: 0;
+      color: var(--text-muted); margin-top: 2px;
+      transition: transform .2s;
+    }
+    .card.expanded .chevron { transform: rotate(180deg); }
+
+    .card-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 99px;
+      font-size: 11px; font-weight: 500;
+    }
+    .tag svg { width: 11px; height: 11px; }
+    .tag.time { background: var(--accent-glow); color: var(--accent); font-family: 'Courier New', monospace; }
+    .tag.area { background: var(--bg-muted); color: var(--text-muted); }
+
+    /* Expanded section */
+    .card-details {
+      display: none;
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--border);
+      gap: 10px; flex-direction: column;
+    }
+    .card.expanded .card-details { display: flex; }
+
+    .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .card-address {
+      display: flex; align-items: flex-start; gap: 6px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .card-address svg { width: 13px; height: 13px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 12px;
+      border-radius: var(--radius-sm); border: 1px solid var(--accent-border);
+      background: var(--accent-glow); color: var(--accent);
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; text-align: right;
+      transition: background .15s, transform .1s;
+    }
+    .nav-btn:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    .nav-btn:active { transform: scale(.98); }
+    .nav-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .nav-btn .nav-ext { margin-right: auto; opacity: .65; width: 13px; height: 13px; }
+
+    /* ============================================================
+       TIP CARD (same base as activity-card)
+    ============================================================ */
+    .tip-card .card-check:hover { border-color: var(--warning); background: var(--warning-glow); }
+
+    .tip-link-btn {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 12px;
+      border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
+      background: var(--warning-glow); color: var(--warning);
+      font-size: 13px; font-weight: 500; font-family: inherit;
+      text-decoration: none; transition: background .15s;
+    }
+    .tip-link-btn:hover { background: color-mix(in srgb, var(--warning) 22%, transparent); }
+    .tip-link-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .tip-link-btn .ext-icon { margin-right: auto; opacity: .65; width: 13px; height: 13px; }
+
+    .tip-preview { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
+
+    /* ============================================================
+       OPTIONS TAB (same cards, slight different header)
+    ============================================================ */
+    .options-count-label {
+      display: flex; align-items: center; gap: 7px;
+      padding: 12px 16px 4px;
+      font-size: 13px; color: var(--text-muted); font-weight: 500;
+    }
+    .options-count-label svg { width: 15px; height: 15px; color: var(--warning); }
+
+    /* ============================================================
+       NEARBY / GPS TAB
+    ============================================================ */
+    #tab-nearby {
+      padding: 28px 16px 32px;
+      display: none;
+      flex-direction: column; align-items: center; gap: 22px;
+    }
+    #tab-nearby.active { display: flex; }
+
+    .nearby-hero {
+      text-align: center;
+    }
+    .nearby-hero-icon {
+      width: 64px; height: 64px; border-radius: var(--radius-xl);
+      background: var(--accent-glow); border: 1px solid var(--accent-border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .nearby-hero-icon svg { width: 32px; height: 32px; color: var(--accent); }
+    .nearby-hero h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .nearby-hero p  { font-size: 13px; color: var(--text-muted); line-height: 1.65; max-width: 280px; margin: 0 auto; }
+
+    .gps-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 24px; border-radius: var(--radius-xl);
+      border: 1px solid var(--accent-border); background: var(--accent-glow);
+      color: var(--accent); font-size: 15px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background .15s, transform .1s;
+    }
+    .gps-btn:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+    .gps-btn:active { transform: scale(.96); }
+    .gps-btn.success { border-color: color-mix(in srgb, var(--success) 30%, transparent); background: var(--success-glow); color: var(--success); }
+    .gps-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .gps-btn svg { width: 20px; height: 20px; }
+
+    .gps-error {
+      display: none;
+      width: 100%; padding: 12px 14px; border-radius: var(--radius);
+      background: var(--danger-glow); border: 1px solid rgba(248,113,113,.22);
+      gap: 10px; align-items: flex-start;
+    }
+    .gps-error.visible { display: flex; }
+    .gps-error svg { width: 18px; height: 18px; color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+    .gps-error p { font-size: 13px; color: var(--danger); line-height: 1.5; }
+
+    .gps-coords {
+      display: none;
+      align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px;
+      background: var(--success-glow); border: 1px solid color-mix(in srgb, var(--success) 28%, transparent);
+      font-size: 11px; font-family: 'Courier New', monospace; color: var(--success);
+    }
+    .gps-coords.visible { display: flex; }
+    .gps-coords svg { width: 13px; height: 13px; }
+
+    .cat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      width: 100%;
+      transition: opacity .3s;
+    }
+    .cat-grid.disabled { opacity: .35; pointer-events: none; }
+
+    .cat-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 20px 10px; border-radius: var(--radius-xl);
+      border: 1px solid; cursor: pointer; font-family: inherit;
+      font-size: 13px; font-weight: 500; text-align: center; line-height: 1.3;
+      transition: opacity .15s, transform .1s;
+    }
+    .cat-btn:active { transform: scale(.96); }
+    .cat-btn svg { width: 24px; height: 24px; }
+    .cat-btn .ext { width: 11px; height: 11px; opacity: .45; }
+    .cat-btn.food    { background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.22); color: #fb923c; }
+    .cat-btn.train   { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.22); color: #60a5fa; }
+    .cat-btn.conbini { background: rgba(34,197,94,.08);  border-color: rgba(34,197,94,.22);  color: #4ade80; }
+    .cat-btn.toilet  { background: rgba(168,85,247,.08); border-color: rgba(168,85,247,.22); color: #c084fc; }
+
+    .gps-hint {
+      font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.65;
+    }
+    .gps-privacy {
+      font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.65; margin-top: auto;
+    }
+
+    /* Spin animation for loading */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; }
+
+    /* ============================================================
+       DEMO BOTTOM BANNER
+    ============================================================ */
+    #demo-banner {
+      position: sticky; bottom: 0; z-index: 10;
+      padding: 0 16px 16px;
+    }
+    .demo-banner-inner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: var(--radius-lg);
+      background: color-mix(in srgb, var(--warning) 8%, var(--bg));
+      border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
+      backdrop-filter: blur(8px); cursor: pointer;
+      transition: background .15s;
+    }
+    .demo-banner-inner:hover { background: color-mix(in srgb, var(--warning) 14%, var(--bg)); }
+    .demo-banner-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      background: var(--warning-glow); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
+    }
+    .demo-banner-icon svg { width: 15px; height: 15px; color: var(--warning); }
+    .demo-banner-title { font-size: 12px; font-weight: 600; color: var(--warning); }
+    .demo-banner-sub   { font-size: 11px; color: color-mix(in srgb, var(--warning) 65%, transparent); }
+
+    /* ============================================================
+       HIGHLIGHT (search)
+    ============================================================ */
+    mark {
+      background: var(--accent-glow);
+      color: var(--accent);
+      border-radius: 3px; padding: 0 2px;
+      font-style: normal;
+    }
+
+    /* ============================================================
+       LOADING SPLASH
+    ============================================================ */
+    #loading-splash {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px;
+    }
+    #loading-splash.gone { display: none; }
+    .splash-icon {
+      width: 52px; height: 52px; border-radius: var(--radius-lg);
+      background: var(--accent-glow); border: 1px solid var(--accent-border);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .splash-icon svg { width: 26px; height: 26px; color: var(--accent); }
+    #loading-splash p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 transition-colors duration-200 font-sans min-h-screen pb-20 select-none">
+<body>
 
-    <!-- Top Sticky Control Center -->
-    <header class="sticky top-0 z-40 bg-white/95 dark:bg-[#090d16]/95 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder shadow-sm">
-        <div class="max-w-md mx-auto px-4 py-3">
-            
-            <!-- Branding, Upload & Theme Toggle -->
-            <div class="flex items-center justify-between gap-2 mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">⚡</span>
-                    <div>
-                        <h1 class="text-lg font-bold leading-none tracking-tight">TripMH</h1>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400">ניהול שטח אופליין</span>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <!-- Reset Button -->
-                    <button onclick="confirmReset()" title="איפוס נתונים" class="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hit-target">
-                        🔄
-                    </button>
-                    <!-- Theme Toggle -->
-                    <button onclick="toggleTheme()" class="p-2 text-slate-500 dark:text-amber-400 bg-slate-100 dark:bg-slate-800 rounded-lg hit-target" id="themeBtn">
-                        🌙
-                    </button>
-                    <!-- CSV Upload -->
-                    <label class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer flex items-center justify-center font-bold hit-target text-sm transition-colors">
-                        ➕ טען קובץ
-                        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
-                    </label>
-                </div>
-            </div>
+<!-- Loading splash -->
+<div id="loading-splash">
+  <div class="splash-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <p>TripMH טוען...</p>
+</div>
 
-            <!-- Search Area -->
-            <div class="relative flex items-center">
-                <input type="text" id="omniSearch" oninput="handleSearch(this.value)" placeholder="חפש יעד, פעילות, טיפ או אזור..." class="w-full pl-10 pr-4 py-2 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white">
-                <span class="absolute left-3 text-slate-400">🔍</span>
-                <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute left-8 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hit-target">✕</button>
-            </div>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="app-header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div>
+          <div class="logo-title">TripMH</div>
+          <span class="logo-demo" id="demo-label" style="display:none">נתוני הדגמה</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="pill-counter" id="progress-pill" style="display:none">
+          <div class="dot"></div>
+          <span id="progress-text">0/0</span>
         </div>
 
-        <!-- Navigation Tabs -->
-        <nav class="max-w-md mx-auto px-2 flex justify-around border-t border-slate-200 dark:border-darkBorder bg-slate-50/50 dark:bg-[#131926]/50">
-            <button onclick="switchTab('itinerary')" id="tab-itinerary" class="py-3 px-2 flex flex-col items-center gap-1 border-b-2 border-transparent text-xs font-semibold text-slate-500 dark:text-slate-400 flex-1 transition-all">
-                <span class="text-lg">📍</span>
-                <span>מסלול</span>
-            </button>
-            <button onclick="switchTab('options')" id="tab-options" class="py-3 px-2 flex flex-col items-center gap-1 border-b-2 border-transparent text-xs font-semibold text-slate-500 dark:text-slate-400 flex-1 transition-all">
-                <span class="text-lg">⭐</span>
-                <span>אופציות</span>
-            </button>
-            <button onclick="switchTab('tips')" id="tab-tips" class="py-3 px-2 flex flex-col items-center gap-1 border-b-2 border-transparent text-xs font-semibold text-slate-500 dark:text-slate-400 flex-1 transition-all">
-                <span class="text-lg">💡</span>
-                <span>טיפים</span>
-            </button>
-            <button onclick="switchTab('around')" id="tab-around" class="py-3 px-2 flex flex-col items-center gap-1 border-b-2 border-transparent text-xs font-semibold text-slate-500 dark:text-slate-400 flex-1 transition-all">
-                <span class="text-lg">🗺️</span>
-                <span>סביבי</span>
-            </button>
-        </nav>
-    </header>
+        <button class="icon-btn" id="theme-btn" title="עבור למצב בהיר/כהה" aria-label="החלפת ערכת נושא">
+          <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
 
-    <!-- Main Content Area -->
-    <main class="max-w-md mx-auto px-4 mt-4" id="mainContent">
-        <!-- Render targets go here dynamically -->
-    </main>
+        <button class="icon-btn danger" id="clear-btn" title="נקה נתונים" aria-label="נקה נתונים" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
 
-    <!-- App Logic -->
-    <script>
-        // Core Application State (Initialized empty to handle any trip)
-        let state = {
-            theme: 'dark',
-            activeTab: 'itinerary',
-            searchFilter: '',
-            userLocation: null,
-            data: {
-                itinerary: [],
-                options: [],
-                tips: []
-            },
-            checkedItems: {}, 
-            expandedCards: {} 
-        };
+        <button class="upload-btn" id="upload-btn" title="העלה קובץ CSV" aria-label="העלה קובץ CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
 
-        // Initialize Application
-        function init() {
-            if (localStorage.getItem('theme')) {
-                state.theme = localStorage.getItem('theme');
-            } else {
-                state.theme = 'dark'; // High-stress contrast default configuration
-            }
-            applyTheme();
+    <!-- Search -->
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="search" id="search-input" placeholder="חיפוש — עיר, מקום, מילת מפתח..." autocomplete="off" />
+      <button class="search-clear" id="search-clear" aria-label="נקה חיפוש">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
 
-            try {
-                const storedData = localStorage.getItem('tripmh_data_custom');
-                const storedChecked = localStorage.getItem('tripmh_checked_custom');
-                
-                if (storedData) {
-                    state.data = JSON.parse(storedData);
-                } else {
-                    state.data = { itinerary: [], options: [], tips: [] };
-                }
+    <!-- Error banner -->
+    <div class="error-banner" id="error-banner" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p id="error-text"></p>
+      <button class="error-close" id="error-close" aria-label="סגור שגיאה">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
 
-                if (storedChecked) {
-                    state.checkedItems = JSON.parse(storedChecked);
-                }
-            } catch (e) {
-                console.error("שגיאה בטעינת הזיכרון המקומי. האפליקציה אותחלה כריקה.", e);
-                clearAppStorage();
-            }
+    <!-- Tab bar -->
+    <nav id="tab-bar" role="tablist" aria-label="ניווט לשוניות">
+      <button class="tab-btn active" data-tab="itinerary" role="tab" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        מסלול
+        <span class="tab-count" id="tab-count-itinerary"></span>
+      </button>
+      <button class="tab-btn" data-tab="options" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        אופציות
+        <span class="tab-count" id="tab-count-options"></span>
+      </button>
+      <button class="tab-btn" data-tab="tips" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+        טיפים
+        <span class="tab-count" id="tab-count-tips"></span>
+      </button>
+      <button class="tab-btn" data-tab="nearby" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10 10 10 0 0 1-10-10 10 10 0 0 1 10-10"/><path d="M12 2c-2.76 4.1-4 7.4-4 10s1.24 5.9 4 10c2.76-4.1 4-7.4 4-10s-1.24-5.9-4-10"/></svg>
+        סביבי
+        <span class="tab-count"></span>
+      </button>
+    </nav>
+  </header>
 
-            switchTab(state.activeTab);
+  <!-- CONTENT -->
+  <main id="tab-content">
+
+    <!-- ITINERARY -->
+    <div class="tab-panel active" id="panel-itinerary" role="tabpanel" aria-label="מסלול">
+      <div id="itinerary-content"></div>
+    </div>
+
+    <!-- OPTIONS -->
+    <div class="tab-panel" id="panel-options" role="tabpanel" aria-label="אופציות">
+      <div id="options-content"></div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="tab-panel" id="panel-tips" role="tabpanel" aria-label="טיפים">
+      <div id="tips-content"></div>
+    </div>
+
+    <!-- NEARBY (GPS) -->
+    <div class="tab-panel" id="panel-nearby" role="tabpanel" aria-label="סביבי">
+      <div id="tab-nearby" class="active">
+        <div class="nearby-hero">
+          <div class="nearby-hero-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <h2>סביבי — GPS מהיר</h2>
+          <p>לחצו על כפתור הלווין לאיתור מיקום מדויק, ואז בחרו קטגוריה לפתיחת מפה מיידית.</p>
+        </div>
+
+        <button class="gps-btn" id="gps-btn" aria-label="אתר מיקום GPS">
+          <svg id="gps-icon-locate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="gps-icon-spin" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <svg id="gps-icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          <span id="gps-btn-text">אתר מיקום GPS</span>
+        </button>
+
+        <div class="gps-error" id="gps-error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p id="gps-error-text"></p>
+        </div>
+
+        <div class="gps-coords" id="gps-coords">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="gps-coords-text"></span>
+        </div>
+
+        <div class="cat-grid disabled" id="cat-grid">
+          <button class="cat-btn food" data-query="restaurants near me" aria-label="מסעדות קרובות">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+            מסעדות קרובות
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+          <button class="cat-btn train" data-query="train station" aria-label="תחנת רכבת">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><circle cx="8.5" cy="16.5" r="1.5"/><circle cx="15.5" cy="16.5" r="1.5"/><path d="M8.5 18 6 21"/><path d="M15.5 18 18 21"/></svg>
+            תחנת רכבת
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+          <button class="cat-btn conbini" data-query="7-Eleven FamilyMart Lawson convenience store" aria-label="קונביני קרוב">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Conbini קרוב
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+          <button class="cat-btn toilet" data-query="public toilet restroom" aria-label="שירותים ציבוריים">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="2"/><circle cx="15" cy="7" r="2"/><path d="M5 22V12.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2V22"/><path d="M12 10.5V22"/></svg>
+            שירותים ציבוריים
+            <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+        </div>
+
+        <p class="gps-hint" id="gps-hint">יש לאתר מיקום תחילה כדי להפעיל את הכפתורים</p>
+
+        <p class="gps-privacy">המיקום נשאר במכשירכם בל��ד ואינו נשלח לשרת.<br>לחיצה על כפתור פותחת את Google Maps בלבד.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Demo bottom banner -->
+  <div id="demo-banner" style="display:none">
+    <div class="demo-banner-inner" id="demo-banner-inner">
+      <div class="demo-banner-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div>
+        <div class="demo-banner-title">מוצגים נתוני הדגמה</div>
+        <div class="demo-banner-sub">לחצו להעלאת קובץ CSV אישי</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- Hidden file input -->
+<input type="file" id="file-input" accept=".csv,text/csv" multiple style="display:none" aria-label="בחר קובץ CSV" />
+
+<script>
+/* ================================================================
+   TRIPMH — Pure Vanilla JS, zero dependencies
+   All logic self-contained in this file
+================================================================ */
+
+'use strict';
+
+// ---- LocalStorage keys ----
+const LS_COMPLETED = 'tripmh_completed_v1';
+const LS_DARK      = 'tripmh_dark_v1';
+const LS_DATA      = 'tripmh_data_v1';
+const LS_TAB       = 'tripmh_tab_v1';
+
+// ---- App state ----
+let state = {
+  activeTab: 'itinerary',
+  searchQuery: '',
+  isDark: true,
+  isDemo: false,
+  data: null,          // { itinerary, options, tips, errors }
+  completedIds: new Set(),
+  gpsCoords: null,     // { lat, lng, accuracy }
+};
+
+// ================================================================
+//   UTILITIES
+// ================================================================
+
+function safeGet(key, fallback) {
+  try { const v = localStorage.getItem(key); return v !== null ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function safeSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+let _idCounter = 0;
+function genId() { return 'item_' + Date.now() + '_' + (++_idCounter); }
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function highlight(text, query) {
+  if (!query || !text) return esc(text);
+  const safe = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return esc(text).replace(new RegExp('(' + safe.replace(/&amp;/g,'&').replace(/&lt;/g,'<') + ')', 'gi'),
+    '<mark>$1</mark>');
+}
+
+function stripUrls(text) {
+  return (text || '').replace(/https?:\/\/[^\s,\u0000-\u001F"<>[\]`{|}\\^]+/gi,'').replace(/\s{2,}/g,' ').trim();
+}
+
+function extractLinks(text) {
+  const regex = /https?:\/\/[^\s,\u0000-\u001F"<>[\]`{|}\\^]+/gi;
+  const matches = text.match(regex) || [];
+  return matches.map(url => {
+    let label = 'פתח קישור';
+    if (url.includes('play.google') || url.includes('apps.apple')) label = 'הורד אפליקציה';
+    else if (url.includes('maps.google') || url.includes('goo.gl/maps')) label = 'פתח במפות';
+    else if (url.includes('chabad')) label = 'אתר חב"ד';
+    else if (url.includes('smartex') || url.includes('smart-ex')) label = 'SmartEX';
+    return { label, url };
+  });
+}
+
+function buildMapUrl(rawUrl, placeName, address) {
+  if (rawUrl) {
+    if (/\/0$/.test(rawUrl) || /\/$/.test(rawUrl)) {
+      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((placeName + ' ' + address).trim());
+    }
+    if (rawUrl.startsWith('http')) return rawUrl;
+  }
+  if (placeName || address) {
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((placeName + ' ' + address).trim());
+  }
+  return '';
+}
+
+function detectIcon(text) {
+  const t = (text || '').toLowerCase();
+  if (t.match(/מסעד|אוכל|food|ramen|sushi|noodle/)) return '🍜';
+  if (t.match(/מוזיאון|museum/)) return '🏛️';
+  if (t.match(/מקדש|shrine|temple|jinja|torii/)) return '⛩️';
+  if (t.match(/פארק|גן|park|garden/)) return '🌿';
+  if (t.match(/קניות|שוק|market|mall|shop/)) return '🛍️';
+  if (t.match(/מלון|hotel|hostel|inn/)) return '🏨';
+  if (t.match(/תחנה|station|train|shinkansen|bullet/)) return '🚆';
+  if (t.match(/טיסה|flight|airport|narita|haneda|kansai/)) return '✈️';
+  if (t.match(/הר|mountain|fuji|yama/)) return '🗻';
+  if (t.match(/ים|חוף|beach|sea|ocean/)) return '🏖️';
+  if (t.match(/טיול|הליכה|hike|trail|trek/)) return '🥾';
+  if (t.match(/קפה|cafe|coffee|kissaten/)) return '☕';
+  if (t.match(/בר|bar|sake|izakaya/)) return '🍶';
+  if (t.match(/שבת|shabbat|shabbos/)) return '🕯️';
+  if (t.match(/כשר|kosher/)) return '✡️';
+  if (t.match(/חב"ד|chabad/)) return '🕍';
+  if (t.match(/אמנות|art|gallery|galler/)) return '🎨';
+  if (t.match(/אנימה|anime|manga|otaku/)) return '🎌';
+  if (t.match(/אונסן|onsen|spa|bath|sento/)) return '♨️';
+  return '📍';
+}
+
+// ================================================================
+//   CSV PARSER
+// ================================================================
+
+function parseCSVRaw(text) {
+  const rows = [];
+  let i = 0, n = text.length;
+  while (i < n) {
+    const row = [];
+    while (i < n) {
+      let field = '';
+      if (text[i] === '"') {
+        i++;
+        while (i < n) {
+          if (text[i] === '"') {
+            if (text[i+1] === '"') { field += '"'; i += 2; }
+            else { i++; break; }
+          } else { field += text[i++]; }
         }
+      } else {
+        while (i < n && text[i] !== ',' && text[i] !== '\n' && text[i] !== '\r') field += text[i++];
+      }
+      row.push(field.trim());
+      if (i < n && text[i] === ',') i++; else break;
+    }
+    if (i < n && text[i] === '\r') i++;
+    if (i < n && text[i] === '\n') i++;
+    if (row.length > 0 && !(row.length === 1 && row[0] === '')) rows.push(row);
+  }
+  return rows;
+}
 
-        // Persist App Data
-        function saveDataToStorage() {
-            try {
-                localStorage.setItem('tripmh_data_custom', JSON.stringify(state.data));
-            } catch (e) {
-                console.error("שגיאה בשמירת נתוני האפליקציה", e);
-            }
+function normalizeHeader(h) { return h.trim().toLowerCase().replace(/\s+/g,' '); }
+
+function rowsToObjects(rows) {
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(normalizeHeader);
+  return rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+    return obj;
+  });
+}
+
+function col(obj) {
+  const keys = Array.prototype.slice.call(arguments, 1);
+  for (const key of keys) {
+    const found = Object.keys(obj).find(k => k.includes(key.toLowerCase()));
+    if (found && obj[found]) return obj[found].trim();
+  }
+  return '';
+}
+
+function classifyRow(obj) {
+  const keys = Object.keys(obj).map(k => k.toLowerCase());
+  const values = Object.values(obj).join(' ').toLowerCase();
+  if (keys.some(k => k.includes('ריכוז') || k.includes('קטגוריה') || k.includes('category') || k.includes('tip'))) return 'tip';
+  const dayVal = col(obj, 'יום', 'day', 'תאריך', 'date');
+  if (dayVal.includes('אופציה') || dayVal.includes('option')) return 'option';
+  if (values.includes('אופציה') || values.includes('optional')) return 'option';
+  if (!dayVal || dayVal === '' || dayVal === '-') {
+    const hasTimeOrPlace = col(obj, 'שעה', 'time', 'טווח שעות', 'שם המקום', 'place');
+    return hasTimeOrPlace ? 'option' : 'tip';
+  }
+  return 'itinerary';
+}
+
+function parseSingleCSV(text) {
+  const errors = [], items = [];
+  try {
+    const rows = parseCSVRaw(text);
+    if (rows.length < 2) { errors.push('הקובץ ריק או לא תקין'); return { items, errors }; }
+    const objects = rowsToObjects(rows);
+    objects.forEach((obj, idx) => {
+      try {
+        const type = classifyRow(obj);
+        if (type === 'tip') {
+          const category = col(obj, 'קטגוריה', 'category', 'נושא', 'topic') || 'כללי';
+          const title = col(obj, 'כותרת', 'title', 'ריכוז') || col(obj, 'שם', 'name') || ('טיפ ' + (idx+1));
+          const content = col(obj, 'תוכן', 'content', 'הסבר', 'פרטים', 'description', 'details', 'הנחיות') || Object.values(obj).filter(Boolean).join(' | ');
+          items.push({ id: genId(), type: 'tip', category, title, content, links: extractLinks(content), rawRow: obj });
+        } else {
+          const day = col(obj, 'יום', 'day', 'תאריך', 'date');
+          const timeRange = col(obj, 'שעות', 'טווח שעות', 'זמן', 'time', 'שעה');
+          const placeName = col(obj, 'שם המקום', 'מקום', 'place', 'name', 'יעד', 'destination') || ('יעד ' + (idx+1));
+          const area = col(obj, 'אזור', 'עיר', 'area', 'city', 'region', 'מיקום');
+          const description = col(obj, 'תיאור', 'description', 'הסבר', 'פרטים', 'details', 'הערות');
+          const address = col(obj, 'כתובת', 'address');
+          const rawMapUrl = col(obj, 'קישור', 'link', 'map', 'מפה', 'url', 'maps');
+          const mapUrl = buildMapUrl(rawMapUrl, placeName, address);
+          const requiresBooking = /שריון|book|reserv/i.test(Object.values(obj).join(' '));
+          const icon = detectIcon(placeName + ' ' + description + ' ' + area);
+          items.push({ id: genId(), type, day, timeRange, placeName, area, description, address, mapUrl, requiresBooking, icon, rawRow: obj });
         }
-
-        function saveCheckedToStorage() {
-            try {
-                localStorage.setItem('tripmh_checked_custom', JSON.stringify(state.checkedItems));
-            } catch (e) {
-                console.error("שגיאה בשמירת מצב סימון", e);
-            }
-        }
-
-        // Theme management
-        function toggleTheme() {
-            state.theme = state.theme === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', state.theme);
-            applyTheme();
-        }
-
-        function applyTheme() {
-            const html = document.documentElement;
-            const themeBtn = document.getElementById('themeBtn');
-            if (state.theme === 'dark') {
-                html.classList.add('dark');
-                themeBtn.innerHTML = '☀️';
-            } else {
-                html.classList.remove('dark');
-                themeBtn.innerHTML = '🌙';
-            }
-        }
-
-        // Clean-Up & Repair broken map links (Self-Healing Engine)
-        function sanitizeMapLink(placeName, rawLink) {
-            if (!rawLink || typeof rawLink !== 'string') {
-                return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`;
-            }
-            let clean = rawLink.trim();
-            if (clean.endsWith('/0')) {
-                clean = clean.substring(0, clean.length - 2);
-            }
-            if (clean.toLowerCase() === 'javascript:void(0)' || clean === '#' || clean.length < 8) {
-                return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName)}`;
-            }
-            return clean;
-        }
-
-        // Parsing links inside textual tips to extract wide call-to-action download buttons
-        function formatTextWithLinks(text) {
-            if (!text) return { text: '', buttons: '' };
-            const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-            
-            const matches = text.match(urlPattern);
-            let cleanedText = text;
-            let actionButtonsHTML = '';
-
-            if (matches) {
-                matches.forEach(url => {
-                    cleanedText = cleanedText.replace(url, `<a href="${url}" target="_blank" class="text-blue-500 dark:text-blue-400 underline break-all">${url}</a>`);
-                    
-                    let buttonLabel = "🔗 פתח קישור";
-                    if (url.includes('apple.com') || url.includes('play.google') || url.includes('app')) {
-                        buttonLabel = "📥 פתח קישור הורדה";
-                    }
-                    actionButtonsHTML += `
-                        <a href="${url}" target="_blank" onclick="event.stopPropagation();" class="mt-2 block w-full text-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold py-2 px-4 rounded-lg text-sm border border-slate-200 dark:border-slate-700 transition-all hit-target">
-                            ${buttonLabel}
-                        </a>
-                    `;
-                });
-            }
-            return { text: cleanedText, buttons: actionButtonsHTML };
-        }
-
-        // Dynamic search management
-        function handleSearch(val) {
-            state.searchFilter = val.toLowerCase().trim();
-            const clearBtn = document.getElementById('clearSearchBtn');
-            if (val.length > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
-            renderActiveTab();
-        }
-
-        function clearSearch() {
-            const searchInput = document.getElementById('omniSearch');
-            searchInput.value = '';
-            state.searchFilter = '';
-            document.getElementById('clearSearchBtn').classList.add('hidden');
-            renderActiveTab();
-        }
-
-        // Tab routing switcher
-        function switchTab(tabId) {
-            state.activeTab = tabId;
-            
-            const tabs = ['itinerary', 'options', 'tips', 'around'];
-            tabs.forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                if (t === tabId) {
-                    el.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
-                    el.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
-                } else {
-                    el.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
-                    el.classList.add('border-transparent', 'text-slate-500', 'dark:text-slate-400');
-                }
-            });
-
-            renderActiveTab();
-        }
-
-        // Toggle card collapse / expand state
-        function toggleCardExpand(cardId) {
-            state.expandedCards[cardId] = !state.expandedCards[cardId];
-            const content = document.getElementById(`desc-${cardId}`);
-            const chevron = document.getElementById(`chevron-${cardId}`);
-            
-            if (content) {
-                if (state.expandedCards[cardId]) {
-                    content.classList.add('expanded');
-                    if (chevron) chevron.innerText = '▲';
-                } else {
-                    content.classList.remove('expanded');
-                    if (chevron) chevron.innerText = '▼';
-                }
-            }
-        }
-
-        // Handle item check / uncheck state
-        function toggleCheckItem(id, event) {
-            event.stopPropagation(); 
-            state.checkedItems[id] = !state.checkedItems[id];
-            saveCheckedToStorage();
-            
-            const card = document.getElementById(`card-${id}`);
-            const checkIcon = document.getElementById(`check-icon-${id}`);
-            
-            if (state.checkedItems[id]) {
-                card.classList.add('opacity-50', 'border-emerald-500', 'dark:border-emerald-800');
-                if (checkIcon) checkIcon.innerHTML = '🟢';
-            } else {
-                card.classList.remove('opacity-50', 'border-emerald-500', 'dark:border-emerald-800');
-                if (checkIcon) checkIcon.innerHTML = '⚪';
-            }
-        }
-
-        // Robust CSV Parser
-        function robustCSVParse(text) {
-            let lines = [];
-            let row = [""];
-            let inQuotes = false;
-            for (let i = 0; i < text.length; i++) {
-                let c = text[i];
-                let next = text[i+1];
-                if (c === '"') {
-                    if (inQuotes && next === '"') {
-                        row[row.length - 1] += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (c === ',' && !inQuotes) {
-                    row.push('');
-                } else if ((c === '\r' || c === '\n') && !inQuotes) {
-                    if (c === '\r' && next === '\n') { i++; }
-                    lines.push(row);
-                    row = [''];
-                } else {
-                    row[row.length - 1] += c;
-                }
-            }
-            if (row.length > 1 || row[0] !== '') {
-                lines.push(row);
-            }
-            return lines;
-        }
-
-        // Semantic analysis mapping of CSV headers & properties
-        function processAndLoadCSV(text) {
-            const parsedLines = robustCSVParse(text);
-            if (parsedLines.length < 2) return;
-
-            const headers = parsedLines[0].map(h => h.trim().toLowerCase());
-            
-            let itineraryList = [];
-            let optionsList = [];
-            let tipsList = [];
-
-            for (let i = 1; i < parsedLines.length; i++) {
-                const row = parsedLines[i];
-                if (row.length === 0 || (row.length === 1 && row[0] === "")) continue;
-
-                let entry = {};
-                headers.forEach((header, idx) => {
-                    entry[header] = row[idx] ? row[idx].trim() : '';
-                });
-
-                const entryId = 'csv_' + i + '_' + Date.now().toString().slice(-4);
-
-                // Semantic Heuristics Detection
-                const isTip = headers.some(h => h.includes('הנחיה') || h.includes('קטגוריה') || h.includes('טיפ') || h.includes('ריכוז'));
-                const dayValue = entry['יום'] || entry['day'] || '';
-                const isOption = dayValue.includes('אופציה') || (!dayValue && (entry['יעד'] || entry['פעילות'] || entry['שם המקום']) && !entry['שעה']);
-
-                if (isTip) {
-                    tipsList.push({
-                        id: entryId,
-                        category: entry['קטגוריה'] || entry['נושא'] || 'כללי',
-                        title: entry['כותרת'] || entry['הנחיה'] || entry['ריכוז הנחיות'] || 'ללא כותרת',
-                        desc: entry['תוכן'] || entry['פירוט'] || entry['תיאור'] || '',
-                        link: entry['קישור'] || entry['לינק'] || ''
-                    });
-                } else if (isOption) {
-                    optionsList.push({
-                        id: entryId,
-                        place: entry['יעד'] || entry['שם המקום'] || entry['פעילות'] || 'פעילות ללא שם',
-                        area: entry['אזור'] || entry['מיקום'] || '',
-                        desc: entry['הערות'] || entry['תיאור'] || '',
-                        link: entry['קישור'] || entry['קישור לניווט'] || entry['לינק'] || ''
-                    });
-                } else {
-                    itineraryList.push({
-                        id: entryId,
-                        day: dayValue || 'מסלול כללי',
-                        time: entry['שעה'] || entry['זמן'] || '--:--',
-                        place: entry['יעד'] || entry['שם המקום'] || entry['פעילות'] || 'פעילות ללא שם',
-                        area: entry['אזור'] || entry['מיקום'] || '',
-                        booking: entry['שריון'] || entry['דורש שריון'] || 'לא',
-                        desc: entry['הערות'] || entry['תיאור'] || '',
-                        link: entry['קישור'] || entry['קישור לניווט'] || entry['לינק'] || ''
-                    });
-                }
-            }
-
-            if (itineraryList.length > 0) state.data.itinerary = itineraryList;
-            if (optionsList.length > 0) state.data.options = optionsList;
-            if (tipsList.length > 0) state.data.tips = tipsList;
-
-            saveDataToStorage();
-            switchTab(state.activeTab);
-            alert("קובץ הנתונים נקרא ומוין בהצלחה ללשוניות!");
-        }
-
-        function handleCSVUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    processAndLoadCSV(e.target.result);
-                } catch (error) {
-                    alert("אירעה שגיאה בעיבוד קובץ ה-CSV. אנא וודא שהקובץ תקין.");
-                }
-            };
-            reader.readAsText(file, "UTF-8");
-        }
-
-        // Render functions with Empty State Support
-        function renderActiveTab() {
-            const container = document.getElementById('mainContent');
-            container.innerHTML = '';
-
-            switch (state.activeTab) {
-                case 'itinerary':
-                    renderItinerary(container);
-                    break;
-                case 'options':
-                    renderOptions(container);
-                    break;
-                case 'tips':
-                    renderTips(container);
-                    break;
-                case 'around':
-                    renderAroundMe(container);
-                    break;
-            }
-        }
-
-        // Helper to output instructions when no data exists
-        function renderEmptyState(container, tabName) {
-            container.innerHTML = `
-                <div class="bg-white dark:bg-darkCard rounded-2xl p-6 border border-slate-200 dark:border-darkBorder shadow-sm text-center my-6">
-                    <span class="text-4xl block mb-2">📁</span>
-                    <h3 class="text-base font-bold mb-2">אין נתוני ${tabName} מוטענים</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                        האפליקציה פועלת במצב אופליין מלא. לחץ על כפתור <b>➕ טען קובץ</b> למעלה והעלה קובץ CSV של הטיול שלך.
-                    </p>
-                    <div class="text-right text-xs bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300">
-                        <span class="font-bold block mb-1">💡 עמודות מומלצות ב-CSV:</span>
-                        <p class="mb-1"><b>מסלול ואופציות:</b> יום, שעה, יעד, אזור, הערות, קישור לניווט, שריון</p>
-                        <p><b>טיפים:</b> קטגוריה, כותרת, תוכן, קישור</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 📍 Render Itinerary
-        function renderItinerary(container) {
-            if (state.data.itinerary.length === 0) {
-                renderEmptyState(container, "מסלול");
-                return;
-            }
-
-            const search = state.searchFilter;
-            let filtered = state.data.itinerary.filter(item => {
-                return !search || 
-                    item.place.toLowerCase().includes(search) || 
-                    item.area.toLowerCase().includes(search) || 
-                    item.desc.toLowerCase().includes(search) ||
-                    item.day.toLowerCase().includes(search);
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-slate-400">לא נמצאו יעדים התואמים את החיפוש.</div>`;
-                return;
-            }
-
-            let daysMap = {};
-            filtered.forEach(item => {
-                if (!daysMap[item.day]) daysMap[item.day] = [];
-                daysMap[item.day].push(item);
-            });
-
-            Object.keys(daysMap).forEach(dayName => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = "sticky-day bg-slate-50/90 dark:bg-darkBg/90 backdrop-blur-sm py-2 px-1 text-sm font-bold text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-darkBorder mb-3";
-                dayHeader.innerHTML = `🗓️ ${dayName}`;
-                container.appendChild(dayHeader);
-
-                daysMap[dayName].forEach(item => {
-                    const isChecked = state.checkedItems[item.id] || false;
-                    const cleanLink = sanitizeMapLink(item.place, item.link);
-                    const isBookingRequired = item.booking && (item.booking.includes('כן') || item.booking.toLowerCase() === 'yes' || item.booking.includes('שריון'));
-                    
-                    const card = document.createElement('div');
-                    card.id = `card-${item.id}`;
-                    card.className = `mb-3 p-3 bg-white dark:bg-darkCard rounded-xl border ${isChecked ? 'opacity-50 border-emerald-500 dark:border-emerald-800' : 'border-slate-200 dark:border-slate-800'} shadow-sm transition-all cursor-pointer`;
-                    card.onclick = () => toggleCardExpand(item.id);
-
-                    card.innerHTML = `
-                        <div class="flex items-start justify-between gap-3">
-                            <button onclick="toggleCheckItem('${item.id}', event)" class="hit-target flex items-center justify-center text-xl mt-0.5">
-                                <span id="check-icon-${item.id}">${isChecked ? '🟢' : '⚪'}</span>
-                            </button>
-
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 flex-wrap mb-1">
-                                    <span class="text-xs font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-600 dark:text-slate-300">${item.time}</span>
-                                    ${item.area ? `<span class="text-xs text-slate-400">📍 ${item.area}</span>` : ''}
-                                    ${isBookingRequired ? `<span class="text-[10px] bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 font-bold px-1.5 py-0.5 rounded-md">🚨 דורש שריון</span>` : ''}
-                                </div>
-                                <h3 class="text-base font-bold">${item.place}</h3>
-                            </div>
-
-                            <span id="chevron-${item.id}" class="text-xs text-slate-400 mt-1.5">${state.expandedCards[item.id] ? '▲' : '▼'}</span>
-                        </div>
-
-                        <div id="desc-${item.id}" class="accordion-content mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-sm ${state.expandedCards[item.id] ? 'expanded' : ''}">
-                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">${item.desc || 'אין תיאור מורחב עבור יעד זה.'}</p>
-                            <a href="${cleanLink}" target="_blank" onclick="event.stopPropagation();" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm hit-target">
-                                🗺️ נווט באפליקציית מפות
-                            </a>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            });
-        }
-
-        // ⭐ Render Options
-        function renderOptions(container) {
-            if (state.data.options.length === 0) {
-                renderEmptyState(container, "אופציות");
-                return;
-            }
-
-            const search = state.searchFilter;
-            let filtered = state.data.options.filter(item => {
-                return !search || 
-                    item.place.toLowerCase().includes(search) || 
-                    item.area.toLowerCase().includes(search) || 
-                    item.desc.toLowerCase().includes(search);
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-slate-400">אין פריטי אופציה התואמים את החיפוש.</div>`;
-                return;
-            }
-
-            filtered.forEach(item => {
-                const isChecked = state.checkedItems[item.id] || false;
-                const cleanLink = sanitizeMapLink(item.place, item.link);
-
-                const card = document.createElement('div');
-                card.id = `card-${item.id}`;
-                card.className = `mb-3 p-3 bg-white dark:bg-darkCard rounded-xl border ${isChecked ? 'opacity-50 border-emerald-500 dark:border-emerald-800' : 'border-slate-200 dark:border-slate-800'} shadow-sm transition-all cursor-pointer`;
-                card.onclick = () => toggleCardExpand(item.id);
-
-                card.innerHTML = `
-                    <div class="flex items-start justify-between gap-3">
-                        <button onclick="toggleCheckItem('${item.id}', event)" class="hit-target flex items-center justify-center text-xl mt-0.5">
-                            <span id="check-icon-${item.id}">${isChecked ? '🟢' : '⚪'}</span>
-                        </button>
-
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xs text-amber-500 font-bold">⭐ אפשרות חלופית</span>
-                                ${item.area ? `<span class="text-xs text-slate-400">📍 ${item.area}</span>` : ''}
-                            </div>
-                            <h3 class="text-base font-bold">${item.place}</h3>
-                        </div>
-
-                        <span id="chevron-${item.id}" class="text-xs text-slate-400 mt-1.5">${state.expandedCards[item.id] ? '▲' : '▼'}</span>
-                    </div>
-
-                    <div id="desc-${item.id}" class="accordion-content mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-sm ${state.expandedCards[item.id] ? 'expanded' : ''}">
-                        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">${item.desc || 'אין תיאור זמין.'}</p>
-                        <a href="${cleanLink}" target="_blank" onclick="event.stopPropagation();" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm hit-target">
-                            🗺️ נווט באפליקציית מפות
-                        </a>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // 💡 Render Tips
-        function renderTips(container) {
-            if (state.data.tips.length === 0) {
-                renderEmptyState(container, "טיפים");
-                return;
-            }
-
-            const search = state.searchFilter;
-            let filtered = state.data.tips.filter(item => {
-                return !search || 
-                    item.category.toLowerCase().includes(search) || 
-                    item.title.toLowerCase().includes(search) || 
-                    item.desc.toLowerCase().includes(search);
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-slate-400">אין טיפים התואמים את החיפוש.</div>`;
-                return;
-            }
-
-            let categoryMap = {};
-            filtered.forEach(item => {
-                if (!categoryMap[item.category]) categoryMap[item.category] = [];
-                categoryMap[item.category].push(item);
-            });
-
-            Object.keys(categoryMap).forEach(cat => {
-                const header = document.createElement('div');
-                header.className = "py-2 px-1 text-sm font-bold text-indigo-500 dark:text-indigo-400 border-b border-slate-200 dark:border-darkBorder mb-3";
-                header.innerText = `💡 ${cat}`;
-                container.appendChild(header);
-
-                categoryMap[cat].forEach(item => {
-                    const isChecked = state.checkedItems[item.id] || false;
-                    const parsedData = formatTextWithLinks(item.desc);
-
-                    const card = document.createElement('div');
-                    card.id = `card-${item.id}`;
-                    card.className = `mb-3 p-3 bg-white dark:bg-darkCard rounded-xl border ${isChecked ? 'opacity-50 border-emerald-500 dark:border-emerald-800' : 'border-slate-200 dark:border-slate-800'} shadow-sm transition-all cursor-pointer`;
-                    card.onclick = () => toggleCardExpand(item.id);
-
-                    card.innerHTML = `
-                        <div class="flex items-start justify-between gap-3">
-                            <button onclick="toggleCheckItem('${item.id}', event)" class="hit-target flex items-center justify-center text-xl mt-0.5">
-                                <span id="check-icon-${item.id}">${isChecked ? '🟢' : '⚪'}</span>
-                            </button>
-
-                            <div class="flex-1">
-                                <h3 class="text-sm font-bold mt-1.5 leading-snug">${item.title}</h3>
-                            </div>
-
-                            <span id="chevron-${item.id}" class="text-xs text-slate-400 mt-2">${state.expandedCards[item.id] ? '▲' : '▼'}</span>
-                        </div>
-
-                        <div id="desc-${item.id}" class="accordion-content mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-sm ${state.expandedCards[item.id] ? 'expanded' : ''}">
-                            <div class="text-slate-600 dark:text-slate-300 leading-relaxed text-xs space-y-2">
-                                <p>${parsedData.text}</p>
-                                ${parsedData.buttons}
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            });
-        }
-
-        // 🗺️ Render GPS Panel
-        function renderAroundMe(container) {
-            container.innerHTML = `
-                <div class="bg-white dark:bg-darkCard rounded-2xl p-5 border border-slate-200 dark:border-darkBorder shadow-sm text-center mb-4">
-                    <span class="text-4xl block mb-2">📡</span>
-                    <h2 class="text-lg font-bold mb-1">רשת ניווט סריקה מהירה סביבי</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">איכון מהיר ללא הקלדה במצבי לחץ או חיפוש פתרון מיידי בשטח.</p>
-                    
-                    <button onclick="triggerGPS()" id="gpsBtn" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all hit-target shadow-md">
-                        🗺️ הפעל איכון לווייני GPS
-                    </button>
-                    
-                    <div id="gpsCoords" class="mt-2 text-xs text-slate-400 hidden"></div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3" id="geoGrid">
-                    <button onclick="openMapQuery('מסעדות')" class="geo-btn opacity-60 flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center hit-target transition-all">
-                        <span class="text-2xl mb-1">🍜</span>
-                        <span class="text-xs font-bold">מסעדות בסביבה</span>
-                    </button>
-                    
-                    <button onclick="openMapQuery('תחנת רכבת')" class="geo-btn opacity-60 flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center hit-target transition-all">
-                        <span class="text-2xl mb-1">🚆</span>
-                        <span class="text-xs font-bold">תחנת רכבת</span>
-                    </button>
-
-                    <button onclick="openMapQuery('conbini')" class="geo-btn opacity-60 flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center hit-target transition-all">
-                        <span class="text-2xl mb-1">🏪</span>
-                        <span class="text-xs font-bold">חנות נוחות</span>
-                    </button>
-
-                    <button onclick="openMapQuery('שירותים ציבוריים')" class="geo-btn opacity-60 flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center hit-target transition-all">
-                        <span class="text-2xl mb-1">🚻</span>
-                        <span class="text-xs font-bold">שירותים ציבוריים</span>
-                    </button>
-                </div>
-            `;
-        }
-
-        function triggerGPS() {
-            const gpsBtn = document.getElementById('gpsBtn');
-            const gpsCoords = document.getElementById('gpsCoords');
-            
-            gpsBtn.innerHTML = '🔄 מאכן מיקום מדויק...';
-            gpsBtn.classList.add('animate-pulse');
-
-            if (!navigator.geolocation) {
-                alert("המכשיר אינו תומך באיכון GPS.");
-                resetGPSBtn();
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    state.userLocation = {
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude
-                    };
-                    
-                    gpsCoords.classList.remove('hidden');
-                    gpsCoords.innerText = `קואורדינטות: ${state.userLocation.lat.toFixed(5)}, ${state.userLocation.lon.toFixed(5)}`;
-                    
-                    const geoButtons = document.querySelectorAll('.geo-btn');
-                    geoButtons.forEach(btn => {
-                        btn.classList.remove('opacity-60');
-                        btn.classList.add('border-emerald-500/40', 'bg-emerald-50/10');
-                    });
-                    
-                    gpsBtn.innerHTML = '🟢 מיקום מאוכן ומסונכרן';
-                    gpsBtn.classList.remove('animate-pulse');
-                    gpsBtn.classList.remove('bg-emerald-600');
-                    gpsBtn.classList.add('bg-slate-700');
-                },
-                (error) => {
-                    alert("לא ניתן היה לאכן מיקום מדויק. האפליקציה תבצע חיפוש כללי סביב המיקום הנוכחי שלך במפות.");
-                    const geoButtons = document.querySelectorAll('.geo-btn');
-                    geoButtons.forEach(btn => {
-                        btn.classList.remove('opacity-60');
-                    });
-                    resetGPSBtn();
-                },
-                { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
-            );
-        }
-
-        function resetGPSBtn() {
-            const gpsBtn = document.getElementById('gpsBtn');
-            if (gpsBtn) {
-                gpsBtn.innerHTML = '🗺️ הפעל איכון לווייני GPS';
-                gpsBtn.classList.remove('animate-pulse');
-            }
-        }
-
-        function openMapQuery(keyword) {
-            let url = '';
-            if (state.userLocation) {
-                url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}&query_place_id=${state.userLocation.lat},${state.userLocation.lon}`;
-            } else {
-                url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(keyword)}`;
-            }
-            window.open(url, '_blank');
-        }
-
-        function confirmReset() {
-            if (confirm("האם ברצונך לאפס את האפליקציה ולמחוק את כל הנתונים השמורים?")) {
-                clearAppStorage();
-            }
-        }
-
-        function clearAppStorage() {
-            localStorage.removeItem('tripmh_data_custom');
-            localStorage.removeItem('tripmh_checked_custom');
-            state.checkedItems = {};
-            state.expandedCards = {};
-            state.data = { itinerary: [], options: [], tips: [] };
-            renderActiveTab();
-            alert("כל הנתונים נמחקו. המערכת מוכנה לקבלת קובץ חדש.");
-        }
-
-        window.onload = init;
-    </script>
+      } catch(e) { errors.push('שורה ' + (idx+2) + ': ' + String(e)); }
+    });
+  } catch(e) { errors.push('שגיאה בפענוח: ' + String(e)); }
+  return { items, errors };
+}
+
+function parseCSVFiles(files) {
+  const result = { itinerary: [], options: [], tips: [], errors: [] };
+  files.forEach(f => {
+    const { items, errors } = parseSingleCSV(f.content);
+    result.errors.push(...errors.map(e => '[' + f.name + '] ' + e));
+    items.forEach(item => {
+      if (item.type === 'itinerary') result.itinerary.push(item);
+      else if (item.type === 'option') result.options.push(item);
+      else if (item.type === 'tip') result.tips.push(item);
+    });
+  });
+  result.itinerary.sort((a,b) => (a.day||a.date||'').localeCompare(b.day||b.date||'', 'he'));
+  return result;
+}
+
+// ================================================================
+//   SAMPLE DATA
+// ================================================================
+
+function getSampleData() {
+  return {
+    itinerary: [
+      { id:'demo_1', type:'itinerary', day:'יום שני • 14/10/2026', timeRange:'09:00–11:30', placeName:'מקדש פושימי אינארי', area:'קיוטו', description:'מקדש שינטו מפורסם עם אלפי שערי טוריי כתומים. הכניסה חופשית, מומלץ להגיע מוקדם.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Shrine+Kyoto', requiresBooking:false, icon:'⛩️', rawRow:{} },
+      { id:'demo_2', type:'itinerary', day:'יום שני • 14/10/2026', timeRange:'13:00–15:00', placeName:'שוק ניישיקי', area:'קיוטו', description:'שוק האוכל המסורתי של קיוטו — "המטבח של קיוטו". דגים, חמוצים, טופו ועוד.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto', requiresBooking:false, icon:'🛍️', rawRow:{} },
+      { id:'demo_3', type:'itinerary', day:'יום שלישי • 15/10/2026', timeRange:'10:00–12:00', placeName:'ארמון הקיסר', area:'טוקיו', description:'הארמון הקיסרי של יפן עם הגנים הציבוריים המדהימים.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Imperial+Palace+Tokyo', requiresBooking:false, icon:'🏛️', rawRow:{} },
+      { id:'demo_4', type:'itinerary', day:'יום שלישי • 15/10/2026', timeRange:'19:00–21:00', placeName:"שכונת שינג'וקו", area:'טוקיו', description:'אחת מהשכונות השוקקות ביותר — קניות, אוכל ובידור. מומלץ לשריין מקום במסעדה.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Shinjuku+Tokyo', requiresBooking:true, icon:'🍜', rawRow:{} },
+      { id:'demo_5', type:'itinerary', day:'יום רביעי • 16/10/2026', timeRange:'כל היום', placeName:"הר פוג'י", area:"פוג'י — יאמאנאשי", description:'עלייה להר הקדוש של יפן. דרוש ציוד חימום ומים בשפע. בדקו מזג אוויר מראש!', mapUrl:'https://www.google.com/maps/search/?api=1&query=Mount+Fuji+Japan', requiresBooking:false, icon:'🗻', rawRow:{} },
+    ],
+    options: [
+      { id:'demo_opt_1', type:'option', placeName:'אטרקציית גיחה — קובה', area:'קובה', description:'יין כשר ייחודי ומסעדות כשרות. גיחה של יום מאוסקה.', mapUrl:'https://www.google.com/maps/search/?api=1&query=Kobe+Japan', requiresBooking:false, icon:'🍷', rawRow:{} },
+      { id:'demo_opt_2', type:'option', placeName:'אונסן בהאקונה', area:'האקונה', description:"מרחצאות מים חמים עם נוף להר פוג'י. חוויה יפנית מסורתית.", mapUrl:'https://www.google.com/maps/search/?api=1&query=Hakone+Onsen', requiresBooking:true, icon:'♨️', rawRow:{} },
+    ],
+    tips: [
+      { id:'demo_tip_1', type:'tip', category:'תחבורה והגעה', title:'JR Pass — כרטיס רכבות', content:'רכשו JR Pass לפני הטיסה מישראל, זול יותר. מכסה את כל קווי JR כולל שינקנסן. הורידו את האפליקציה SmartEX להזמנת מושבים: https://smart-ex.jp/en/index.php', links:[{label:'SmartEX App', url:'https://smart-ex.jp/en/index.php'}], rawRow:{} },
+      { id:'demo_tip_2', type:'tip', category:'כשרות ושבת', title:'כשרות ביפן', content:'חב"ד טוקיו: https://www.chabadtokyo.com — ארוחות, שבת ומגמ"ד. ירושלים של יפן — קיוטו יש בה קהילה יהודית קטנה. הכינו בשר כשר מהארץ בשקיות ואקום.', links:[{label:'חב"ד טוקיו', url:'https://www.chabadtokyo.com'}], rawRow:{} },
+      { id:'demo_tip_3', type:'tip', category:'כשרות ושבת', title:'לוגיסטיקת שבת', content:'שבת נכנסת מוקדם מאוד! ודאו שהמלון מאפשר מפתח שבת. לא לסמוך על מעלית, בדקו אם יש מעלית שבת. ICE Suites בטוקיו מכיר שבת ויהודים.', links:[], rawRow:{} },
+      { id:'demo_tip_4', type:'tip', category:'אפליקציות חיוניות', title:'אפליקציות שחובה להוריד', content:'Google Translate (מצלמה לקריאת יפנית), Google Maps (הורידו מפות אופליין!), Suica / IC Card (תחבורה), Coke ON (מכונות שתייה): https://c.cocacola.co.jp/app/', links:[{label:'Coke ON App', url:'https://c.cocacola.co.jp/app/'}], rawRow:{} },
+    ],
+    errors: []
+  };
+}
+
+// ================================================================
+//   RENDERING
+// ================================================================
+
+function renderCheckIcon() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6 9 17l-5-5"/></svg>';
+}
+
+function renderActivityCard(item, completed, searchQuery) {
+  const q = searchQuery;
+  const hasDetails = !!(item.description || item.address || item.mapUrl);
+
+  return `<div class="card${completed ? ' done' : ''}" data-id="${esc(item.id)}" role="article" aria-label="${esc(item.placeName)}">
+    ${item.requiresBooking ? `<div class="card-booking-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>דורש שריון מראש</span>
+    </div>` : ''}
+    <div class="card-body">
+      <button class="card-check" data-check="${esc(item.id)}" aria-label="${completed ? 'סמן כלא הושלם' : 'סמן כהושלם'}" aria-pressed="${completed}">
+        ${completed ? renderCheckIcon() : ''}
+      </button>
+      <div class="card-main">
+        <div class="card-title-row">
+          <div class="card-title-inner">
+            <span class="card-icon" aria-hidden="true">${esc(item.icon || '📍')}</span>
+            <h3 class="card-title">${highlight(item.placeName, q)}</h3>
+          </div>
+          ${hasDetails ? `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>` : ''}
+        </div>
+        <div class="card-tags">
+          ${item.timeRange ? `<span class="tag time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${esc(item.timeRange)}</span>` : ''}
+          ${item.area ? `<span class="tag area"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${highlight(item.area, q)}</span>` : ''}
+        </div>
+      </div>
+    </div>
+    ${hasDetails ? `<div class="card-details">
+      ${item.description ? `<p class="card-desc">${highlight(item.description, q)}</p>` : ''}
+      ${item.address ? `<p class="card-address"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${esc(item.address)}</p>` : ''}
+      ${item.mapUrl ? `<button class="nav-btn" data-nav="${esc(item.mapUrl)}" aria-label="פתח ניווט">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        פתח ניווט ב-Google Maps
+        <svg class="nav-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </button>` : ''}
+    </div>` : ''}
+  </div>`;
+}
+
+function renderTipCard(item, completed, searchQuery) {
+  const q = searchQuery;
+  const displayContent = stripUrls(item.content);
+  return `<div class="card tip-card${completed ? ' done' : ''}" data-id="${esc(item.id)}" role="article" aria-label="${esc(item.title)}">
+    <div class="card-body" style="cursor:pointer" data-expand="${esc(item.id)}">
+      <button class="card-check" data-check="${esc(item.id)}" aria-label="${completed ? 'סמן כלא נקרא' : 'סמן כנקרא'}" aria-pressed="${completed}" style="border-color: ${completed ? 'var(--success)' : 'var(--border)'}; background: ${completed ? 'var(--success-glow)' : 'none'}; color: ${completed ? 'var(--success)' : 'transparent'}">
+        ${completed ? renderCheckIcon() : ''}
+      </button>
+      <div class="card-main">
+        <div class="card-title-row">
+          <h3 class="card-title">${highlight(item.title, q)}</h3>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        ${displayContent ? `<p class="tip-preview">${esc(displayContent)}</p>` : ''}
+      </div>
+    </div>
+    <div class="card-details">
+      ${displayContent ? `<p class="card-desc" style="white-space:pre-wrap">${highlight(displayContent, q)}</p>` : ''}
+      ${item.links && item.links.length > 0 ? item.links.map(link => `
+        <a class="tip-link-btn" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ${esc(link.label)}
+          <svg class="ext-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`).join('') : ''}
+    </div>
+  </div>`;
+}
+
+function renderEmpty(iconSvg, color, title, desc) {
+  return `<div class="empty-state">
+    <div class="empty-icon" style="background:color-mix(in srgb, ${color} 10%, transparent); border: 1px solid color-mix(in srgb, ${color} 20%, transparent)">
+      ${iconSvg}
+    </div>
+    <h3>${esc(title)}</h3>
+    <p>${esc(desc)}</p>
+  </div>`;
+}
+
+function filterActivity(items, q) {
+  if (!q) return items;
+  const lq = q.toLowerCase();
+  return items.filter(i =>
+    (i.placeName||'').toLowerCase().includes(lq) ||
+    (i.area||'').toLowerCase().includes(lq) ||
+    (i.description||'').toLowerCase().includes(lq) ||
+    (i.day||'').toLowerCase().includes(lq) ||
+    (i.timeRange||'').toLowerCase().includes(lq)
+  );
+}
+
+function filterTips(items, q) {
+  if (!q) return items;
+  const lq = q.toLowerCase();
+  return items.filter(i =>
+    (i.title||'').toLowerCase().includes(lq) ||
+    (i.category||'').toLowerCase().includes(lq) ||
+    (i.content||'').toLowerCase().includes(lq)
+  );
+}
+
+function renderItinerary() {
+  const el = document.getElementById('itinerary-content');
+  const items = (state.data && state.data.itinerary) || [];
+  const q = state.searchQuery;
+  const filtered = filterActivity(items, q);
+
+  if (items.length === 0) {
+    el.innerHTML = renderEmpty(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+      'var(--accent)', 'אין מסלול עדיין', 'העלו קובץ CSV עם לוח הזמנים שלכם בעזרת כפתור ה-+ בראש המסך'
+    );
+    return;
+  }
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &quot;' + esc(q) + '&quot;</p></div>';
+    return;
+  }
+
+  // Group by day
+  const map = new Map();
+  filtered.forEach(item => {
+    const key = item.day || item.date || 'ללא תאריך';
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(item);
+  });
+
+  let html = '';
+  map.forEach((activities, day) => {
+    const done = activities.filter(a => state.completedIds.has(a.id)).length;
+    const total = activities.length;
+    const pct = total > 0 ? (done/total*100) : 0;
+    const allDone = done === total && total > 0;
+
+    html += `<div class="mb-2">
+      <div class="section-header">
+        <div class="section-header-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--accent)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="section-header-title">${esc(day)}</span>
+        </div>
+        <span class="section-badge${allDone ? ' all-done' : ''}">${done}/${total}</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill${allDone ? ' done' : ''}" style="width:${pct}%"></div></div>
+      <div class="cards-list">
+        ${activities.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function renderOptions() {
+  const el = document.getElementById('options-content');
+  const items = (state.data && state.data.options) || [];
+  const q = state.searchQuery;
+  const filtered = filterActivity(items, q);
+
+  if (items.length === 0) {
+    el.innerHTML = renderEmpty(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--warning)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+      'var(--warning)', 'אין אופציות עדיין', 'אופציות הן יעדים אלטרנטיביים וגיחות אופציונליות. העלו CSV עם שורות "אופציה" בעמודת היום.'
+    );
+    return;
+  }
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &quot;' + esc(q) + '&quot;</p></div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="options-count-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      ${filtered.length} אופציות זמינות
+    </div>
+    <div class="cards-list">${filtered.map(item => renderActivityCard(item, state.completedIds.has(item.id), q)).join('')}</div>`;
+}
+
+function renderTips() {
+  const el = document.getElementById('tips-content');
+  const items = (state.data && state.data.tips) || [];
+  const q = state.searchQuery;
+  const filtered = filterTips(items, q);
+
+  if (items.length === 0) {
+    el.innerHTML = renderEmpty(
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:38px;height:38px;color:var(--success)"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+      'var(--success)', 'אין טיפים עדיין', 'טיפים הם חוקי ברזל, הכנות, כשרות ולינקים חיוניים. העלו CSV עם עמודות "קטגוריה" או "ריכוז הנחיות".'
+    );
+    return;
+  }
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p style="color:var(--text-muted);font-size:13px">לא נמצאו תוצאות עבור &quot;' + esc(q) + '&quot;</p></div>';
+    return;
+  }
+
+  // Group by category
+  const map = new Map();
+  filtered.forEach(item => {
+    const key = item.category || 'כללי';
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(item);
+  });
+
+  let html = '';
+  map.forEach((tips, category) => {
+    html += `<div>
+      <div class="section-header">
+        <div class="section-header-left tips">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--success)"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <span class="section-header-title">${esc(category)}</span>
+        </div>
+        <span class="section-badge">${tips.length}</span>
+      </div>
+      <div class="cards-list">${tips.map(item => renderTipCard(item, state.completedIds.has(item.id), q)).join('')}</div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function renderAll() {
+  renderItinerary();
+  renderOptions();
+  renderTips();
+  updateCounts();
+  updateProgress();
+}
+
+function updateCounts() {
+  const d = state.data;
+  const counts = {
+    itinerary: d ? d.itinerary.length : 0,
+    options:   d ? d.options.length : 0,
+    tips:      d ? d.tips.length : 0,
+  };
+  Object.entries(counts).forEach(([tab, count]) => {
+    const el = document.getElementById('tab-count-' + tab);
+    if (el) el.textContent = count > 0 ? count : '';
+  });
+}
+
+function updateProgress() {
+  const d = state.data;
+  if (!d) { document.getElementById('progress-pill').style.display = 'none'; return; }
+  const total = d.itinerary.length + d.options.length + d.tips.length;
+  if (total === 0) { document.getElementById('progress-pill').style.display = 'none'; return; }
+  const allItems = [...d.itinerary, ...d.options, ...d.tips];
+  const done = allItems.filter(i => state.completedIds.has(i.id)).length;
+  document.getElementById('progress-pill').style.display = 'flex';
+  document.getElementById('progress-text').textContent = done + '/' + total;
+}
+
+// ================================================================
+//   SWITCH TABS
+// ================================================================
+
+function setTab(tabId) {
+  state.activeTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const active = btn.dataset.tab === tabId;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === 'panel-' + tabId);
+  });
+  try { localStorage.setItem(LS_TAB, tabId); } catch {}
+}
+
+// ================================================================
+//   TOGGLE COMPLETE
+// ================================================================
+
+function toggleComplete(id) {
+  if (state.completedIds.has(id)) state.completedIds.delete(id);
+  else state.completedIds.add(id);
+  safeSet(LS_COMPLETED, Array.from(state.completedIds));
+  renderAll();
+}
+
+// ================================================================
+//   THEME
+// ================================================================
+
+function applyTheme() {
+  document.documentElement.classList.toggle('dark', state.isDark);
+  document.documentElement.classList.toggle('light', !state.isDark);
+  document.getElementById('theme-icon-sun').style.display  = state.isDark ? 'block' : 'none';
+  document.getElementById('theme-icon-moon').style.display = state.isDark ? 'none'  : 'block';
+  try { localStorage.setItem(LS_DARK, String(state.isDark)); } catch {}
+}
+
+// ================================================================
+//   DEMO / CLEAR
+// ================================================================
+
+function loadDemoData() {
+  state.data = getSampleData();
+  state.isDemo = true;
+  document.getElementById('demo-label').style.display = 'block';
+  document.getElementById('demo-banner').style.display = 'block';
+  document.getElementById('clear-btn').style.display = 'none';
+}
+
+function clearData() {
+  try { localStorage.removeItem(LS_DATA); localStorage.removeItem(LS_COMPLETED); } catch {}
+  state.completedIds = new Set();
+  loadDemoData();
+  renderAll();
+}
+
+// ================================================================
+//   FILE UPLOAD
+// ================================================================
+
+function setUploading(on) {
+  const btn = document.getElementById('upload-btn');
+  if (on) {
+    btn.classList.add('loading');
+    btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+  } else {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  }
+}
+
+async function handleFiles(files) {
+  if (!files || files.length === 0) return;
+  setUploading(true);
+  hideError();
+
+  try {
+    const fileContents = await Promise.all(
+      Array.from(files).map(f => f.text().then(content => ({ name: f.name, content })))
+    );
+    const result = parseCSVFiles(fileContents);
+    state.data = result;
+    state.isDemo = false;
+    state.completedIds = new Set();
+    safeSet(LS_DATA, result);
+
+    document.getElementById('demo-label').style.display = 'none';
+    document.getElementById('demo-banner').style.display = 'none';
+    document.getElementById('clear-btn').style.display = 'flex';
+
+    if (result.errors.length > 0) showError(result.errors.slice(0, 3).join(' • '));
+
+    if (result.itinerary.length > 0) setTab('itinerary');
+    else if (result.tips.length > 0) setTab('tips');
+    else if (result.options.length > 0) setTab('options');
+
+    renderAll();
+  } catch(e) {
+    showError('שגיאה בטעינת הקובץ: ' + String(e));
+  }
+  setUploading(false);
+}
+
+// ================================================================
+//   ERROR BANNER
+// ================================================================
+
+function showError(msg) {
+  document.getElementById('error-banner').style.display = 'flex';
+  document.getElementById('error-text').textContent = msg;
+}
+function hideError() {
+  document.getElementById('error-banner').style.display = 'none';
+}
+
+// ================================================================
+//   GPS
+// ================================================================
+
+function initGPS() {
+  const btn = document.getElementById('gps-btn');
+  btn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      showGPSError('הדפדפן שלך אינו תומך ב-GPS. נסה Chrome או Safari.');
+      return;
+    }
+    setGPSLoading(true);
+    clearGPSError();
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        state.gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) };
+        setGPSLoading(false);
+        showGPSSuccess();
+      },
+      err => {
+        let msg = 'לא ניתן לאתר מיקום.';
+        if (err.code === 1) msg = 'הגישה ל-GPS נדחתה. אפשר הרשאת מיקום בהגדרות.';
+        else if (err.code === 2) msg = 'איתות GPS לא זמין. נסה באזור פתוח יותר.';
+        else if (err.code === 3) msg = 'תם הזמן לאיתור מיקום. נסה שוב.';
+        setGPSLoading(false);
+        showGPSError(msg);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+  });
+
+  // Category buttons
+  document.getElementById('cat-grid').addEventListener('click', e => {
+    const catBtn = e.target.closest('.cat-btn');
+    if (!catBtn || !state.gpsCoords) return;
+    const query = catBtn.dataset.query;
+    const { lat, lng } = state.gpsCoords;
+    const url = 'https://www.google.com/maps/search/' + encodeURIComponent(query) + '/@' + lat + ',' + lng + ',16z';
+    window.open(url, '_blank', 'noopener,noreferrer');
+  });
+}
+
+function setGPSLoading(on) {
+  const btn = document.getElementById('gps-btn');
+  btn.disabled = on;
+  document.getElementById('gps-icon-locate').style.display = on ? 'none' : (state.gpsCoords ? 'none' : 'block');
+  document.getElementById('gps-icon-spin').style.display   = on ? 'block' : 'none';
+  document.getElementById('gps-icon-refresh').style.display = on ? 'none' : (state.gpsCoords ? 'block' : 'none');
+  document.getElementById('gps-btn-text').textContent = on ? 'מאתר...' : (state.gpsCoords ? 'רענן מיקום' : 'אתר מיקום GPS');
+}
+
+function showGPSSuccess() {
+  const { lat, lng, accuracy } = state.gpsCoords;
+  const btn = document.getElementById('gps-btn');
+  btn.classList.add('success');
+  document.getElementById('gps-icon-locate').style.display  = 'none';
+  document.getElementById('gps-icon-spin').style.display    = 'none';
+  document.getElementById('gps-icon-refresh').style.display = 'block';
+  document.getElementById('gps-btn-text').textContent = 'רענן מיקום';
+  document.getElementById('gps-coords').classList.add('visible');
+  document.getElementById('gps-coords-text').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5) + ' ±' + accuracy + 'מ\'';
+  document.getElementById('cat-grid').classList.remove('disabled');
+  document.getElementById('gps-hint').style.display = 'none';
+}
+
+function showGPSError(msg) {
+  document.getElementById('gps-error').classList.add('visible');
+  document.getElementById('gps-error-text').textContent = msg;
+}
+function clearGPSError() {
+  document.getElementById('gps-error').classList.remove('visible');
+}
+
+// ================================================================
+//   CARD INTERACTIONS (event delegation)
+// ================================================================
+
+function initCardInteractions() {
+  document.getElementById('tab-content').addEventListener('click', e => {
+    // Check button
+    const checkBtn = e.target.closest('[data-check]');
+    if (checkBtn) {
+      e.stopPropagation();
+      toggleComplete(checkBtn.dataset.check);
+      return;
+    }
+
+    // Nav button
+    const navBtn = e.target.closest('[data-nav]');
+    if (navBtn) {
+      e.stopPropagation();
+      window.open(navBtn.dataset.nav, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Tip expand (data-expand on the card-body)
+    const expandTrigger = e.target.closest('[data-expand]');
+    if (expandTrigger) {
+      const card = expandTrigger.closest('.card');
+      if (card) { card.classList.toggle('expanded'); return; }
+    }
+
+    // Activity card click — expand
+    const card = e.target.closest('.card');
+    if (card && !card.classList.contains('tip-card')) {
+      const details = card.querySelector('.card-details');
+      if (details) card.classList.toggle('expanded');
+    }
+  });
+}
+
+// ================================================================
+//   INIT
+// ================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Restore state from localStorage ---
+  const savedDark = localStorage.getItem(LS_DARK);
+  state.isDark = savedDark !== null ? savedDark === 'true' : true;
+  applyTheme();
+
+  const savedTab = localStorage.getItem(LS_TAB);
+  if (savedTab && ['itinerary','options','tips','nearby'].includes(savedTab)) state.activeTab = savedTab;
+
+  const savedCompleted = safeGet(LS_COMPLETED, []);
+  state.completedIds = new Set(savedCompleted);
+
+  const savedData = safeGet(LS_DATA, null);
+  if (savedData && (savedData.itinerary || savedData.options || savedData.tips)) {
+    state.data = savedData;
+    state.isDemo = false;
+    document.getElementById('clear-btn').style.display = 'flex';
+  } else {
+    loadDemoData();
+  }
+
+  // --- Render ---
+  setTab(state.activeTab);
+  renderAll();
+
+  // --- Tab bar ---
+  document.getElementById('tab-bar').addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (btn && btn.dataset.tab) setTab(btn.dataset.tab);
+  });
+
+  // --- Search ---
+  const searchInput = document.getElementById('search-input');
+  const searchClear = document.getElementById('search-clear');
+
+  searchInput.addEventListener('input', () => {
+    state.searchQuery = searchInput.value;
+    searchClear.classList.toggle('visible', !!searchInput.value);
+    renderAll();
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    state.searchQuery = '';
+    searchClear.classList.remove('visible');
+    renderAll();
+  });
+
+  // --- Theme toggle ---
+  document.getElementById('theme-btn').addEventListener('click', () => {
+    state.isDark = !state.isDark;
+    applyTheme();
+  });
+
+  // --- Clear data ---
+  document.getElementById('clear-btn').addEventListener('click', clearData);
+
+  // --- Upload ---
+  const fileInput = document.getElementById('file-input');
+  document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+  document.getElementById('demo-banner-inner').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+
+  // --- Error close ---
+  document.getElementById('error-close').addEventListener('click', hideError);
+
+  // --- Drag & drop ---
+  document.getElementById('app').addEventListener('dragover', e => e.preventDefault());
+  document.getElementById('app').addEventListener('drop', e => {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  });
+
+  // --- Card interactions ---
+  initCardInteractions();
+
+  // --- GPS ---
+  initGPS();
+
+  // --- Hide splash ---
+  document.getElementById('loading-splash').classList.add('gone');
+});
+</script>
 </body>
 </html>
