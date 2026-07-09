@@ -521,7 +521,8 @@ select.edit-input{appearance:none}
       העלאת קבצי מסלול
     </div>
     <p class="modal-subtitle">
-      המערכת מזהה אוטומטית את סוג הקובץ לפי שמו ולפי כותרות העמודות.
+      המערכת מזהה אוטומטית את סוג הקובץ לפי שמו ולפי כותרות העמודות,
+      ו<strong>מוסיפה</strong> את הנתונים לקיימים — ניתן להעלות כל קובץ בנפרד.
       מומלץ לשם הקובץ להכיל: <strong>מסלול</strong>, <strong>אופציות</strong>, <strong>טיפים</strong>.
     </p>
     <div class="format-hint-grid">
@@ -535,7 +536,7 @@ select.edit-input{appearance:none}
       </div>
       <div class="format-hint-item">
         <strong>טיפים.csv</strong>
-        <span>כותרת, תוכן, קישור...</span>
+        <span>כותרת, תוכן, קטגוריה, קישור (ללא עמודת יום)</span>
       </div>
       <div class="format-hint-item">
         <strong>פורמטים נתמכים</strong>
@@ -762,7 +763,7 @@ function parseCSV(raw) {
    COLUMN ALIASES
 ========================================================= */
 const ALIASES = {
-  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place'],
+  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
   day:       ['יום','day'],
   date:      ['תאריך','date'],
   time:      ['שעות','זמן פתיחה','מתי','time','טווח שעות','שעת פתיחה','opening hours'],
@@ -770,8 +771,9 @@ const ALIASES = {
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation'],
-  desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן'],
+  desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
   area:      ['אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood'],
+  category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
   link:      ['קישור','אתר','url','link','website'],
   linkLabel: ['שם הקישור','טקסט קישור','link label','link name'],
 };
@@ -786,17 +788,43 @@ function getCol(obj, type) {
 
 /* =========================================================
    AUTO DETECT FILE TYPE
+   Priority: filename > headers. Anything without day/date and
+   with content/category signals is treated as tips.
 ========================================================= */
 function detectFileType(fname, headers) {
-  const n = fname.toLowerCase();
+  const n = fname.toLowerCase().replace(/[_\-\s]/g, '');
   const h = headers.join(' ').toLowerCase();
-  if (/טיפ|tips?|hint|עצה/.test(n))           return 'tips';
-  if (/השלמ|אופצי|option|extra|bonus/.test(n)) return 'options';
-  if (/ראש|מסלול|iti|main|plan|primary/.test(n)) return 'itinerary';
-  if (/יום|day/.test(h))                        return 'itinerary';
-  if (/אופצי|option/.test(h))                   return 'options';
-  if (/טיפ|tip|hint/.test(h) && !/יום|day|date/.test(h)) return 'tips';
-  if (!/יום|day|date|תאריך/.test(h) && /תוכן|content|notes|הערות/.test(h)) return 'tips';
+
+  // --- Filename signals (strongest) ---
+  if (/טיפ|tips?|hint|עצה|הנחי|advice|guide/.test(n))        return 'tips';
+  if (/השלמ|אופצי|option|extra|bonus|recommend/.test(n))      return 'options';
+  if (/מסלול|iti|main|plan|primary|schedule|itinerary/.test(n)) return 'itinerary';
+
+  // --- Header signals ---
+  const hasDay      = /יום|day/.test(h);
+  const hasDate     = /תאריך|date/.test(h);
+  const hasTipWord  = /\bטיפ|\btip|\bhint|עצה/.test(h);
+  const hasCat      = /קטגוריה|category|נושא|topic|תחום/.test(h);
+  const hasContent  = /תוכן|content|notes|הערות|מידע|פירוט/.test(h);
+  const hasOption   = /אופצי|option/.test(h);
+
+  // Has day/date → definitely itinerary
+  if (hasDay || hasDate) return 'itinerary';
+
+  // Tips-specific column names
+  if (hasTipWord || hasCat) return 'tips';
+
+  // Content column without day/date → tips
+  if (hasContent) return 'tips';
+
+  // Option keyword
+  if (hasOption) return 'options';
+
+  // Fallback — if no day/date at all, lean toward tips
+  // (itinerary files almost always have a day column)
+  const hasPlaceOnly = /שם|place|name|title|כותרת|אטרקציה/.test(h);
+  if (hasPlaceOnly && !hasDay && !hasDate) return 'options';
+
   return 'itinerary';
 }
 
@@ -833,11 +861,16 @@ function detectIcon(text) {
   return '📍';
 }
 function needsBooking(book, desc) {
-  const b = (book||'').toLowerCase();
+  const b = (book||'').trim().toLowerCase();
   const d = (desc||'').toLowerCase();
-  if (/(אין צורך|לא צריך|במקום|בקופה|חינם|free|walk.?in)/i.test(b)) return false;
-  if (book && book.length > 2) return true;
-  if (/(להזמין מראש|דורש שריון|חובה להזמין|must.?book|reservation required)/.test(b + d)) return true;
+  if (!b) return false;
+  // Explicit "no booking needed" signals
+  if (/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(b)) return false;
+  // Explicit "free" on its own usually means no cost, not no booking — check context
+  if (/^(חינם|free|0)$/.test(b)) return false;
+  // Any non-trivial booking info means booking required
+  if (b.length > 3) return true;
+  if (/(להזמין מראש|דורש שריון|חובה להזמין|must.?book|reservation required|book in advance|\d+\s*ימים|\d+\s*days)/i.test(b + d)) return true;
   return false;
 }
 function buildMapUrl(placeName, area) {
@@ -861,6 +894,27 @@ function formatCost(s) {
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
   return c ? '₪'+c : '';
+}
+// Normalize time strings: replace various dash/hyphen chars with a clean " – "
+function formatTime(s) {
+  if (!s) return '';
+  // Replace en-dash, em-dash, minus, figure-dash, non-breaking hyphen with space-dash-space
+  return s.replace(/[\u2013\u2014\u2012\u2010\u2011\uFE58\uFE63\uFF0D]/g,' – ')
+          .replace(/\s*-\s*/g,' – ')
+          .replace(/\s{2,}/g,' ')
+          .trim();
+}
+// Extract advance booking days from booking field
+function extractBookingAdvance(booking) {
+  if (!booking) return null;
+  // Match patterns like "3 ימים", "48 שעות", "2 weeks", "3 days in advance"
+  const m = booking.match(/(\d+)\s*(ימים?|days?|weeks?|שבוע|שבועות|שעות?|hours?)/i);
+  if (!m) return null;
+  const n = parseInt(m[1]);
+  const unit = m[2].toLowerCase();
+  if (/שעות?|hours?/.test(unit)) return `${n} שעות מראש`;
+  if (/שבוע|שבועות|weeks?/.test(unit)) return `${n * 7} ימים מראש`;
+  return `${n} ימים מראש`;
 }
 function escHtml(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -920,17 +974,32 @@ async function processFiles(files) {
       const place = getCol(obj,'place'), day = getCol(obj,'day'), date = getCol(obj,'date');
       const desc  = getCol(obj,'desc'),  area = getCol(obj,'area'), book = getCol(obj,'book');
       const link  = getCol(obj,'link');
+      // For tips files, also grab category directly
+      const catCol = getCol(obj,'category');
 
-      if (fileType === 'tips' || (!place && !day && !date)) {
-        if (place || desc) {
+      // A row is a tip if: file was detected as tips, OR it has no day/date/place at all
+      const isTipRow = fileType === 'tips' || (!place && !day && !date);
+
+      if (isTipRow) {
+        // Accept rows that have at least a title/content OR any non-empty cell
+        const anyValue = place || desc || catCol || Object.values(obj).some(v => v.trim());
+        if (anyValue) {
+          // Build the best possible title and content
+          const title   = place || catCol || Object.values(obj).find(v => v.trim()) || `טיפ ${ri}`;
+          const content = desc
+            || Object.entries(obj)
+                .filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]) // skip first column (=title)
+                .map(([, v]) => v)
+                .join(' • ')
+            || '';
           data.tips.push({
             id:genId(), type:'tip', _idx:ri,
             placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'',
             duration:'', cost:'', transport:'', booking:'', area:'', mapUrl:'',
             requiresBooking:false, icon:'💡',
-            title:    place || `טיפ ${ri}`,
-            category: area  || 'כללי',
-            content:  desc  || Object.values(obj).filter(Boolean).join(' • '),
+            title,
+            category: catCol || area || 'כללי',
+            content,
             link, linkLabel: getCol(obj,'linkLabel') || 'למידע נוסף',
           });
         }
@@ -943,7 +1012,7 @@ async function processFiles(files) {
           dayLabel:  rawDay,
           dateVal:   parseDateVal(rawDay),
           description: desc,
-          timeRange:   getCol(obj,'time'),
+          timeRange:   formatTime(getCol(obj,'time')),
           duration:    getCol(obj,'dur'),
           cost:        getCol(obj,'cost'),
           transport:   getCol(obj,'trans'),
@@ -1171,32 +1240,41 @@ function renderTripCard(item, q) {
   const expanded = state.expandedIds.has(item.id);
   const cost     = formatCost(item.cost);
   const showWarn = item.requiresBooking && !done;
+  const timeDisp = formatTime(item.timeRange);
 
+  // Extract advance notice from booking field
+  const advanceNotice = extractBookingAdvance(item.booking);
   const bookingBar = showWarn
-    ? `<div class="card-booking-bar">${svgIcon('warn')}<span>דורש שריון / הזמנה מראש</span></div>` : '';
+    ? `<div class="card-booking-bar">${svgIcon('warn')}<span>דורש הזמנה מראש${advanceNotice ? ' — ' + advanceNotice : ''}</span></div>` : '';
 
   const checkStyle = done
     ? `border-color:var(--success);background:var(--success-glow);color:var(--success);`
     : 'color:transparent;';
 
   const badges = [
-    item.timeRange ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(item.timeRange,q)}</span>` : '',
+    timeDisp       ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(timeDisp,q)}</span>` : '',
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area,q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport,q)}</span>` : '',
+    // Show transport as a short badge (first ~30 chars) — full detail in expanded view
+    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
   const mapUrl = item.mapUrl || '';
+  // Transit URL: use Google Maps directions with transit mode for this specific location
+  const transitUrl = mapUrl
+    ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent([item.placeName,item.area].filter(Boolean).join(' ')) + '&travelmode=transit'
+    : '';
+
   const navBtns = [
-    mapUrl ? `<a href="${escHtml(mapUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} נווט ב-Google Maps</a>` : '',
-    mapUrl ? `<a href="${escHtml(mapUrl)}&travelmode=transit" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} ניווט בתחבורה ציבורית</a>` : '',
-    item.link ? `<a href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
+    mapUrl     ? `<a href="${escHtml(mapUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} נווט ב-Google Maps</a>` : '',
+    transitUrl ? `<a href="${escHtml(transitUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} הגע בתחבורה ציבורית</a>` : '',
+    item.link  ? `<a href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
   const bookingRow = item.booking
-    ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}</span></div>` : '';
+    ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}${advanceNotice ? ' <strong style="color:var(--danger)">('+advanceNotice+')</strong>' : ''}</span></div>` : '';
   const transRow = item.transport
     ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
@@ -1304,8 +1382,9 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     const transitUrl = routeUrl ? routeUrl + '&travelmode=transit' : '';
     const ids = JSON.stringify(arr.map(i => i.id));
 
+    const safeIds = arr.map(i => i.id).join(',');
     const completeAllBtn = (!allDone && arr.length > 1)
-      ? `<button class="complete-day-btn" onclick="completeAllInGroup(${escHtml(ids)})" title="סמן את כולם כהושלם">${svgIcon('checkAll')} סמן הכל</button>` : '';
+      ? `<button class="complete-day-btn js-complete-all" data-ids="${escHtml(safeIds)}" title="סמן את כולם כהושלם">${svgIcon('checkAll')} סמן הכל</button>` : '';
 
     html += `
 <div>
@@ -1412,8 +1491,8 @@ function toggleComplete(id) {
   updateUI();
   persistState();
 }
-function completeAllInGroup(idsJson) {
-  const ids = JSON.parse(idsJson);
+function completeAllInGroup(idsCsv) {
+  const ids = String(idsCsv).split(',').map(s => s.trim()).filter(Boolean);
   ids.forEach(id => state.completedIds.add(id));
   triggerUndo({ ids, label: `${ids.length} פריטים סומנו כהושלמו` });
   updateUI();
@@ -1476,8 +1555,8 @@ function buildEditForm(item) {
     <input class="edit-input" id="ef-dayLabel" value="${escHtml(item.dayLabel)}" placeholder="יום א׳ / 13/10/2025..." autocomplete="off" />
   </div>
   <div class="edit-group">
-    <label class="edit-label">ש��ות פעילות</label>
-    <input class="edit-input" id="ef-timeRange" value="${escHtml(item.timeRange)}" placeholder="09:00–17:00" autocomplete="off" />
+    <label class="edit-label">שעות פעילות</label>
+    <input class="edit-input" id="ef-timeRange" value="${escHtml(item.timeRange)}" placeholder="09:00 - 17:00" autocomplete="off" />
   </div>
 </div>
 <div class="edit-group">
@@ -1714,18 +1793,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loading-overlay').style.display = 'flex';
     try {
       const result = await processFiles(files);
-      state.data = result.data;
+
       if (result.completedIds) {
+        // JSON backup — full replace
+        state.data = result.data;
         state.completedIds = new Set(result.completedIds);
+        state.expandedIds  = new Set();
         showToast('גיבוי JSON יובא בהצלחה', 'success');
       } else {
-        state.completedIds = new Set();
-        const total = result.data.itinerary.length + result.data.options.length + result.data.tips.length;
-        showToast(`נטענו ${total} פריטים`, 'success');
+        // CSV upload — APPEND to existing data (supports uploading files one at a time)
+        const prevTotal = state.data.itinerary.length + state.data.options.length + state.data.tips.length;
+        state.data.itinerary.push(...result.data.itinerary);
+        state.data.options.push(...result.data.options);
+        state.data.tips.push(...result.data.tips);
+        const added = result.data.itinerary.length + result.data.options.length + result.data.tips.length;
+        const tipAdded = result.data.tips.length;
+        const parts = [];
+        if (result.data.itinerary.length) parts.push(`${result.data.itinerary.length} מסלול`);
+        if (result.data.options.length)   parts.push(`${result.data.options.length} אופציות`);
+        if (result.data.tips.length)      parts.push(`${result.data.tips.length} טיפים`);
+        showToast(parts.length ? `נוספו: ${parts.join(' | ')}` : 'לא נמצאו נתונים — בדוק את הקובץ', parts.length ? 'success' : 'error');
       }
-      state.expandedIds = new Set();
-      const tab = result.data.itinerary.length ? 'itinerary'
-                : result.data.options.length   ? 'options' : 'tips';
+
+      // Switch to the tab that just got new content
+      const tab = result.data.tips.length       ? 'tips'
+                : result.data.itinerary.length  ? 'itinerary'
+                : result.data.options.length    ? 'options'
+                : state.activeTab;
       state.activeTab = tab;
       updateUI();
       setTab(tab);
@@ -1828,6 +1922,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       saveEdit();
+    }
+  });
+
+  // Event delegation — "סמן הכל" buttons rendered dynamically
+  document.getElementById('tab-content').addEventListener('click', e => {
+    const btn = e.target.closest('.js-complete-all');
+    if (btn) {
+      e.stopPropagation();
+      completeAllInGroup(btn.dataset.ids || '');
     }
   });
 
