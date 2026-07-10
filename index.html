@@ -39,10 +39,12 @@ body{min-height:100dvh;overflow-x:hidden;direction:rtl;background:var(--bg);}
 html.light ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12)}
 mark{background:rgba(251,191,36,.35);color:inherit;border-radius:2px;padding:0 2px}
 html.light mark{background:rgba(217,119,6,.22)}
+
 /* =========================================================
    LAYOUT
 ========================================================= */
 #app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg);position:relative}
+
 /* =========================================================
    HEADER
 ========================================================= */
@@ -57,6 +59,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .logo-icon svg{width:18px;height:18px;color:var(--accent)}
 .logo-title{font-size:16px;font-weight:700;color:var(--text);line-height:1.1}
 .header-actions{display:flex;align-items:center;gap:5px}
+
 .pill-counter{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;
   background:var(--bg-muted);font-size:11px;font-family:'Courier New',monospace;color:var(--text-muted)}
 .pill-counter .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
@@ -66,17 +69,14 @@ html.light mark{background:rgba(217,119,6,.22)}
 .icon-btn:hover{color:var(--text);background:var(--bg-muted)}
 .icon-btn svg{width:16px;height:16px}
 .icon-btn.danger:hover{color:var(--danger);background:var(--danger-glow)}
-.icon-btn .btn-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;
-  transform:translateX(-50%);white-space:nowrap;background:var(--bg-elevated);color:var(--text);
-  font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);
-  pointer-events:none;font-family:inherit;z-index:999}
-.icon-btn:hover .btn-tooltip{display:block}
+
 .upload-btn{width:32px;height:32px;border-radius:var(--r-sm);border:none;cursor:pointer;
   background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;
   transition:opacity .15s,transform .1s;box-shadow:0 2px 8px rgba(34,211,238,.2)}
 .upload-btn:hover{opacity:.85}
 .upload-btn:active{transform:scale(.9)}
 .upload-btn svg{width:16px;height:16px}
+
 .search-wrap{position:relative;padding:0 14px 10px}
 .search-icon{position:absolute;right:26px;top:50%;transform:translateY(-50%);
   width:15px;height:15px;color:var(--text-muted);pointer-events:none}
@@ -89,6 +89,7 @@ html.light mark{background:rgba(217,119,6,.22)}
   cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--text-muted)}
 .search-clear.visible{display:flex}
 .search-clear svg{width:11px;height:11px}
+
 /* =========================================================
    TAB BAR
 ========================================================= */
@@ -106,6 +107,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .tab-btn.active .tab-count{color:var(--accent);background:var(--accent-glow)}
 .tab-btn.active::after{content:'';position:absolute;bottom:0;left:8px;right:8px;
   height:2px;border-radius:2px;background:var(--accent)}
+
 /* =========================================================
    STATS BAR
 ========================================================= */
@@ -119,10 +121,12 @@ html.light mark{background:rgba(217,119,6,.22)}
 .stat-item.success .stat-num{color:var(--success)}
 .stat-item.warning .stat-num{color:var(--warning)}
 .stat-item.purple .stat-num{color:var(--purple)}
+
 /* =========================================================
    MAIN CONTENT
 ========================================================= */
 #tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:40px}
+
 /* =========================================================
    SECTION HEADERS
 ========================================================= */
@@ -137,27 +141,20 @@ html.light mark{background:rgba(217,119,6,.22)}
 .section-badge{font-size:10px;font-family:'Courier New',monospace;
   padding:2px 8px;border-radius:99px;background:var(--bg-muted);color:var(--text-muted)}
 .section-badge.all-done{background:var(--success-glow);color:var(--success)}
-.daily-route-btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
-  text-decoration:none;color:var(--bg);background:var(--accent);padding:3px 8px;
-  border-radius:99px;transition:opacity .2s;white-space:nowrap;border:none;cursor:pointer;font-family:inherit}
-.daily-route-btn:hover{opacity:.85}
-.daily-route-btn svg{width:11px;height:11px}
-.transit-route-btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
-  text-decoration:none;color:var(--warning);background:var(--warning-glow);padding:3px 8px;
-  border-radius:99px;border:1px solid color-mix(in srgb,var(--warning) 28%,transparent);
-  transition:opacity .2s;white-space:nowrap;cursor:pointer;font-family:inherit}
-.transit-route-btn:hover{opacity:.85}
-.transit-route-btn svg{width:11px;height:11px}
-.complete-day-btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
-  color:var(--success);background:var(--success-glow);padding:3px 8px;border-radius:99px;
-  border:1px solid color-mix(in srgb,var(--success) 28%,transparent);
-  transition:opacity .2s;white-space:nowrap;cursor:pointer;font-family:inherit}
-.complete-day-btn:hover{opacity:.85}
-.complete-day-btn svg{width:11px;height:11px}
+
+.daily-route-btn, .transit-route-btn, .complete-day-btn {
+  display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
+  text-decoration:none;padding:3px 8px;border-radius:99px;transition:opacity .2s;white-space:nowrap;border:none;cursor:pointer;font-family:inherit;
+}
+.daily-route-btn{color:var(--bg);background:var(--accent);}
+.transit-route-btn{color:var(--warning);background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 28%,transparent);}
+.complete-day-btn{color:var(--success);background:var(--success-glow);border:1px solid color-mix(in srgb,var(--success) 28%,transparent);}
+
 .progress-bar-wrap{height:2px;background:var(--border);overflow:hidden}
 .progress-bar-fill{height:100%;background:var(--accent);transition:width .5s ease}
 .progress-bar-fill.done{background:var(--success)}
 .cards-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+
 /* =========================================================
    CARDS
 ========================================================= */
@@ -165,18 +162,20 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card.done{opacity:.46;filter:saturate(.35)}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
+
 .card-booking-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px; border-bottom:1px solid;}
 .card-booking-bar.unbooked {background:var(--danger-glow); border-color:rgba(248,113,113,.18);}
 .card-booking-bar.booked {background:var(--success-glow); border-color:rgba(74,222,128,.18);}
-.booking-info{display:flex;align-items:center;gap:6px;}
-.booking-info svg{width:12px;height:12px;flex-shrink:0}
-.unbooked .booking-info{color:var(--danger);}
+.booking-info{display:flex;align-items:center;gap:6px; color:var(--danger);}
 .booked .booking-info{color:var(--success);}
+.booking-info svg{width:12px;height:12px;flex-shrink:0}
 .booking-info span{font-size:11px;font-weight:600;}
+
 .book-toggle-btn{background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:10px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:4px; transition:opacity .2s;}
 .book-toggle-btn:hover{opacity:.85;}
 .unbooked .book-toggle-btn{border-color:var(--danger); color:var(--danger);}
 .booked .book-toggle-btn{border-color:var(--success); color:var(--success);}
+
 .card-body{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 11px;cursor:pointer;user-select:none}
 .card-check{flex-shrink:0;margin-top:1px;width:24px;height:24px;border-radius:50%;
   border:2px solid var(--border);background:none;cursor:pointer;
@@ -200,15 +199,18 @@ html.light mark{background:rgba(217,119,6,.22)}
 .badge-dur{background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent);font-family:'Courier New',monospace}
 .badge-trans{background:var(--warning-glow);color:var(--warning);border:1px solid color-mix(in srgb,var(--warning) 28%,transparent)}
 .badge-cat{background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent)}
+
 .card-details{display:none;padding:0 12px 12px;gap:10px;flex-direction:column}
 .card.expanded .card-details{display:flex}
 .details-divider{height:1px;background:var(--border);border-radius:1px;margin-bottom:2px}
 .card-desc{font-size:13px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap}
+
 .detail-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text-muted);line-height:1.55}
 .detail-row svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
 .detail-row.booking svg{color:var(--danger)}
 .detail-row .dr-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:1px;flex-shrink:0}
 .detail-row .dr-value{flex:1}
+
 .nav-btns{display:flex;flex-direction:column;gap:6px}
 .link-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;
   border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg-muted);
@@ -218,6 +220,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .link-btn.primary{background:var(--accent-glow);color:var(--accent);border-color:var(--accent-border);font-weight:600}
 .link-btn.warning{background:var(--warning-glow);color:var(--warning);border-color:color-mix(in srgb,var(--warning) 28%,transparent);font-weight:600}
 .link-btn svg{width:14px;height:14px;flex-shrink:0}
+
 /* =========================================================
    MODALS
 ========================================================= */
@@ -239,6 +242,7 @@ html.light mark{background:rgba(217,119,6,.22)}
   display:flex;align-items:center;gap:8px}
 .modal-title svg{width:17px;height:17px;color:var(--accent)}
 .modal-subtitle{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:14px}
+
 .btn-row{display:flex;gap:8px;margin-top:16px}
 .btn-row button{flex:1;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
   font-family:inherit;cursor:pointer;transition:opacity .15s;border:none}
@@ -246,6 +250,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .btn-primary{background:var(--accent);color:var(--bg)}
 .btn-cancel{background:var(--bg-muted);color:var(--text-muted);border:1px solid var(--border)!important}
 .btn-danger{background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent)!important}
+
 .edit-group{margin-bottom:11px}
 .edit-label{font-size:11px;color:var(--text-muted);margin-bottom:5px;display:block;
   font-weight:600;text-transform:uppercase;letter-spacing:.03em}
@@ -258,27 +263,35 @@ select.edit-input{appearance:none}
 .edit-row .edit-group{flex:1;margin-bottom:0}
 
 /* =========================================================
-   STACKABLE TOASTS
+   STACKABLE TOASTS (WITH PROGRESS BAR)
 ========================================================= */
 #toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;gap:8px;z-index:9999;width:90%;max-width:320px;pointer-events:none;}
-.toast-msg{background:var(--bg-elevated);color:var(--text);padding:10px 14px;
-  border-radius:var(--r);border:1px solid var(--border);display:flex;align-items:center;gap:14px;
-  font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.45);pointer-events:auto;
-  animation:fadeUp .3s ease forwards;}
+.toast-msg{
+  background:var(--bg-elevated); color:var(--text); padding:0; border-radius:var(--r);
+  border:1px solid var(--border); font-size:13px; font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.45); pointer-events:auto;
+  animation:fadeUp .3s ease forwards; overflow:hidden; position:relative;
+}
+.toast-content {
+  display:flex; align-items:center; gap:14px; padding:10px 14px; width:100%; position:relative; z-index:2;
+}
 .toast-msg.success{border-color:color-mix(in srgb,var(--success) 30%,transparent);color:var(--success)}
 .toast-msg.error{border-color:color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)}
 .toast-msg .undo-btn{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);
   border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;margin-right:auto;border:none;font-family:inherit;}
 
+.undo-progress {
+  position:absolute; bottom:0; left:0; height:4px; background:currentColor; width:100%;
+  transform-origin:left; animation:shrinkBar 5s linear forwards; opacity:0.3; z-index:1;
+}
+@keyframes shrinkBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
 /* =========================================================
    EMPTY STATE
 ========================================================= */
-.empty-state{display:flex;flex-direction:column;align-items:center;
-  padding:48px 24px 32px;gap:16px;text-align:center}
-.empty-icon{width:56px;height:56px;border-radius:var(--r-lg);
-  background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 22%,transparent);
-  display:flex;align-items:center;justify-content:center}
+.empty-state{display:flex;flex-direction:column;align-items:center;padding:48px 24px 32px;gap:16px;text-align:center}
+.empty-icon{width:56px;height:56px;border-radius:var(--r-lg);background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 22%,transparent);display:flex;align-items:center;justify-content:center}
 .empty-icon svg{width:24px;height:24px;color:var(--warning)}
 .empty-title{font-size:15px;font-weight:700;color:var(--text)}
 .empty-sub{font-size:13px;color:var(--text-muted);line-height:1.5;max-width:260px}
@@ -289,12 +302,11 @@ select.edit-input{appearance:none}
 .empty-btn.primary{background:var(--accent);color:var(--bg)}
 .empty-btn.secondary{background:var(--bg-muted);color:var(--text-muted);border:1px solid var(--border)}
 .empty-btn svg{width:15px;height:15px}
-.add-fab{display:flex;align-items:center;gap:6px;margin:10px 12px 0;
-  padding:9px 14px;border-radius:var(--r-sm);border:1px dashed var(--border);
-  background:transparent;color:var(--text-muted);font-size:12px;font-weight:500;
-  cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;width:calc(100% - 24px)}
+.add-fab{display:flex;align-items:center;gap:6px;margin:10px 12px 0;padding:9px 14px;border-radius:var(--r-sm);border:1px dashed var(--border);
+  background:transparent;color:var(--text-muted);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;width:calc(100% - 24px)}
 .add-fab:hover{border-color:var(--accent);color:var(--accent)}
 .add-fab svg{width:14px;height:14px}
+
 /* =========================================================
    UPLOAD HINT GRID
 ========================================================= */
@@ -302,33 +314,25 @@ select.edit-input{appearance:none}
 .format-hint-item{padding:8px 10px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
 .format-hint-item strong{display:block;font-size:11px;color:var(--accent);margin-bottom:3px}
 .format-hint-item span{font-size:11px;color:var(--text-muted)}
+
 /* =========================================================
-   ANIMATIONS
+   ANIMATIONS & LOADING
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes shrinkBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp .25s ease both}
-/* =========================================================
-   LOADING
-========================================================= */
-.loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.loading-spinner{width:52px;height:52px;border-radius:var(--r-lg);
-  background:var(--accent-glow);border:1px solid var(--accent-border);
-  display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
+.loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.loading-spinner{width:52px;height:52px;border-radius:var(--r-lg);background:var(--accent-glow);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
 .loading-spinner svg{width:22px;height:22px;color:var(--accent)}
 .loading-label{font-size:13px;color:var(--text-muted);font-weight:500}
+
 /* =========================================================
-   EXPORT MODAL — extra section for CSV preview
+   EXPORT MODAL
 ========================================================= */
 .export-row{display:flex;flex-direction:column;gap:8px}
-.export-option{display:flex;align-items:center;gap:10px;padding:10px;
-  border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border);cursor:pointer;
-  transition:border-color .15s;text-decoration:none}
+.export-option{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border);cursor:pointer;transition:border-color .15s;text-decoration:none}
 .export-option:hover{border-color:var(--accent-border)}
-.export-option .eo-icon{width:32px;height:32px;border-radius:var(--r-sm);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center}
+.export-option .eo-icon{width:32px;height:32px;border-radius:var(--r-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .export-option .eo-icon svg{width:16px;height:16px}
 .export-option .eo-info .eo-title{font-size:13px;font-weight:600;color:var(--text)}
 .export-option .eo-info .eo-desc{font-size:11px;color:var(--text-muted);margin-top:2px}
@@ -371,7 +375,6 @@ select.edit-input{appearance:none}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
-          <span class="btn-tooltip" id="theme-tooltip">מצב בהיר</span>
         </button>
         <!-- Share -->
         <button class="icon-btn" id="btn-share" aria-label="שתף מסלול" style="display:none">
@@ -379,7 +382,6 @@ select.edit-input{appearance:none}
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
           </svg>
-          <span class="btn-tooltip">שתף מסלול</span>
         </button>
         <!-- Export -->
         <button class="icon-btn" id="btn-export" aria-label="ייצוא נתונים" style="display:none">
@@ -387,17 +389,15 @@ select.edit-input{appearance:none}
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
-          <span class="btn-tooltip">ייצוא נתונים</span>
         </button>
         <!-- Clear -->
         <button class="icon-btn danger" id="btn-clear" aria-label="מחק הכל" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
           </svg>
-          <span class="btn-tooltip">מחק הכל</span>
         </button>
         <!-- Upload -->
-        <button class="upload-btn" id="btn-upload" title="העלאת קבצים" aria-label="העלאת קבצים">
+        <button class="upload-btn" id="btn-upload" title="העלאת קבצים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
             <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
@@ -413,8 +413,8 @@ select.edit-input{appearance:none}
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
       </span>
-      <input id="search-input" type="search" placeholder="חיפוש חופשי במסלול, ציוד, טיפ..." autocomplete="off" aria-label="חיפוש" />
-      <button class="search-clear" id="search-clear" aria-label="נקה חיפוש">
+      <input id="search-input" type="search" placeholder="חיפוש חופשי במסלול, ציוד, טיפ..." autocomplete="off" />
+      <button class="search-clear" id="search-clear">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
@@ -422,8 +422,8 @@ select.edit-input{appearance:none}
     </div>
 
     <!-- Tab bar -->
-    <nav id="tab-bar" role="tablist" aria-label="ניווט ראשי">
-      <button class="tab-btn active" data-tab="itinerary" role="tab" aria-selected="true">
+    <nav id="tab-bar">
+      <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
           <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -431,28 +431,28 @@ select.edit-input{appearance:none}
         <span class="tab-lbl">מסלול</span>
         <span class="tab-count" id="count-itinerary">0</span>
       </button>
-      <button class="tab-btn" data-tab="options" role="tab" aria-selected="false">
+      <button class="tab-btn" data-tab="options">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
         <span class="tab-lbl">אופציות</span>
         <span class="tab-count" id="count-options">0</span>
       </button>
-      <button class="tab-btn" data-tab="checklist" role="tab" aria-selected="false">
+      <button class="tab-btn" data-tab="checklist">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
         <span class="tab-lbl">צ'ק ליסט</span>
         <span class="tab-count" id="count-checklist">0</span>
       </button>
-      <button class="tab-btn" data-tab="tips" role="tab" aria-selected="false">
+      <button class="tab-btn" data-tab="tips">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
         </svg>
         <span class="tab-lbl">טיפים</span>
         <span class="tab-count" id="count-tips">0</span>
       </button>
-      <button class="tab-btn" data-tab="dictionary" role="tab" aria-selected="false">
+      <button class="tab-btn" data-tab="dictionary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
         </svg>
@@ -462,7 +462,7 @@ select.edit-input{appearance:none}
     </nav>
 
     <!-- Stats bar -->
-    <div class="stats-bar" id="stats-bar" style="display:none" role="region" aria-label="סטטיסטיקות">
+    <div class="stats-bar" id="stats-bar" style="display:none">
       <div class="stat-item accent">
         <span class="stat-num" id="stat-attractions">0</span>
         <span class="stat-lbl">אטרקציות</span>
@@ -484,11 +484,11 @@ select.edit-input{appearance:none}
 
   <!-- TAB PANELS -->
   <main id="tab-content">
-    <div id="panel-itinerary" role="tabpanel"></div>
-    <div id="panel-options"   role="tabpanel" style="display:none"></div>
-    <div id="panel-checklist" role="tabpanel" style="display:none"></div>
-    <div id="panel-tips"      role="tabpanel" style="display:none"></div>
-    <div id="panel-dictionary" role="tabpanel" style="display:none"></div>
+    <div id="panel-itinerary"></div>
+    <div id="panel-options"   style="display:none"></div>
+    <div id="panel-checklist" style="display:none"></div>
+    <div id="panel-tips"      style="display:none"></div>
+    <div id="panel-dictionary" style="display:none"></div>
   </main>
 </div>
 
@@ -505,7 +505,7 @@ select.edit-input{appearance:none}
 </div>
 
 <!-- =========================================================
-     STACKING TOAST CONTAINER
+     STACKING TOAST CONTAINER (WITH PROGRESS BAR)
 ========================================================= -->
 <div id="toast-container"></div>
 
@@ -527,7 +527,7 @@ select.edit-input{appearance:none}
      UPLOAD MODAL
 ========================================================= -->
 <div class="modal-overlay hidden" id="modal-upload">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-label="העלאת קבצים">
+  <div class="modal-box">
     <div class="modal-drag-handle"></div>
     <div class="modal-title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--accent)">
@@ -579,7 +579,7 @@ select.edit-input{appearance:none}
      EXPORT MODAL
 ========================================================= -->
 <div class="modal-overlay hidden" id="modal-export">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-label="ייצוא נתונים">
+  <div class="modal-box">
     <div class="modal-drag-handle"></div>
     <div class="modal-title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;color:var(--accent)">
@@ -649,14 +649,14 @@ select.edit-input{appearance:none}
      EDIT MODAL
 ========================================================= -->
 <div class="modal-overlay hidden" id="modal-edit">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-label="עריכת פריט" id="edit-modal-box">
+  <div class="modal-box" id="edit-modal-box">
     <div class="modal-drag-handle"></div>
     <div class="modal-title" id="edit-modal-title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;color:var(--accent)">
         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
       </svg>
-      עריכת פריט
+      <span>עריכת פריט</span>
     </div>
     <div id="edit-form-body"></div>
     <p style="font-size:11px;color:var(--text-dim);margin-top:8px">
@@ -686,12 +686,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v12';
-const LS_COMPLETED = 'tripmh_completed_v12';
-const LS_BOOKED    = 'tripmh_booked_v12';
-const LS_EXPANDED  = 'tripmh_expanded_v12';
-const LS_TAB       = 'tripmh_tab_v12';
-const LS_DARK      = 'tripmh_dark_v12';
+const LS_DATA      = 'tripmh_data_v15';
+const LS_COMPLETED = 'tripmh_completed_v15';
+const LS_BOOKED    = 'tripmh_booked_v15';
+const LS_EXPANDED  = 'tripmh_expanded_v15';
+const LS_TAB       = 'tripmh_tab_v15';
+const LS_DARK      = 'tripmh_dark_v15';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -732,23 +732,35 @@ function persistState() {
 }
 
 /* =========================================================
-   STACKING TOASTS
+   STACKING TOASTS WITH ANIMATION
 ========================================================= */
 function addToast(msg, type = 'neutral', undoCallback = null) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `toast-msg ${type}`;
-  toast.innerHTML = `<span>${msg}</span>${undoCallback ? `<button class="undo-btn">בטל</button>` : ''}`;
   
+  toast.innerHTML = `
+    <div class="toast-content">
+      <span>${msg}</span>
+      ${undoCallback ? `<button class="undo-btn">בטל</button>` : ''}
+    </div>
+    ${undoCallback ? `<div class="undo-progress"></div>` : ''}
+  `;
+  
+  let timeoutId;
+
   if (undoCallback) {
     toast.querySelector('.undo-btn').addEventListener('click', () => {
       undoCallback();
+      clearTimeout(timeoutId);
       toast.remove();
     });
   }
   
   container.prepend(toast);
-  setTimeout(() => {
+  
+  // 5000ms = 5 seconds to match the CSS shrinkBar animation
+  timeoutId = setTimeout(() => {
     if (toast.parentNode) {
       toast.style.opacity = '0';
       toast.style.transform = 'translateY(20px)';
@@ -771,6 +783,24 @@ function showConfirm(title, text, onConfirm, isDanger=false) {
   btnC.onclick = () => { onConfirm(); m.classList.add('hidden'); };
   document.getElementById('mc-btn-cancel').onclick = () => m.classList.add('hidden');
   m.classList.remove('hidden');
+}
+
+/* =========================================================
+   SMART LINKS
+========================================================= */
+function getSmartLinkLabel(url, label) {
+  if (label && label !== 'מידע נוסף' && label !== 'למידע נוסף') return label; // Trust the user if explicitly provided
+  if (!url) return 'מידע נוסף';
+  const u = url.toLowerCase();
+  
+  if (u.includes('mailto:')) return 'שליחת אימייל';
+  if (u.includes('booking.com') || u.includes('agoda.com') || u.includes('airbnb') || u.includes('hotels.com')) return 'הזמנת לינה / מלון';
+  if (u.includes('klook.com') || u.includes('getyourguide') || u.includes('kkday')) return 'הזמנת אטרקציה / כרטיסים';
+  if (u.includes('lawson') || u.includes('eplus') || u.includes('ticket') || u.includes('pia.jp') || u.includes('l-tike')) return 'רכישת כרטיסים להופעה';
+  if (u.includes('tabelog') || u.includes('tripadvisor') || u.includes('google.com/maps')) return 'ביקורות ומידע על המקום';
+  if (u.includes('instagram.com') || u.includes('facebook.com') || u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
+  
+  return 'האתר הרשמי';
 }
 
 /* =========================================================
@@ -820,14 +850,21 @@ function parseCSV(raw) {
 ========================================================= */
 const ALIASES = {
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
-  task:      ['משימה', 'פריט', 'ציוד', 'task', 'item', 'שם'],
+  task:      ['משימה', 'פריט', 'ציוד', 'task', 'item'],
   day:       ['יום','day'],
   date:      ['תאריך','date'],
   time:      ['שעות','זמן פתיחה','מתי','time','טווח שעות','שעת פתיחה','opening hours'],
   dur:       ['משך','זמן מוערך','duration','זמן ביקור'],
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
+  
+  // NEW ALIASES TO CATCH ALL BOOKING & CHECK-IN/OUT FIELDS
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation'],
+  bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
+  bookWhen:  ['מתי להזמין','זמן מומלץ להזמנה','תזמון'],
+  checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה'],
+  checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה'],
+  
   desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
   area:      ['אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood'],
   category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
@@ -896,8 +933,8 @@ function detectIcon(text) {
   if (/כנסיה|church|cathedral/.test(t))                      return '⛪';
   return '📍';
 }
-function needsBooking(book, desc) {
-  const b = (book||'').trim().toLowerCase();
+function needsBooking(bookText, desc) {
+  const b = (bookText||'').trim().toLowerCase();
   const d = (desc||'').toLowerCase();
   if (!b) return false;
   if (/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(b)) return false;
@@ -922,12 +959,16 @@ function buildDailyRouteUrl(items) {
   if (wps.length) url += `&waypoints=${wps.join('|')}`;
   return url;
 }
+
+// Fixed Cost Formatting - only show ₪ if there is an actual number!
 function formatCost(s) {
   if (!s) return '';
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
-  return c ? '₪'+c : '';
+  if (!/\d/.test(c)) return c; // Just text (e.g. "כלול בפס", "כבר שולם") - no currency symbol needed
+  return '₪' + c;
 }
+
 function formatTime(s) {
   if (!s) return '';
   return s.replace(/[\u2013\u2014\u2012\u2010\u2011\uFE58\uFE63\uFF0D]/g,' – ')
@@ -975,6 +1016,7 @@ async function readFileText(f) {
   }
 }
 
+// SMART DEDUPLICATION: Includes place, day, AND time to prevent losing items (111 -> 107 fix)
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) arr[idx] = { ...arr[idx], ...newItem, id: arr[idx].id };
@@ -1015,8 +1057,20 @@ async function processFiles(files) {
       hdrs.forEach((h,j) => { obj[h] = rows[ri][j] ?? ''; });
 
       const place = getCol(obj,'place'), day = getCol(obj,'day'), date = getCol(obj,'date');
-      const desc  = getCol(obj,'desc'),  area = getCol(obj,'area'), book = getCol(obj,'book');
-      const link  = getCol(obj,'link'),  catCol = getCol(obj,'category');
+      const desc  = getCol(obj,'desc'),  area = getCol(obj,'area'), catCol = getCol(obj,'category');
+      const link  = getCol(obj,'link');
+      
+      // BOOKING AND CHECK-IN LOGIC
+      const bBase = getCol(obj,'book');
+      const bHow  = getCol(obj,'bookHow');
+      const bWhen = getCol(obj,'bookWhen');
+      const finalBooking = [bBase, bHow, bWhen].filter(Boolean).join(' | ');
+      
+      const checkIn  = getCol(obj,'checkIn');
+      const checkOut = getCol(obj,'checkOut');
+
+      const rawTime = getCol(obj,'time');
+      const timeStr = formatTime(rawTime);
 
       if (fileType === 'dictionary') {
         const hebrew = getCol(obj, 'hebrew') || place;
@@ -1031,7 +1085,7 @@ async function processFiles(files) {
             stats.added++;
         }
       } else if (fileType === 'checklist') {
-        const taskTitle = getCol(obj, 'task'); // Prioritize explicit task column
+        const taskTitle = getCol(obj, 'task') || place; 
         if (taskTitle) {
             mergeItem(state.data.checklist, {
                 id: genId(), type: 'task', _idx: ri,
@@ -1048,7 +1102,7 @@ async function processFiles(files) {
           const content = desc || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
           mergeItem(state.data.tips, {
             id:genId(), type:'tip', _idx:ri, title, content, category: catCol || area || 'כללי',
-            link, linkLabel: getCol(obj,'linkLabel') || 'למידע נוסף', icon:'💡'
+            link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')), icon:'💡'
           }, x => x.title === title);
           stats.added++;
         }
@@ -1058,15 +1112,17 @@ async function processFiles(files) {
         const item = {
           id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
           placeName: place || 'ללא שם', dayLabel: rawDay, dateVal: parseDateVal(rawDay),
-          description: desc, timeRange: formatTime(getCol(obj,'time')),
-          duration: getCol(obj,'dur'), cost: getCol(obj,'cost'), transport: getCol(obj,'trans'),
-          booking: book, area, link, linkLabel: getCol(obj,'linkLabel') || 'מידע נוסף',
-          requiresBooking: needsBooking(book, desc),
+          description: desc, timeRange: timeStr,
+          duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
+          booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, 
+          link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
+          requiresBooking: needsBooking(finalBooking, desc),
           icon: detectIcon([place, desc, area].join(' ')),
           mapUrl: buildMapUrl(place || 'ללא שם', area),
         };
         const dest = isOpt ? state.data.options : state.data.itinerary;
-        mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay);
+        // Fix: Deduplication now requires the same place, same day, AND same time. Prevents data loss (111 items issue)
+        mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr);
         stats.added++;
       }
     }
@@ -1131,14 +1187,14 @@ function exportCSV() {
       csv += csvRow(['משימה','תיאור','קטגוריה','הושלם']);
       items.forEach(i => csv += csvRow([i.title, i.description, i.category, state.completedIds.has(i.id)?'כן':'לא']));
   } else {
-      const hdrs = ['סוג','יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','הזמנה','אזור / כתובת','תיאור','קישור','שם הקישור','מפה','הושלם','קטגוריה','תוכן הטיפ'];
+      const hdrs = ['סוג','יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה (מתי ואיך)','אזור / כתובת','תיאור','קישור','שם הקישור','מפה','הושלם','קטגוריה','תוכן הטיפ'];
       csv += csvRow(hdrs);
       items.forEach(item => {
         csv += csvRow([
           item.type === 'itinerary' ? 'מסלול' : item.type === 'option' ? 'אופציה' : 'טיפ',
           item.dayLabel || '', item.type === 'tip' ? item.title : item.placeName,
           item.type === 'tip' ? '💡' : item.icon || '📍', item.timeRange || '', item.duration || '',
-          item.cost || '', item.transport || '', item.booking || '', item.area || '',
+          item.cost || '', item.transport || '', item.checkIn || '', item.checkOut || '', item.booking || '', item.area || '',
           item.type === 'tip' ? item.content : item.description, item.link || '', item.linkLabel || '',
           item.mapUrl || '', state.completedIds.has(item.id) ? 'כן' : 'לא', item.type === 'tip' ? item.category : '',
           item.type === 'tip' ? item.content : ''
@@ -1172,8 +1228,7 @@ function exportTxt() {
           } else {
             let ln = `  ${i.icon} ${i.placeName}`;
             if (i.timeRange) ln += ` (${i.timeRange})`;
-            const cost = formatCost(i.cost);
-            if (cost) ln += ` – ${cost}`;
+            if (i.cost) ln += ` – ${i.cost}`;
             text += ln + '\n';
           }
         });
@@ -1190,7 +1245,7 @@ function exportTxt() {
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 4, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 5, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
@@ -1305,7 +1360,9 @@ function renderTripCard(item, q) {
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
-  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}${advanceNotice ? ' <strong style="color:var(--danger)">('+advanceNotice+')</strong>' : ''}</span></div>` : '';
+  const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
+  const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
+  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">פרטי הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}</span></div>` : '';
   const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
@@ -1331,7 +1388,7 @@ function renderTripCard(item, q) {
   <div class="card-details">
     <div class="details-divider"></div>
     ${item.description ? `<p class="card-desc">${hlHtml(item.description,q)}</p>` : ''}
-    ${bookingRow}${transRow}
+    ${ciRow}${coRow}${bookingRow}${transRow}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
 </article>`;
@@ -1494,7 +1551,6 @@ function updateUI() {
   document.getElementById('count-itinerary').textContent = d.itinerary.length;
   document.getElementById('count-options').textContent   = d.options.length;
   
-  // Safe updates for new tabs (in case ID doesn't exist, though it should based on our HTML)
   const cc = document.getElementById('count-checklist'); if (cc) cc.textContent = d.checklist.length;
   const ct = document.getElementById('count-tips'); if (ct) ct.textContent = d.tips.length;
   const cd = document.getElementById('count-dictionary'); if (cd) cd.textContent = d.dictionary.length;
@@ -1505,19 +1561,13 @@ function updateUI() {
 
   const hasData = d.itinerary.length || d.options.length || d.tips.length || d.checklist.length || d.dictionary.length;
 
-  // Header buttons visibility
   document.getElementById('pill-counter').style.display = totalItems > 0 ? 'flex' : 'none';
   document.getElementById('pill-text').textContent = `${totalCompleted}/${totalItems}`;
   
-  // Cleanly handle logo-sub visibility if it exists (prevents the crash you experienced)
-  const logoSub = document.getElementById('logo-sub');
-  if (logoSub) logoSub.style.display = hasData ? 'none' : 'block';
-
   for (const id of ['btn-share','btn-export','btn-clear']) {
     document.getElementById(id).style.display = hasData ? 'flex' : 'none';
   }
 
-  // Stats bar
   document.getElementById('stats-bar').style.display = hasData ? 'flex' : 'none';
   document.getElementById('stat-attractions').textContent = d.itinerary.length + d.options.length;
   document.getElementById('stat-done').textContent        = totalCompleted;
@@ -1539,42 +1589,6 @@ function setTab(tab) {
     const p = document.getElementById('panel-'+t);
     if (p) p.style.display = t === tab ? 'block' : 'none';
   });
-  persistState();
-}
-
-/* =========================================================
-   COMPLETE TOGGLE
-========================================================= */
-function toggleComplete(id) {
-  const wasCompleted = state.completedIds.has(id);
-  if (wasCompleted) state.completedIds.delete(id);
-  else state.completedIds.add(id);
-  addToast(wasCompleted ? 'הוסר סימון הושלם' : 'סומן כהושלם', 'neutral', () => {
-    if (wasCompleted) state.completedIds.add(id);
-    else state.completedIds.delete(id);
-    updateUI(); persistState();
-  });
-  updateUI();
-  persistState();
-}
-function completeAllInGroup(idsCsv) {
-  const ids = String(idsCsv).split(',').map(s => s.trim()).filter(Boolean);
-  ids.forEach(id => state.completedIds.add(id));
-  addToast(`${ids.length} פריטים סומנו כהושלמו`, 'neutral', () => {
-    ids.forEach(id => state.completedIds.delete(id));
-    updateUI(); persistState();
-  });
-  updateUI();
-  persistState();
-}
-
-/* =========================================================
-   EXPAND TOGGLE
-========================================================= */
-function toggleExpand(id) {
-  if (state.expandedIds.has(id)) state.expandedIds.delete(id);
-  else state.expandedIds.add(id);
-  updateUI();
   persistState();
 }
 
@@ -1611,13 +1625,17 @@ function buildEditForm(item) {
   <div class="edit-group"><label class="edit-label">יום / תאריך</label><input class="edit-input" id="ef-dayLabel" value="${escHtml(item.dayLabel)}" autocomplete="off" /></div>
   <div class="edit-group"><label class="edit-label">שעות פעילות</label><input class="edit-input" id="ef-timeRange" value="${escHtml(item.timeRange)}" autocomplete="off" /></div>
 </div>
+<div class="edit-row">
+  <div class="edit-group"><label class="edit-label">צ'ק-אין / קבלת חדרים</label><input class="edit-input" id="ef-checkIn" value="${escHtml(item.checkIn)}" autocomplete="off" placeholder="15:00" /></div>
+  <div class="edit-group"><label class="edit-label">צ'ק-אאוט / פינוי</label><input class="edit-input" id="ef-checkOut" value="${escHtml(item.checkOut)}" autocomplete="off" placeholder="11:00" /></div>
+</div>
 <div class="edit-group"><label class="edit-label">תיאור ופרטים</label><textarea class="edit-input" id="ef-description" rows="3">${escHtml(item.description)}</textarea></div>
 <div class="edit-row">
   <div class="edit-group"><label class="edit-label">עלות</label><input class="edit-input" id="ef-cost" value="${escHtml(item.cost)}" autocomplete="off" /></div>
   <div class="edit-group"><label class="edit-label">משך ביקור</label><input class="edit-input" id="ef-duration" value="${escHtml(item.duration)}" autocomplete="off" /></div>
 </div>
 <div class="edit-group"><label class="edit-label">תחבורה / הגעה</label><input class="edit-input" id="ef-transport" value="${escHtml(item.transport)}" autocomplete="off" /></div>
-<div class="edit-group"><label class="edit-label">הזמנה / כרטיסים</label><input class="edit-input" id="ef-booking" value="${escHtml(item.booking)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">פרטי הזמנה (מתי, איך ואיפה משריינים)</label><input class="edit-input" id="ef-booking" value="${escHtml(item.booking)}" autocomplete="off" /></div>
 <div class="edit-group"><label class="edit-label">כתובת / מיקום לניווט</label><input class="edit-input" id="ef-area" value="${escHtml(item.area)}" autocomplete="off" /></div>
 <div class="edit-row"><div class="edit-group"><label class="edit-label">קישור</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" type="url" /></div><div class="edit-group" style="flex:0 0 140px"><label class="edit-label">שם הקישור</label><input class="edit-input" id="ef-linkLabel" value="${escHtml(item.linkLabel)}" /></div></div>
 <div class="edit-group">
@@ -1636,11 +1654,12 @@ function readEditForm(item) {
   if (item.type === 'tip') return { ...item, title:g('ef-title'), category:g('ef-category'), content:g('ef-content'), link:g('ef-link'), linkLabel:g('ef-linkLabel') };
 
   const type = (document.getElementById('ef-type')?.value) || item.type;
+  const link = g('ef-link');
   const updated = {
     ...item, type,
     placeName:g('ef-placeName'), icon:g('ef-icon') || '📍', dayLabel:g('ef-dayLabel'), dateVal:parseDateVal(g('ef-dayLabel')),
-    timeRange:g('ef-timeRange'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
-    transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:g('ef-link'), linkLabel:g('ef-linkLabel'),
+    timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
+    transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
   };
   updated.mapUrl = buildMapUrl(updated.placeName, updated.area);
   updated.requiresBooking = needsBooking(updated.booking, updated.description);
@@ -1654,7 +1673,7 @@ function openEdit(id) {
   if (!item) return;
   state.editItem = { ...item };
   state.editIsNew = false;
-  document.getElementById('edit-modal-title').innerHTML = `${svgIcon('edit')} עריכת פריט`;
+  document.getElementById('edit-modal-title').innerHTML = `${svgIcon('edit')} <span>עריכת פריט</span>`;
   document.getElementById('edit-form-body').innerHTML = buildEditForm(item);
   document.getElementById('edit-delete').style.display = 'flex';
   document.getElementById('modal-edit').classList.remove('hidden');
@@ -1667,12 +1686,12 @@ function openAdd(type) {
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
   else {
-    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍', mapUrl:'' });
+    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍', mapUrl:'' });
   }
   
   state.editItem = item;
   state.editIsNew = true;
-  document.getElementById('edit-modal-title').innerHTML = `${svgIcon('plus')} הוספת פריט חדש`;
+  document.getElementById('edit-modal-title').innerHTML = `${svgIcon('plus')} <span>הוספת פריט חדש</span>`;
   document.getElementById('edit-form-body').innerHTML = buildEditForm(item);
   document.getElementById('edit-delete').style.display = 'none';
   document.getElementById('modal-edit').classList.remove('hidden');
@@ -1733,7 +1752,6 @@ function applyTheme(dark) {
   document.documentElement.classList.toggle('dark',  dark);
   document.documentElement.classList.toggle('light', !dark);
   document.getElementById('theme-meta').content = dark ? '#0c0f14' : '#f2f4f8';
-  document.getElementById('theme-tooltip').textContent = dark ? 'מצב בהיר' : 'מצב כהה';
 }
 
 /* =========================================================
@@ -1810,7 +1828,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (result.added === 0) {
           addToast('לא נמצאו פריטים חדשים להוספה.', 'neutral');
       } else {
-          // This block hits if JSON was loaded successfully
           addToast('נתוני הגיבוי נטענו בהצלחה.', 'success');
       }
 
