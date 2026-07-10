@@ -165,10 +165,18 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card.done{opacity:.46;filter:saturate(.35)}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
-.card-booking-bar{display:flex;align-items:center;gap:6px;padding:5px 12px;
-  background:var(--danger-glow);border-bottom:1px solid rgba(248,113,113,.18)}
-.card-booking-bar svg{width:12px;height:12px;color:var(--danger);flex-shrink:0}
-.card-booking-bar span{font-size:11px;font-weight:600;color:var(--danger)}
+.card-booking-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px; border-bottom:1px solid;}
+.card-booking-bar.unbooked {background:var(--danger-glow); border-color:rgba(248,113,113,.18);}
+.card-booking-bar.booked {background:var(--success-glow); border-color:rgba(74,222,128,.18);}
+.booking-info{display:flex;align-items:center;gap:6px;}
+.booking-info svg{width:12px;height:12px;flex-shrink:0}
+.unbooked .booking-info{color:var(--danger);}
+.booked .booking-info{color:var(--success);}
+.booking-info span{font-size:11px;font-weight:600;}
+.book-toggle-btn{background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:10px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:4px; transition:opacity .2s;}
+.book-toggle-btn:hover{opacity:.85;}
+.unbooked .book-toggle-btn{border-color:var(--danger); color:var(--danger);}
+.booked .book-toggle-btn{border-color:var(--success); color:var(--success);}
 .card-body{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 11px;cursor:pointer;user-select:none}
 .card-check{flex-shrink:0;margin-top:1px;width:24px;height:24px;border-radius:50%;
   border:2px solid var(--border);background:none;cursor:pointer;
@@ -214,14 +222,17 @@ html.light mark{background:rgba(217,119,6,.22)}
    MODALS
 ========================================================= */
 .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);
-  backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:0}
+  backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:0; transition:opacity .2s;}
 @media(min-height:600px){.modal-overlay{align-items:center;padding:24px 16px}}
-.modal-overlay.hidden{display:none}
+.modal-overlay.hidden{opacity:0; pointer-events:none;}
 .modal-box{width:100%;max-width:448px;background:var(--bg-card);border:1px solid var(--border);
   border-radius:var(--r-xl) var(--r-xl) 0 0;padding:20px 20px 32px;
-  max-height:92dvh;overflow-y:auto;animation:slideUp .2s ease}
-@media(min-height:600px){.modal-box{border-radius:var(--r-xl);padding:20px}}
-@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+  max-height:92dvh;overflow-y:auto; transition:transform .2s ease;}
+.modal-overlay.hidden .modal-box {transform:translateY(100%);}
+@media(min-height:600px){
+  .modal-box{border-radius:var(--r-xl);}
+  .modal-overlay.hidden .modal-box {transform:translateY(24px) scale(0.95);}
+}
 .modal-drag-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:-4px auto 14px}
 @media(min-height:600px){.modal-drag-handle{display:none}}
 .modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;
@@ -245,33 +256,21 @@ textarea.edit-input{resize:vertical;min-height:72px}
 select.edit-input{appearance:none}
 .edit-row{display:flex;gap:10px}
 .edit-row .edit-group{flex:1;margin-bottom:0}
+
 /* =========================================================
-   UNDO TOAST
+   STACKABLE TOASTS
 ========================================================= */
-.undo-toast{position:fixed;bottom:20px;left:50%;
-  transform:translateX(-50%) translateY(100px);background:var(--bg-elevated);color:var(--text);
-  padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);
-  display:flex;align-items:center;gap:14px;font-size:13px;font-weight:600;
-  box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:1000;opacity:0;pointer-events:none;
-  transition:transform .4s cubic-bezier(.175,.885,.32,1.275),opacity .3s;
-  overflow:hidden;width:90%;max-width:320px}
-.undo-toast.visible{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
-.undo-btn{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);
-  border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;
-  transition:background .2s;margin-right:auto;font-family:inherit}
-.undo-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--accent);width:100%;transform-origin:left}
-.undo-toast.visible .undo-progress{animation:shrinkBar 10s linear forwards}
-/* =========================================================
-   GENERIC TOAST
-========================================================= */
-.toast-notification{position:fixed;top:72px;left:50%;
-  transform:translateX(-50%) translateY(-20px);background:var(--bg-elevated);color:var(--text);
-  padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);
-  font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.4);
-  z-index:1001;opacity:0;pointer-events:none;transition:transform .3s ease,opacity .3s;white-space:nowrap}
-.toast-notification.visible{transform:translateX(-50%) translateY(0);opacity:1}
-.toast-notification.success{border-color:color-mix(in srgb,var(--success) 30%,transparent);color:var(--success)}
-.toast-notification.error{border-color:color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)}
+#toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;gap:8px;z-index:9999;width:90%;max-width:320px;pointer-events:none;}
+.toast-msg{background:var(--bg-elevated);color:var(--text);padding:10px 14px;
+  border-radius:var(--r);border:1px solid var(--border);display:flex;align-items:center;gap:14px;
+  font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.45);pointer-events:auto;
+  animation:fadeUp .3s ease forwards;}
+.toast-msg.success{border-color:color-mix(in srgb,var(--success) 30%,transparent);color:var(--success)}
+.toast-msg.error{border-color:color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)}
+.toast-msg .undo-btn{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);
+  border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;margin-right:auto;border:none;font-family:inherit;}
+
 /* =========================================================
    EMPTY STATE
 ========================================================= */
@@ -308,12 +307,12 @@ select.edit-input{appearance:none}
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes shrinkBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp .25s ease both}
 /* =========================================================
    LOADING
 ========================================================= */
-.loading-overlay{position:fixed;inset:0;z-index:999;background:var(--bg);
+.loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .loading-spinner{width:52px;height:52px;border-radius:var(--r-lg);
   background:var(--accent-glow);border:1px solid var(--accent-border);
@@ -323,9 +322,6 @@ select.edit-input{appearance:none}
 /* =========================================================
    EXPORT MODAL — extra section for CSV preview
 ========================================================= */
-.csv-preview{background:var(--bg-muted);border:1px solid var(--border);border-radius:var(--r-sm);
-  padding:10px;font-size:11px;color:var(--text-muted);font-family:'Courier New',monospace;
-  overflow-x:auto;white-space:pre;max-height:140px;overflow-y:auto;margin-bottom:12px;direction:ltr;text-align:left}
 .export-row{display:flex;flex-direction:column;gap:8px}
 .export-option{display:flex;align-items:center;gap:10px;padding:10px;
   border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border);cursor:pointer;
@@ -340,11 +336,19 @@ select.edit-input{appearance:none}
 .eo-json .eo-icon{background:var(--accent-glow);color:var(--accent)}
 .eo-kml .eo-icon{background:var(--warning-glow);color:var(--warning)}
 .eo-txt .eo-icon{background:var(--purple-glow);color:var(--purple)}
+
+/* Confirm Modal Specific */
+#modal-confirm .modal-box { max-width: 320px; margin: 0 auto; text-align: center; padding-bottom: 24px; }
+#modal-confirm .modal-title { justify-content: center; }
 </style>
 </head>
 <body>
 
+<!-- =========================================================
+     APP SHELL
+========================================================= -->
 <div id="app">
+  <!-- HEADER -->
   <header id="app-header">
     <div class="header-top">
       <div class="logo">
@@ -362,12 +366,14 @@ select.edit-input{appearance:none}
           <div class="dot"></div>
           <span id="pill-text">0/0</span>
         </div>
+        <!-- Theme toggle -->
         <button class="icon-btn" id="btn-theme" aria-label="שנה ערכת צבעים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
           <span class="btn-tooltip" id="theme-tooltip">מצב בהיר</span>
         </button>
+        <!-- Share -->
         <button class="icon-btn" id="btn-share" aria-label="שתף מסלול" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -375,6 +381,7 @@ select.edit-input{appearance:none}
           </svg>
           <span class="btn-tooltip">שתף מסלול</span>
         </button>
+        <!-- Export -->
         <button class="icon-btn" id="btn-export" aria-label="ייצוא נתונים" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -382,12 +389,14 @@ select.edit-input{appearance:none}
           </svg>
           <span class="btn-tooltip">ייצוא נתונים</span>
         </button>
+        <!-- Clear -->
         <button class="icon-btn danger" id="btn-clear" aria-label="מחק הכל" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
           </svg>
           <span class="btn-tooltip">מחק הכל</span>
         </button>
+        <!-- Upload -->
         <button class="upload-btn" id="btn-upload" title="העלאת קבצים" aria-label="העלאת קבצים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
@@ -397,14 +406,14 @@ select.edit-input{appearance:none}
       </div>
     </div>
 
+    <!-- Search -->
     <div class="search-wrap">
       <span class="search-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
       </span>
-      <input id="search-input" type="search" placeholder="חיפוש חופשי במסלול..."
-        autocomplete="off" aria-label="חיפוש" />
+      <input id="search-input" type="search" placeholder="חיפוש חופשי במסלול, ציוד, טיפ..." autocomplete="off" aria-label="חיפוש" />
       <button class="search-clear" id="search-clear" aria-label="נקה חיפוש">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -412,6 +421,7 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
+    <!-- Tab bar -->
     <nav id="tab-bar" role="tablist" aria-label="ניווט ראשי">
       <button class="tab-btn active" data-tab="itinerary" role="tab" aria-selected="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -451,6 +461,7 @@ select.edit-input{appearance:none}
       </button>
     </nav>
 
+    <!-- Stats bar -->
     <div class="stats-bar" id="stats-bar" style="display:none" role="region" aria-label="סטטיסטיקות">
       <div class="stat-item accent">
         <span class="stat-num" id="stat-attractions">0</span>
@@ -471,6 +482,7 @@ select.edit-input{appearance:none}
     </div>
   </header>
 
+  <!-- TAB PANELS -->
   <main id="tab-content">
     <div id="panel-itinerary" role="tabpanel"></div>
     <div id="panel-options"   role="tabpanel" style="display:none"></div>
@@ -480,6 +492,9 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
+<!-- =========================================================
+     LOADING OVERLAY
+========================================================= -->
 <div class="loading-overlay" id="loading-overlay" style="display:none">
   <div class="loading-spinner">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -489,19 +504,28 @@ select.edit-input{appearance:none}
   <p class="loading-label">מעבד קבצים...</p>
 </div>
 
-<div class="undo-toast" id="undo-toast" role="status" aria-live="polite">
-  <span id="undo-label"></span>
-  <button class="undo-btn" id="undo-btn">בטל</button>
-  <button id="undo-dismiss" style="background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0 2px;margin-right:-4px" aria-label="סגור">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px">
-      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  </button>
-  <div class="undo-progress"></div>
+<!-- =========================================================
+     STACKING TOAST CONTAINER
+========================================================= -->
+<div id="toast-container"></div>
+
+<!-- =========================================================
+     CONFIRM MODAL (For deletion / actions)
+========================================================= -->
+<div class="modal-overlay hidden" id="modal-confirm">
+  <div class="modal-box">
+    <div class="modal-title" id="mc-title">אישור פעולה</div>
+    <p class="modal-subtitle" id="mc-text" style="text-align:center;">האם אתה בטוח?</p>
+    <div class="btn-row">
+      <button class="btn-primary" id="mc-btn-confirm">אישור</button>
+      <button class="btn-cancel" id="mc-btn-cancel">ביטול</button>
+    </div>
+  </div>
 </div>
 
-<div class="toast-notification" id="gen-toast" role="status" aria-live="polite"></div>
-
+<!-- =========================================================
+     UPLOAD MODAL
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-upload">
   <div class="modal-box" role="dialog" aria-modal="true" aria-label="העלאת קבצים">
     <div class="modal-drag-handle"></div>
@@ -510,17 +534,16 @@ select.edit-input{appearance:none}
         <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
         <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
       </svg>
-      העלאת קבצי מסלול
+      העלאת נתונים
     </div>
     <p class="modal-subtitle">
-      המערכת מזהה אוטומטית את סוג הקובץ לפי שמו ולפי כותרות העמודות,
-      ו<strong>מוסיפה</strong> את הנתונים לקיימים — ניתן להעלות כל קובץ בנפרד.
-      מומלץ לשם הקובץ להכיל: <strong>מסלול</strong>, <strong>אופציות</strong>, <strong>צ'ק ליסט</strong>, <strong>טיפים</strong> או <strong>מילון</strong>.
+      המערכת מזהה אוטומטית את סוג הקובץ. ניתן להעלות מסלול, אופציות, צ'ק ליסט, טיפים ומילון. 
+      <strong>כפילויות יעודכנו אוטומטית.</strong>
     </p>
     <div class="format-hint-grid">
       <div class="format-hint-item">
         <strong>מסלול.csv</strong>
-        <span>יום, שם המקום, שעות, עלות, תחבורה...</span>
+        <span>יום, אטרקציה, שעות, תחבורה...</span>
       </div>
       <div class="format-hint-item">
         <strong>צ'ק ליסט.csv</strong>
@@ -532,11 +555,11 @@ select.edit-input{appearance:none}
       </div>
       <div class="format-hint-item">
         <strong>מילון.csv</strong>
-        <span>עברית, יפנית, הגייה, הקשר</span>
+        <span>עברית, שפה זרה, הגייה, הקשר</span>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-primary" id="modal-pick-csv">העלה קבצי CSV</button>
+      <button class="btn-primary" id="modal-pick-csv">העלה קובץ CSV</button>
       <button class="btn-cancel" id="modal-pick-json" title="ייבוא גיבוי JSON" style="flex:0 0 auto;padding:10px 14px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
           <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
@@ -552,6 +575,9 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- =========================================================
+     EXPORT MODAL
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-export">
   <div class="modal-box" role="dialog" aria-modal="true" aria-label="ייצוא נתונים">
     <div class="modal-drag-handle"></div>
@@ -571,8 +597,8 @@ select.edit-input{appearance:none}
           </svg>
         </div>
         <div class="eo-info">
-          <div class="eo-title">ייצוא CSV — הלשונית הנוכחית</div>
-          <div class="eo-desc">מייצא לאקסל את כל הנתונים שמוצגים כעת בלשונית הפתוחה.</div>
+          <div class="eo-title">ייצוא ל-CSV — לפי הלשונית הפתוחה</div>
+          <div class="eo-desc">מוריד קובץ אקסל רגיל של הנתונים מהלשונית בה אתה צופה כעת.</div>
         </div>
       </button>
       <button class="export-option eo-json" id="exp-json">
@@ -583,8 +609,20 @@ select.edit-input{appearance:none}
           </svg>
         </div>
         <div class="eo-info">
-          <div class="eo-title">גיבוי JSON מלא (כל האפליקציה)</div>
-          <div class="eo-desc">שומר את כל הנתונים מכל הלשוניות + סטטוס הושלם.</div>
+          <div class="eo-title">גיבוי JSON מלא</div>
+          <div class="eo-desc">שומר את כל הנתונים מכל הלשוניות לגיבוי מלא או לשחזור באפליקציה.</div>
+        </div>
+      </button>
+      <button class="export-option eo-kml" id="exp-kml">
+        <div class="eo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+            <line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
+          </svg>
+        </div>
+        <div class="eo-info">
+          <div class="eo-title">Google My Maps — KML</div>
+          <div class="eo-desc">ייצא את כל המיקומים למפה אינטראקטיבית.</div>
         </div>
       </button>
       <button class="export-option eo-txt" id="exp-txt">
@@ -596,8 +634,8 @@ select.edit-input{appearance:none}
           </svg>
         </div>
         <div class="eo-info">
-          <div class="eo-title">העתקת טקסט — הלשונית הנוכחית</div>
-          <div class="eo-desc">העתקה נוחה של הנתונים מהלשונית הפתוחה לשיתוף בוואטסאפ.</div>
+          <div class="eo-title">העתקה כטקסט — לפי הלשונית הפתוחה</div>
+          <div class="eo-desc">מעתיק את הרשימה הנוכחית ללוח לשליחה בוואטסאפ או במייל.</div>
         </div>
       </button>
     </div>
@@ -607,6 +645,9 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- =========================================================
+     EDIT MODAL
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-edit">
   <div class="modal-box" role="dialog" aria-modal="true" aria-label="עריכת פריט" id="edit-modal-box">
     <div class="modal-drag-handle"></div>
@@ -619,13 +660,12 @@ select.edit-input{appearance:none}
     </div>
     <div id="edit-form-body"></div>
     <p style="font-size:11px;color:var(--text-dim);margin-top:8px">
-      Ctrl+Enter לשמירה מהירה  •  Esc לביטול
+      Ctrl+Enter לשמירה מהירה &nbsp;•&nbsp; Esc לביטול
     </p>
     <div class="btn-row" id="edit-btn-row">
       <button class="btn-primary" id="edit-save">שמור שינויים</button>
       <button class="btn-cancel"  id="edit-cancel">ביטול</button>
-      <button class="btn-danger"  id="edit-delete"
-        style="flex:0 0 auto;padding:10px 12px;display:none" aria-label="מחק פריט">
+      <button class="btn-danger"  id="edit-delete" style="flex:0 0 auto;padding:10px 12px;display:none" aria-label="מחק פריט">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
           <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
         </svg>
@@ -634,19 +674,24 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- Hidden file inputs -->
 <input type="file" id="file-csv"  accept=".csv,text/csv" multiple style="display:none" />
 <input type="file" id="file-json" accept=".json,application/json" style="display:none" />
 
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 <script>
 'use strict';
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v10';
-const LS_COMPLETED = 'tripmh_completed_v10';
-const LS_EXPANDED  = 'tripmh_expanded_v10';
-const LS_TAB       = 'tripmh_tab_v10';
-const LS_DARK      = 'tripmh_dark_v10';
+const LS_DATA      = 'tripmh_data_v12';
+const LS_COMPLETED = 'tripmh_completed_v12';
+const LS_BOOKED    = 'tripmh_booked_v12';
+const LS_EXPANDED  = 'tripmh_expanded_v12';
+const LS_TAB       = 'tripmh_tab_v12';
+const LS_DARK      = 'tripmh_dark_v12';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -657,18 +702,16 @@ const DAY_COLORS = [
    STATE
 ========================================================= */
 let state = {
-  data:        { itinerary: [], options: [], tips: [], checklist: [], dictionary: [] },
+  data: { itinerary: [], options: [], tips: [], checklist: [], dictionary: [] },
   completedIds: new Set(),
-  expandedIds:  new Set(),
-  activeTab:    'itinerary',
-  isDark:       true,
-  searchQuery:  '',
-  editItem:     null,
-  editIsNew:    false,
-  undoInfo:     null,
+  bookedIds: new Set(),
+  expandedIds: new Set(),
+  activeTab: 'itinerary',
+  isDark: true,
+  searchQuery: '',
+  editItem: null,
+  editIsNew: false,
 };
-let undoTimer  = null;
-let toastTimer = null;
 
 /* =========================================================
    LOCAL STORAGE
@@ -682,9 +725,52 @@ function lsSet(key, v) {
 function persistState() {
   lsSet(LS_DATA,      state.data);
   lsSet(LS_COMPLETED, [...state.completedIds]);
+  lsSet(LS_BOOKED,    [...state.bookedIds]);
   lsSet(LS_EXPANDED,  [...state.expandedIds]);
   lsSet(LS_TAB,       state.activeTab);
   localStorage.setItem(LS_DARK, String(state.isDark));
+}
+
+/* =========================================================
+   STACKING TOASTS
+========================================================= */
+function addToast(msg, type = 'neutral', undoCallback = null) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast-msg ${type}`;
+  toast.innerHTML = `<span>${msg}</span>${undoCallback ? `<button class="undo-btn">בטל</button>` : ''}`;
+  
+  if (undoCallback) {
+    toast.querySelector('.undo-btn').addEventListener('click', () => {
+      undoCallback();
+      toast.remove();
+    });
+  }
+  
+  container.prepend(toast);
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, 5000);
+}
+
+/* =========================================================
+   MODALS (Confirm)
+========================================================= */
+function showConfirm(title, text, onConfirm, isDanger=false) {
+  const m = document.getElementById('modal-confirm');
+  document.getElementById('mc-title').textContent = title;
+  document.getElementById('mc-text').textContent = text;
+  const btnC = document.getElementById('mc-btn-confirm');
+  
+  btnC.className = isDanger ? 'btn-danger' : 'btn-primary';
+  btnC.onclick = () => { onConfirm(); m.classList.add('hidden'); };
+  document.getElementById('mc-btn-cancel').onclick = () => m.classList.add('hidden');
+  m.classList.remove('hidden');
 }
 
 /* =========================================================
@@ -730,10 +816,11 @@ function parseCSV(raw) {
 }
 
 /* =========================================================
-   COLUMN ALIASES
+   COLUMN ALIASES & PARSING HELPERS
 ========================================================= */
 const ALIASES = {
-  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם','משימה','task','פריט'],
+  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
+  task:      ['משימה', 'פריט', 'ציוד', 'task', 'item', 'שם'],
   day:       ['יום','day'],
   date:      ['תאריך','date'],
   time:      ['שעות','זמן פתיחה','מתי','time','טווח שעות','שעת פתיחה','opening hours'],
@@ -760,40 +847,26 @@ function getCol(obj, type) {
   return '';
 }
 
-/* =========================================================
-   AUTO DETECT FILE TYPE
-========================================================= */
 function detectFileType(fname, headers) {
   const n = fname.toLowerCase().replace(/[_\-\s]/g, '');
   const h = headers.join(' ').toLowerCase();
 
   if (/מילון|שפה|מילים|dictionary|words/.test(n) || /עברית|יפנית|hebrew|romaji/.test(h)) return 'dictionary';
-  if (/צ'ק|משימות|ציוד|checklist|tasks/.test(n) || /משימה|task/.test(h)) return 'checklist';
+  if (/צ'ק|משימות|ציוד|checklist|tasks/.test(n) || /משימה|task|פריט/.test(h)) return 'checklist';
   if (/טיפ|tips?|hint|עצה|הנחי|advice|guide/.test(n)) return 'tips';
   if (/השלמ|אופצי|option|extra|bonus|recommend/.test(n)) return 'options';
   if (/מסלול|iti|main|plan|primary|schedule|itinerary/.test(n)) return 'itinerary';
 
-  const hasDay = /יום|day/.test(h);
-  const hasDate = /תאריך|date/.test(h);
-  const hasTipWord = /\bטיפ|\btip|\bhint|עצה/.test(h);
-  const hasCat = /קטגוריה|category|נושא|topic|תחום/.test(h);
-  const hasContent = /תוכן|content|notes|הערות|מידע|פירוט/.test(h);
-  const hasOption = /אופצי|option/.test(h);
-
-  if (hasDay || hasDate) return 'itinerary';
-  if (hasTipWord || hasCat) return 'tips';
-  if (hasContent) return 'tips';
-  if (hasOption) return 'options';
+  if (/יום|day|תאריך|date/.test(h)) return 'itinerary';
+  if (/\bטיפ|\btip|\bhint|עצה|תוכן|content|notes|הערות|מידע|פירוט/.test(h)) return 'tips';
+  if (/אופצי|option/.test(h)) return 'options';
 
   const hasPlaceOnly = /שם|place|name|title|כותרת|אטרקציה/.test(h);
-  if (hasPlaceOnly && !hasDay && !hasDate) return 'options';
+  if (hasPlaceOnly) return 'options';
 
   return 'itinerary';
 }
 
-/* =========================================================
-   HELPERS
-========================================================= */
 function genId() { return 'i' + Math.random().toString(36).slice(2,9) + Date.now().toString(36); }
 function parseDateVal(d) {
   if (!d) return 0;
@@ -840,7 +913,7 @@ function buildMapUrl(placeName, area) {
 }
 function buildDailyRouteUrl(items) {
   const locs = items
-    .filter(a => a.type !== 'tip' && a.type !== 'task' && a.type !== 'dictionary' && (a.area || a.placeName))
+    .filter(a => (a.type === 'itinerary' || a.type === 'option') && (a.area || a.placeName))
     .map(a => encodeURIComponent([a.placeName, a.area].filter(Boolean).join(' ').trim()));
   if (!locs.length) return '';
   if (locs.length === 1) return `https://www.google.com/maps/search/?api=1&query=${locs[0]}`;
@@ -872,8 +945,14 @@ function extractBookingAdvance(booking) {
   if (/שבוע|שבועות|weeks?/.test(unit)) return `${n * 7} ימים מראש`;
   return `${n} ימים מראש`;
 }
+function extractBookingAdvDays(txt) {
+  const m = (txt||'').match(/(\d+)\s*(ימים|days|שבוע|שבועות)/i);
+  if (!m) return 7; 
+  if (/שבוע/.test(m[2])) return parseInt(m[1]) * 7;
+  return parseInt(m[1]);
+}
 function escHtml(s) {
-  return (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function hlHtml(raw, q) {
   const s = escHtml(raw);
@@ -895,9 +974,16 @@ async function readFileText(f) {
     });
   }
 }
+
+function mergeItem(arr, newItem, matchFn) {
+  const idx = arr.findIndex(matchFn);
+  if (idx >= 0) arr[idx] = { ...arr[idx], ...newItem, id: arr[idx].id };
+  else arr.push(newItem);
+}
+
 async function processFiles(files) {
-  const data = { itinerary:[], options:[], tips:[], checklist:[], dictionary:[] };
-  let importedCompleted;
+  const stats = { added: 0 };
+  let importedCompleted, importedBooked;
 
   for (const f of Array.from(files)) {
     const text = await readFileText(f);
@@ -906,12 +992,13 @@ async function processFiles(files) {
       try {
         const p = JSON.parse(text);
         if (p.data && (p.data.itinerary||p.data.options||p.data.tips||p.data.checklist||p.data.dictionary)) {
-          if (p.data.itinerary) data.itinerary.push(...p.data.itinerary);
-          if (p.data.options) data.options.push(...p.data.options);
-          if (p.data.tips) data.tips.push(...p.data.tips);
-          if (p.data.checklist) data.checklist.push(...p.data.checklist);
-          if (p.data.dictionary) data.dictionary.push(...p.data.dictionary);
+          if (p.data.itinerary) state.data.itinerary = p.data.itinerary;
+          if (p.data.options) state.data.options = p.data.options;
+          if (p.data.tips) state.data.tips = p.data.tips;
+          if (p.data.checklist) state.data.checklist = p.data.checklist;
+          if (p.data.dictionary) state.data.dictionary = p.data.dictionary;
           if (p.completedIds) importedCompleted = p.completedIds;
+          if (p.bookedIds) importedBooked = p.bookedIds;
         }
       } catch {}
       continue;
@@ -929,79 +1016,104 @@ async function processFiles(files) {
 
       const place = getCol(obj,'place'), day = getCol(obj,'day'), date = getCol(obj,'date');
       const desc  = getCol(obj,'desc'),  area = getCol(obj,'area'), book = getCol(obj,'book');
-      const link  = getCol(obj,'link');
-      const catCol = getCol(obj,'category');
+      const link  = getCol(obj,'link'),  catCol = getCol(obj,'category');
 
       if (fileType === 'dictionary') {
         const hebrew = getCol(obj, 'hebrew') || place;
         const foreign = getCol(obj, 'foreign');
         if (hebrew || foreign) {
-            data.dictionary.push({
+            mergeItem(state.data.dictionary, {
                 id: genId(), type: 'dictionary', _idx: ri,
                 hebrew: hebrew || '', foreign: foreign || '',
                 romaji: getCol(obj, 'romaji') || '',
                 context: getCol(obj, 'context') || catCol || ''
-            });
+            }, x => x.hebrew === hebrew);
+            stats.added++;
         }
       } else if (fileType === 'checklist') {
-        if (place) {
-            data.checklist.push({
+        const taskTitle = getCol(obj, 'task'); // Prioritize explicit task column
+        if (taskTitle) {
+            mergeItem(state.data.checklist, {
                 id: genId(), type: 'task', _idx: ri,
-                title: place,
+                title: taskTitle,
                 description: desc || '',
                 category: catCol || 'כללי'
-            });
+            }, x => x.title === taskTitle);
+            stats.added++;
+        }
+      } else if (fileType === 'tips') {
+        const anyValue = place || desc || catCol || Object.values(obj).some(v => v.trim());
+        if (anyValue) {
+          const title = place || catCol || Object.values(obj).find(v => v.trim()) || `טיפ ${ri}`;
+          const content = desc || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
+          mergeItem(state.data.tips, {
+            id:genId(), type:'tip', _idx:ri, title, content, category: catCol || area || 'כללי',
+            link, linkLabel: getCol(obj,'linkLabel') || 'למידע נוסף', icon:'💡'
+          }, x => x.title === title);
+          stats.added++;
         }
       } else {
-        const isTipRow = fileType === 'tips' || (!place && !day && !date);
-        if (isTipRow) {
-          const anyValue = place || desc || catCol || Object.values(obj).some(v => v.trim());
-          if (anyValue) {
-            const title   = place || catCol || Object.values(obj).find(v => v.trim()) || `טיפ ${ri}`;
-            const content = desc
-              || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ')
-              || '';
-            data.tips.push({
-              id:genId(), type:'tip', _idx:ri,
-              placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'',
-              duration:'', cost:'', transport:'', booking:'', area:'', mapUrl:'',
-              requiresBooking:false, icon:'💡',
-              title, category: catCol || area || 'כללי', content,
-              link, linkLabel: getCol(obj,'linkLabel') || 'למידע נוסף',
-            });
-          }
-        } else {
-          const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(day);
-          const rawDay = day || date || 'ללא תאריך';
-          const item = {
-            id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
-            placeName: place || 'ללא שם', dayLabel: rawDay, dateVal: parseDateVal(rawDay),
-            description: desc, timeRange: formatTime(getCol(obj,'time')),
-            duration: getCol(obj,'dur'), cost: getCol(obj,'cost'), transport: getCol(obj,'trans'),
-            booking: book, area, link, linkLabel: getCol(obj,'linkLabel') || 'מידע נוסף',
-            requiresBooking: needsBooking(book, desc),
-            icon: detectIcon([place, desc, area].join(' ')),
-            mapUrl: buildMapUrl(place || 'ללא שם', area),
-            title:'', category:'', content:'',
-          };
-          data[isOpt ? 'options' : 'itinerary'].push(item);
-        }
+        const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(day);
+        const rawDay = day || date || 'ללא תאריך';
+        const item = {
+          id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
+          placeName: place || 'ללא שם', dayLabel: rawDay, dateVal: parseDateVal(rawDay),
+          description: desc, timeRange: formatTime(getCol(obj,'time')),
+          duration: getCol(obj,'dur'), cost: getCol(obj,'cost'), transport: getCol(obj,'trans'),
+          booking: book, area, link, linkLabel: getCol(obj,'linkLabel') || 'מידע נוסף',
+          requiresBooking: needsBooking(book, desc),
+          icon: detectIcon([place, desc, area].join(' ')),
+          mapUrl: buildMapUrl(place || 'ללא שם', area),
+        };
+        const dest = isOpt ? state.data.options : state.data.itinerary;
+        mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay);
+        stats.added++;
       }
     }
   }
 
-  data.itinerary.sort((a,b) => (a.dateVal && b.dateVal && a.dateVal !== b.dateVal) ? a.dateVal-b.dateVal : a._idx-b._idx);
-  data.options.sort((a,b) => a._idx-b._idx);
-  return { data, completedIds: importedCompleted };
+  state.data.itinerary.sort((a,b) => (a.dateVal && b.dateVal && a.dateVal !== b.dateVal) ? a.dateVal-b.dateVal : a._idx-b._idx);
+  state.data.options.sort((a,b) => a._idx-b._idx);
+  
+  if (importedCompleted) state.completedIds = new Set(importedCompleted);
+  if (importedBooked) state.bookedIds = new Set(importedBooked);
+
+  return stats;
 }
 
 /* =========================================================
-   CSV EXPORT (CURRENT TAB ONLY)
+   CALENDAR REMINDERS
+========================================================= */
+function setCalendarReminder(id) {
+  const arr = [...state.data.itinerary, ...state.data.options];
+  const item = arr.find(x => x.id === id);
+  if (!item || !item.dateVal) {
+    addToast('לא הוגדר תאריך יעד לאטרקציה זו', 'error');
+    return;
+  }
+
+  const daysAdv = extractBookingAdvDays(item.booking);
+  const targetDate = new Date(item.dateVal);
+  const reminderDate = new Date(targetDate.getTime() - (daysAdv * 24 * 60 * 60 * 1000));
+  reminderDate.setHours(10, 0, 0, 0); 
+  const endDate = new Date(reminderDate.getTime() + (60 * 60 * 1000)); 
+
+  const fmt = d => d.toISOString().replace(/-|:|\.\d+/g, '').substring(0, 15) + 'Z';
+  const title = encodeURIComponent(`תזכורת הזמנה: ${item.placeName}`);
+  const desc = encodeURIComponent(`תזכורת ממערכת TripMH!\n\nהגיע הזמן לשריין עבור: ${item.placeName}\nפירוט: ${item.booking}\n\n${item.link ? 'קישור: '+item.link : ''}`);
+  const loc = encodeURIComponent(item.area || '');
+  
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(reminderDate)}/${fmt(endDate)}&details=${desc}&location=${loc}`;
+  window.open(url, '_blank');
+  addToast('מעביר ליצירת תזכורת ב-Google Calendar...', 'success');
+}
+
+/* =========================================================
+   CSV / TXT EXPORT (CURRENT TAB ONLY)
 ========================================================= */
 function csvField(v) {
   const s = String(v == null ? '' : v);
-  if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r'))
-    return '"' + s.replace(/"/g,'""') + '"';
+  if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) return '"' + s.replace(/"/g,'""') + '"';
   return s;
 }
 function csvRow(arr) { return arr.map(csvField).join(',') + '\r\n'; }
@@ -1034,14 +1146,6 @@ function exportCSV() {
       });
   }
   downloadBlob(csv, `tripmh_${tab}_export.csv`, 'text/csv;charset=utf-8');
-}
-
-/* =========================================================
-   JSON / KML / TXT EXPORT
-========================================================= */
-function exportJSON(data, completedIds) {
-  const payload = { version: 3, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds] };
-  downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
 function exportTxt() {
@@ -1079,10 +1183,26 @@ function exportTxt() {
   if (navigator.share) {
     navigator.share({ title:'TripMH', text }).catch(()=>{});
   } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => showToast('הטקסט הועתק ללוח!','success'));
+    navigator.clipboard.writeText(text).then(() => addToast('הטקסט הועתק ללוח!','success'));
   } else {
     downloadBlob(text,`tripmh_${tab}.txt`,'text/plain;charset=utf-8');
   }
+}
+
+function exportJSON(data, completedIds, bookedIds) {
+  const payload = { version: 4, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
+}
+
+function exportKML(data) {
+  const e = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n<name>TripMH</name>\n`;
+  [...data.itinerary, ...data.options].filter(i => i.area || i.placeName).forEach(i => {
+      const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `הזמנה: ${i.booking}` : ''].filter(Boolean).join('\n');
+      kml += `<Placemark>\n<name>${e(i.placeName)}</name>\n<description>${e(desc)}</description>\n<address>${e(i.area||i.placeName)}</address>\n</Placemark>\n`;
+  });
+  kml += `</Document>\n</kml>`;
+  downloadBlob(kml, 'tripmh_map.kml', 'application/vnd.google-earth.kml+xml');
 }
 
 function downloadBlob(content, filename, mime) {
@@ -1094,89 +1214,78 @@ function downloadBlob(content, filename, mime) {
 }
 
 /* =========================================================
-   TOAST
-========================================================= */
-function showToast(msg, kind = 'neutral') {
-  const el = document.getElementById('gen-toast');
-  el.textContent = msg;
-  el.className = 'toast-notification visible' + (kind !== 'neutral' ? ' '+kind : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
-}
-
-/* =========================================================
-   UNDO
-========================================================= */
-function triggerUndo(info) {
-  state.undoInfo = info;
-  const el = document.getElementById('undo-toast');
-  document.getElementById('undo-label').textContent = info.label;
-  el.classList.add('visible');
-  clearTimeout(undoTimer);
-  undoTimer = setTimeout(() => el.classList.remove('visible'), 10000);
-}
-function handleUndo() {
-  const info = state.undoInfo;
-  if (!info) return;
-  if (info.id !== undefined) {
-    if (info.wasCompleted) state.completedIds.add(info.id);
-    else state.completedIds.delete(info.id);
-  }
-  if (info.ids) info.ids.forEach(id => state.completedIds.delete(id));
-  document.getElementById('undo-toast').classList.remove('visible');
-  clearTimeout(undoTimer);
-  updateUI();
-  persistState();
-}
-
-/* =========================================================
    RENDER HELPERS
 ========================================================= */
+function svgIcon(name) {
+  const icons = {
+    pin:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    clock:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    dur:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>`,
+    bus:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg>`,
+    book:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+    nav:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`,
+    link:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+    warn:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    edit:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    chev:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`,
+    check:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`,
+    transit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg>`,
+    money:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    map:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
+    checkAll:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l5 5L20 5"/><path d="M7 12l5 5 8-8" opacity=".4"/></svg>`,
+    tag:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>`,
+    plus:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    upload:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>`,
+    ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+  };
+  return icons[name] || '';
+}
+
+/* =========================================================
+   CARD RENDERERS
+========================================================= */
+function toggleBooked(id) {
+  const isBooked = state.bookedIds.has(id);
+  if (isBooked) {
+    state.bookedIds.delete(id);
+    updateUI(); persistState();
+    addToast('סימון הזמנה בוטל', 'neutral', () => { state.bookedIds.add(id); updateUI(); persistState(); });
+  } else {
+    showConfirm('אישור הזמנה', 'האם אתה בטוח שהזמנת/שילמת על פריט זה?', () => {
+      state.bookedIds.add(id);
+      updateUI(); persistState();
+      addToast('סומן כהוזמן בהצלחה', 'success', () => { state.bookedIds.delete(id); updateUI(); persistState(); });
+    });
+  }
+}
+
 function renderTripCard(item, q) {
   const done     = state.completedIds.has(item.id);
   const expanded = state.expandedIds.has(item.id);
   const cost     = formatCost(item.cost);
-  const showWarn = item.requiresBooking && !done;
+  const showWarn = item.requiresBooking;
   const timeDisp = formatTime(item.timeRange);
-
   const advanceNotice = extractBookingAdvance(item.booking);
-  let bookingBar = '';
   
+  let bookingBar = '';
   if (showWarn) {
-      let calendarBtn = '';
-      if (item.dateVal) {
-          // Calculate reminder: Target Date - X days (at 10:00 AM)
-          let daysToSubtract = 7;
-          if (advanceNotice) {
-              const match = advanceNotice.match(/(\d+)/);
-              if (match) {
-                  daysToSubtract = parseInt(match[1]);
-                  if (advanceNotice.includes('שבוע')) daysToSubtract *= 7;
-              }
-          }
-          const targetDate = new Date(item.dateVal);
-          const reminderDate = new Date(targetDate.getTime() - (daysToSubtract * 24 * 60 * 60 * 1000));
-          reminderDate.setHours(10, 0, 0, 0); 
-          const endDate = new Date(reminderDate.getTime() + (60 * 60 * 1000));
-          
-          const fmt = d => d.toISOString().replace(/-|:|\.\d+/g, '').substring(0, 15) + 'Z';
-          const title = encodeURIComponent(`תזכורת להזמנה: ${item.placeName}`);
-          const details = encodeURIComponent(`יש לבצע הזמנה מראש עבור: ${item.placeName}\nפרטים: ${item.booking}\n\n${item.link ? 'קישור: '+item.link : ''}`);
-          const loc = encodeURIComponent(item.area || '');
-          const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(reminderDate)}/${fmt(endDate)}&details=${details}&location=${loc}`;
-          
-          calendarBtn = `<a href="${url}" target="_blank" onclick="event.stopPropagation()" style="font-size:10px; font-weight:700; color:var(--danger); background:var(--danger-glow); padding:2px 6px; border-radius:4px; text-decoration:none; border:1px solid currentColor;">📅 תזכורת ביומן</a>`;
-      }
-
-      bookingBar = `<div class="card-booking-bar" style="display:flex; justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:6px;">${svgIcon('warn')}<span>דורש הזמנה${advanceNotice ? ' — ' + advanceNotice : ''}</span></div>
+    const isBooked = state.bookedIds.has(item.id);
+    let calendarBtn = '';
+    if (!isBooked && item.dateVal) {
+        calendarBtn = `<button class="book-toggle-btn" style="border-color:var(--accent); color:var(--accent); background:var(--accent-glow);" onclick="event.stopPropagation(); setCalendarReminder('${item.id}')">📅 תזכורת</button>`;
+    }
+    const label = isBooked ? 'הוזמן / שולם' : `דורש הזמנה מראש${advanceNotice ? ' ('+advanceNotice+')' : ''}`;
+    bookingBar = `
+    <div class="card-booking-bar ${isBooked ? 'booked' : 'unbooked'}" onclick="event.stopPropagation()">
+      <div class="booking-info">${svgIcon(isBooked ? 'ok' : 'warn')}<span>${label}</span></div>
+      <div style="display:flex; gap:6px;">
         ${calendarBtn}
-      </div>`;
+        <button class="book-toggle-btn" onclick="toggleBooked('${item.id}')">${isBooked ? 'בטל' : 'סמן כטופל'}</button>
+      </div>
+    </div>`;
   }
 
-  const checkStyle = done
-    ? `border-color:var(--success);background:var(--success-glow);color:var(--success);`
-    : 'color:transparent;';
+  const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
 
   const badges = [
     timeDisp       ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(timeDisp,q)}</span>` : '',
@@ -1187,9 +1296,7 @@ function renderTripCard(item, q) {
   ].filter(Boolean).join('');
 
   const mapUrl = item.mapUrl || '';
-  const transitUrl = mapUrl
-    ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent([item.placeName,item.area].filter(Boolean).join(' ')) + '&travelmode=transit'
-    : '';
+  const transitUrl = mapUrl ? 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent([item.placeName,item.area].filter(Boolean).join(' ')) + '&travelmode=transit' : '';
 
   const navBtns = [
     mapUrl     ? `<a href="${escHtml(mapUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} נווט ב-Google Maps</a>` : '',
@@ -1198,16 +1305,16 @@ function renderTripCard(item, q) {
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
-  const bookingRow = item.booking
-    ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}${advanceNotice ? ' <strong style="color:var(--danger)">('+advanceNotice+')</strong>' : ''}</span></div>` : '';
-  const transRow = item.transport
-    ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
+  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}${advanceNotice ? ' <strong style="color:var(--danger)">('+advanceNotice+')</strong>' : ''}</span></div>` : '';
+  const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
 <article class="card${done?' done':''}${expanded?' expanded':''} fade-up" data-id="${item.id}">
   ${bookingBar}
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" aria-expanded="${expanded}" tabindex="0">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" aria-label="${done?'הסר סימון':'סמן כהושלם'}" style="${checkStyle}">
+  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" aria-expanded="${expanded}" tabindex="0"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleExpand('${item.id}')}">
+    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')"
+      aria-label="${done?'הסר סימון':'סמן כהושלם'}" style="${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
     <div class="card-main">
@@ -1235,6 +1342,7 @@ function renderTipCard(item, q) {
   const expanded = state.expandedIds.has(item.id);
   const checkStyle = done ? 'border-color:var(--success);background:var(--success-glow);color:var(--success);' : 'color:transparent;';
   const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
+
   const navBtns = [
     item.link ? `<a href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
@@ -1242,15 +1350,17 @@ function renderTipCard(item, q) {
 
   return `
 <article class="card${done?' done':''}${expanded?' expanded':''} fade-up" data-id="${item.id}">
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">${done ? svgIcon('check') : ''}</button>
+  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" aria-expanded="${expanded}" tabindex="0">
+    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
+      ${done ? svgIcon('check') : ''}
+    </button>
     <div class="card-main">
       <div class="card-title-row">
         <div class="card-title-inner">
           <span class="card-icon" aria-hidden="true">💡</span>
           <h3 class="card-title">${hlHtml(item.title,q)}</h3>
         </div>
-        <span class="chevron">${svgIcon('chev')}</span>
+        <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
       </div>
       <div class="card-badges">${catBadge}</div>
     </div>
@@ -1267,23 +1377,21 @@ function renderChecklistCard(item, q) {
   const done = state.completedIds.has(item.id);
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
   return `
-  <article class="card ${done?'done':''} fade-up" data-id="${item.id}">
-    <div class="card-body" onclick="toggleComplete('${item.id}')" role="button" tabindex="0" style="padding:10px 12px;">
-      <button class="card-check" style="${checkStyle}">${done ? svgIcon('check') : ''}</button>
-      <div class="card-main" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <h3 class="card-title" style="${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title, q)}</h3>
-          ${item.description ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${hlHtml(item.description, q)}</div>` : ''}
-        </div>
-        <button class="icon-btn" onclick="event.stopPropagation(); openEdit('${item.id}')" style="flex-shrink:0;">${svgIcon('edit')}</button>
-      </div>
+  <article class="card ${done?'done':''} fade-up" data-id="${item.id}" style="padding:10px 12px; display:flex; gap:10px; align-items:center;">
+    <button class="card-check" onclick="toggleComplete('${item.id}')" style="flex-shrink:0; ${checkStyle}">
+      ${done ? svgIcon('check') : ''}
+    </button>
+    <div style="flex:1; cursor:pointer;" onclick="openEdit('${item.id}')">
+      <div style="font-size:14px; font-weight:600; color:var(--text); ${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title,q)}</div>
+      ${item.description ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${hlHtml(item.description,q)}</div>` : ''}
     </div>
+    <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0;">${svgIcon('edit')}</button>
   </article>`;
 }
 
 function renderDictionaryCard(item, q) {
   return `
-  <article class="card fade-up" data-id="${item.id}" style="padding:12px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border); margin-bottom:8px;">
+  <article class="card fade-up" data-id="${item.id}" style="padding:12px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <div>
         <div style="font-size:15px; font-weight:700; color:var(--accent);">${hlHtml(item.hebrew, q)}</div>
@@ -1385,27 +1493,35 @@ function updateUI() {
 
   document.getElementById('count-itinerary').textContent = d.itinerary.length;
   document.getElementById('count-options').textContent   = d.options.length;
-  document.getElementById('count-checklist').textContent = d.checklist.length;
-  document.getElementById('count-tips').textContent      = d.tips.length;
-  document.getElementById('count-dictionary').textContent = d.dictionary.length;
+  
+  // Safe updates for new tabs (in case ID doesn't exist, though it should based on our HTML)
+  const cc = document.getElementById('count-checklist'); if (cc) cc.textContent = d.checklist.length;
+  const ct = document.getElementById('count-tips'); if (ct) ct.textContent = d.tips.length;
+  const cd = document.getElementById('count-dictionary'); if (cd) cd.textContent = d.dictionary.length;
 
   const totalCompleted = state.completedIds.size;
-  const totalItems = d.itinerary.length + d.options.length + d.checklist.length;
+  const totalItems = d.itinerary.length + d.options.length + d.tips.length + d.checklist.length;
   const bookingCount = [...d.itinerary, ...d.options].filter(i => i.requiresBooking).length;
 
   const hasData = d.itinerary.length || d.options.length || d.tips.length || d.checklist.length || d.dictionary.length;
-  
+
+  // Header buttons visibility
   document.getElementById('pill-counter').style.display = totalItems > 0 ? 'flex' : 'none';
   document.getElementById('pill-text').textContent = `${totalCompleted}/${totalItems}`;
+  
+  // Cleanly handle logo-sub visibility if it exists (prevents the crash you experienced)
+  const logoSub = document.getElementById('logo-sub');
+  if (logoSub) logoSub.style.display = hasData ? 'none' : 'block';
 
   for (const id of ['btn-share','btn-export','btn-clear']) {
     document.getElementById(id).style.display = hasData ? 'flex' : 'none';
   }
 
+  // Stats bar
   document.getElementById('stats-bar').style.display = hasData ? 'flex' : 'none';
   document.getElementById('stat-attractions').textContent = d.itinerary.length + d.options.length;
   document.getElementById('stat-done').textContent        = totalCompleted;
-  document.getElementById('stat-booking').textContent     = bookingCount;
+  document.getElementById('stat-booking').textContent     = state.bookedIds.size + '/' + bookingCount;
   document.getElementById('stat-tips').textContent        = d.tips.length;
 }
 
@@ -1420,7 +1536,8 @@ function setTab(tab) {
     b.setAttribute('aria-selected', active);
   });
   ['itinerary','options','checklist','tips','dictionary'].forEach(t => {
-    document.getElementById('panel-'+t).style.display = t === tab ? 'block' : 'none';
+    const p = document.getElementById('panel-'+t);
+    if (p) p.style.display = t === tab ? 'block' : 'none';
   });
   persistState();
 }
@@ -1432,14 +1549,21 @@ function toggleComplete(id) {
   const wasCompleted = state.completedIds.has(id);
   if (wasCompleted) state.completedIds.delete(id);
   else state.completedIds.add(id);
-  triggerUndo({ id, wasCompleted, label: wasCompleted ? 'הוסר סימון הושלם' : 'סומן כהושלם' });
+  addToast(wasCompleted ? 'הוסר סימון הושלם' : 'סומן כהושלם', 'neutral', () => {
+    if (wasCompleted) state.completedIds.add(id);
+    else state.completedIds.delete(id);
+    updateUI(); persistState();
+  });
   updateUI();
   persistState();
 }
 function completeAllInGroup(idsCsv) {
   const ids = String(idsCsv).split(',').map(s => s.trim()).filter(Boolean);
   ids.forEach(id => state.completedIds.add(id));
-  triggerUndo({ ids, label: `${ids.length} פריטים סומנו כהושלמו` });
+  addToast(`${ids.length} פריטים סומנו כהושלמו`, 'neutral', () => {
+    ids.forEach(id => state.completedIds.delete(id));
+    updateUI(); persistState();
+  });
   updateUI();
   persistState();
 }
@@ -1460,16 +1584,16 @@ function toggleExpand(id) {
 function buildEditForm(item) {
   if (item.type === 'dictionary') {
     return `
-      <div class="edit-group"><label class="edit-label">עברית</label><input class="edit-input" id="ef-hebrew" value="${escHtml(item.hebrew)}" autocomplete="off" /></div>
-      <div class="edit-group"><label class="edit-label">שפה זרה</label><input class="edit-input" id="ef-foreign" value="${escHtml(item.foreign)}" autocomplete="off" /></div>
-      <div class="edit-group"><label class="edit-label">הגייה</label><input class="edit-input" id="ef-romaji" value="${escHtml(item.romaji)}" autocomplete="off" /></div>
-      <div class="edit-group"><label class="edit-label">הקשר / קטגוריה</label><input class="edit-input" id="ef-context" value="${escHtml(item.context)}" autocomplete="off" /></div>`;
+<div class="edit-group"><label class="edit-label">עברית</label><input class="edit-input" id="ef-hebrew" value="${escHtml(item.hebrew)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">שפה זרה</label><input class="edit-input" id="ef-foreign" value="${escHtml(item.foreign)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">הגייה</label><input class="edit-input" id="ef-romaji" value="${escHtml(item.romaji)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">הקשר / קטגוריה</label><input class="edit-input" id="ef-context" value="${escHtml(item.context)}" autocomplete="off" /></div>`;
   }
   if (item.type === 'task') {
     return `
-      <div class="edit-group"><label class="edit-label">משימה / פריט</label><input class="edit-input" id="ef-title" value="${escHtml(item.title)}" autocomplete="off" /></div>
-      <div class="edit-group"><label class="edit-label">קטגוריה</label><input class="edit-input" id="ef-category" value="${escHtml(item.category)}" autocomplete="off" /></div>
-      <div class="edit-group"><label class="edit-label">תיאור</label><textarea class="edit-input" id="ef-desc" rows="3">${escHtml(item.description)}</textarea></div>`;
+<div class="edit-group"><label class="edit-label">משימה / פריט</label><input class="edit-input" id="ef-title" value="${escHtml(item.title)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">קטגוריה</label><input class="edit-input" id="ef-category" value="${escHtml(item.category)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">תיאור</label><textarea class="edit-input" id="ef-description" rows="3">${escHtml(item.description)}</textarea></div>`;
   }
   if (item.type === 'tip') {
     return `
@@ -1508,7 +1632,7 @@ function buildEditForm(item) {
 function readEditForm(item) {
   const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
   if (item.type === 'dictionary') return { ...item, hebrew:g('ef-hebrew'), foreign:g('ef-foreign'), romaji:g('ef-romaji'), context:g('ef-context') };
-  if (item.type === 'task') return { ...item, title:g('ef-title'), category:g('ef-category'), description:g('ef-desc') };
+  if (item.type === 'task') return { ...item, title:g('ef-title'), category:g('ef-category'), description:g('ef-description') };
   if (item.type === 'tip') return { ...item, title:g('ef-title'), category:g('ef-category'), content:g('ef-content'), link:g('ef-link'), linkLabel:g('ef-linkLabel') };
 
   const type = (document.getElementById('ef-type')?.value) || item.type;
@@ -1530,7 +1654,7 @@ function openEdit(id) {
   if (!item) return;
   state.editItem = { ...item };
   state.editIsNew = false;
-  document.getElementById('edit-modal-title').lastChild.textContent = ' עריכת פריט';
+  document.getElementById('edit-modal-title').innerHTML = `${svgIcon('edit')} עריכת פריט`;
   document.getElementById('edit-form-body').innerHTML = buildEditForm(item);
   document.getElementById('edit-delete').style.display = 'flex';
   document.getElementById('modal-edit').classList.remove('hidden');
@@ -1548,7 +1672,7 @@ function openAdd(type) {
   
   state.editItem = item;
   state.editIsNew = true;
-  document.getElementById('edit-modal-title').lastChild.textContent = ' הוספת פריט חדש';
+  document.getElementById('edit-modal-title').innerHTML = `${svgIcon('plus')} הוספת פריט חדש`;
   document.getElementById('edit-form-body').innerHTML = buildEditForm(item);
   document.getElementById('edit-delete').style.display = 'none';
   document.getElementById('modal-edit').classList.remove('hidden');
@@ -1567,7 +1691,7 @@ function saveEdit() {
     for (const key of ['itinerary','options','tips','checklist','dictionary']) {
       const idx = d[key].findIndex(x => x.id === updated.id);
       if (idx >= 0) {
-        if (k !== key) { // moved to another array
+        if (k !== key) {
           d[key] = d[key].filter(x => x.id !== updated.id);
           d[k] = [...d[k], updated];
         } else {
@@ -1580,7 +1704,7 @@ function saveEdit() {
 
   state.editItem = null;
   document.getElementById('modal-edit').classList.add('hidden');
-  showToast(isNew ? 'פריט נוסף בהצלחה' : 'השינויים נשמרו', 'success');
+  addToast(isNew ? 'פריט נוסף בהצלחה' : 'השינויים נשמרו', 'success');
   updateUI();
   persistState();
 }
@@ -1592,10 +1716,11 @@ function deleteEditItem() {
     state.data[k] = state.data[k].filter(x => x.id !== id);
   }
   state.completedIds.delete(id);
+  state.bookedIds.delete(id);
   state.expandedIds.delete(id);
   state.editItem = null;
   document.getElementById('modal-edit').classList.add('hidden');
-  showToast('הפריט נמחק', 'neutral');
+  addToast('הפריט נמחק', 'neutral');
   updateUI();
   persistState();
 }
@@ -1632,6 +1757,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dictionary: saved.dictionary|| [],
     };
     state.completedIds = new Set(lsGet(LS_COMPLETED, []));
+    state.bookedIds    = new Set(lsGet(LS_BOOKED, []));
     state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
     state.activeTab    = lsGet(LS_TAB, 'itinerary');
   }
@@ -1679,33 +1805,19 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const result = await processFiles(files);
 
-      if (result.completedIds) {
-        state.data = result.data;
-        state.completedIds = new Set(result.completedIds);
-        state.expandedIds  = new Set();
-        showToast('גיבוי JSON יובא בהצלחה', 'success');
+      if (result.added > 0) {
+          addToast(`נוספו/עודכנו ${result.added} פריטים בהצלחה`, 'success');
+      } else if (result.added === 0) {
+          addToast('לא נמצאו פריטים חדשים להוספה.', 'neutral');
       } else {
-        state.data.itinerary.push(...result.data.itinerary);
-        state.data.options.push(...result.data.options);
-        state.data.tips.push(...result.data.tips);
-        state.data.checklist.push(...result.data.checklist);
-        state.data.dictionary.push(...result.data.dictionary);
-        showToast('הנתונים סונכרנו בהצלחה', 'success');
+          // This block hits if JSON was loaded successfully
+          addToast('נתוני הגיבוי נטענו בהצלחה.', 'success');
       }
 
-      // Switch to the tab that got new content
-      const tab = result.data.dictionary?.length ? 'dictionary'
-                : result.data.checklist?.length  ? 'checklist'
-                : result.data.tips?.length       ? 'tips'
-                : result.data.itinerary?.length  ? 'itinerary'
-                : result.data.options?.length    ? 'options'
-                : state.activeTab;
-      state.activeTab = tab;
       updateUI();
-      setTab(tab);
       persistState();
     } catch (e) {
-      showToast('שגיאה בקריאת הקובץ: ' + String(e), 'error');
+      addToast('שגיאה בקריאת הקובץ: ' + String(e), 'error');
     }
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('file-csv').value  = '';
@@ -1723,12 +1835,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('exp-csv').addEventListener('click',  () => {
     exportCSV();
     document.getElementById('modal-export').classList.add('hidden');
-    showToast('קובץ CSV של הלשונית הורד בהצלחה', 'success');
+    addToast('קובץ CSV של הלשונית הורד בהצלחה', 'success');
   });
   document.getElementById('exp-json').addEventListener('click', () => {
-    exportJSON(state.data, state.completedIds);
+    exportJSON(state.data, state.completedIds, state.bookedIds);
     document.getElementById('modal-export').classList.add('hidden');
-    showToast('גיבוי JSON מלא הורד בהצלחה', 'success');
+    addToast('גיבוי JSON מלא הורד בהצלחה', 'success');
+  });
+  document.getElementById('exp-kml').addEventListener('click',  () => {
+    exportKML(state.data);
+    document.getElementById('modal-export').classList.add('hidden');
+    addToast('מפת KML הורדה בהצלחה', 'success');
   });
   document.getElementById('exp-txt').addEventListener('click',  () => {
     document.getElementById('modal-export').classList.add('hidden');
@@ -1740,22 +1857,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Clear all
   document.getElementById('btn-clear').addEventListener('click', () => {
-    if (!confirm('למחוק את כל הנתונים? פעולה זו לא ניתנת לביטול.')) return;
-    try { localStorage.clear(); } catch {}
-    state.data = { itinerary:[], options:[], tips:[], checklist:[], dictionary:[] };
-    state.completedIds = new Set();
-    state.expandedIds  = new Set();
-    state.activeTab    = 'itinerary';
-    updateUI();
-    setTab('itinerary');
-    showToast('כל הנתונים נמחקו', 'neutral');
-  });
-
-  // Undo toast
-  document.getElementById('undo-btn').addEventListener('click', handleUndo);
-  document.getElementById('undo-dismiss').addEventListener('click', () => {
-    document.getElementById('undo-toast').classList.remove('visible');
-    clearTimeout(undoTimer);
+    showConfirm('מחק הכל', 'האם אתה בטוח שברצונך למחוק את כל הנתונים? פעולה זו אינה הפיכה.', () => {
+        try { localStorage.clear(); } catch {}
+        state.data = { itinerary:[], options:[], tips:[], checklist:[], dictionary:[] };
+        state.completedIds = new Set();
+        state.bookedIds    = new Set();
+        state.expandedIds  = new Set();
+        state.activeTab    = 'itinerary';
+        updateUI();
+        setTab('itinerary');
+        addToast('כל הנתונים נמחקו', 'neutral');
+    }, true);
   });
 
   // Search
@@ -1777,7 +1889,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.editItem = null;
     document.getElementById('modal-edit').classList.add('hidden');
   });
-  document.getElementById('edit-delete').addEventListener('click', deleteEditItem);
+  document.getElementById('edit-delete').addEventListener('click', () => {
+    showConfirm('מחיקת פריט', 'האם למחוק פריט זה?', () => deleteEditItem(), true);
+  });
 
   // Ctrl+Enter / Esc in edit modal
   document.getElementById('modal-edit').addEventListener('keydown', e => {
