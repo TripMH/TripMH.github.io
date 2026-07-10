@@ -349,7 +349,11 @@ select.edit-input{appearance:none}
 </head>
 <body>
 
+<!-- =========================================================
+     APP SHELL
+========================================================= -->
 <div id="app">
+  <!-- HEADER -->
   <header id="app-header">
     <div class="header-top">
       <div class="logo">
@@ -367,28 +371,33 @@ select.edit-input{appearance:none}
           <div class="dot"></div>
           <span id="pill-text">0/0</span>
         </div>
+        <!-- Theme toggle -->
         <button class="icon-btn" id="btn-theme" aria-label="שנה ערכת צבעים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
         </button>
+        <!-- Share -->
         <button class="icon-btn" id="btn-share" aria-label="שתף מסלול" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
           </svg>
         </button>
+        <!-- Export -->
         <button class="icon-btn" id="btn-export" aria-label="ייצוא נתונים" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
+        <!-- Clear -->
         <button class="icon-btn danger" id="btn-clear" aria-label="מחק הכל" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
           </svg>
         </button>
+        <!-- Upload -->
         <button class="upload-btn" id="btn-upload" title="העלאת קבצים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
@@ -398,6 +407,7 @@ select.edit-input{appearance:none}
       </div>
     </div>
 
+    <!-- Search -->
     <div class="search-wrap">
       <span class="search-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -412,6 +422,7 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
+    <!-- Tab bar -->
     <nav id="tab-bar">
       <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -451,6 +462,7 @@ select.edit-input{appearance:none}
       </button>
     </nav>
 
+    <!-- Stats bar -->
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
       <div class="stat-item accent">
         <span class="stat-num" id="stat-attractions">0</span>
@@ -462,7 +474,7 @@ select.edit-input{appearance:none}
       </div>
       <div class="stat-item warning" title="מעקב אחר אטרקציות ומקומות שדורשים הזמנה או שריון מראש">
         <span class="stat-num" id="stat-booking">0</span>
-        <span class="stat-lbl">מעקב הזמנות</span>
+        <span class="stat-lbl">הוזמן / לשריון</span>
       </div>
       <div class="stat-item purple">
         <span class="stat-num" id="stat-tips">0</span>
@@ -471,6 +483,7 @@ select.edit-input{appearance:none}
     </div>
   </header>
 
+  <!-- TAB PANELS -->
   <main id="tab-content">
     <div id="panel-itinerary"></div>
     <div id="panel-options"   style="display:none"></div>
@@ -480,6 +493,9 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
+<!-- =========================================================
+     LOADING OVERLAY
+========================================================= -->
 <div class="loading-overlay" id="loading-overlay" style="display:none">
   <div class="loading-spinner">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -489,8 +505,14 @@ select.edit-input{appearance:none}
   <p class="loading-label">מעבד קבצים...</p>
 </div>
 
+<!-- =========================================================
+     STACKING TOAST CONTAINER (WITH PROGRESS BAR)
+========================================================= -->
 <div id="toast-container"></div>
 
+<!-- =========================================================
+     CONFIRM MODAL (For deletion / actions)
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-confirm">
   <div class="modal-box">
     <div class="modal-title" id="mc-title">אישור פעולה</div>
@@ -502,6 +524,9 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- =========================================================
+     UPLOAD MODAL
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-upload">
   <div class="modal-box">
     <div class="modal-drag-handle"></div>
@@ -551,6 +576,9 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- =========================================================
+     EXPORT MODAL
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-export">
   <div class="modal-box">
     <div class="modal-drag-handle"></div>
@@ -571,7 +599,7 @@ select.edit-input{appearance:none}
         </div>
         <div class="eo-info">
           <div class="eo-title">ייצוא ל-CSV — כל הנתונים בנפרד</div>
-          <div class="eo-desc">מוריד ברצף קובץ אקסל נפרד ומסודר לכל לשונית פעילה במערכת.</div>
+          <div class="eo-desc">מוריד ברצף קבצי אקסל נפרדים ומסודרים לכל הלשוניות במערכת.</div>
         </div>
       </button>
       <button class="export-option eo-json" id="exp-json">
@@ -618,6 +646,9 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- =========================================================
+     EDIT MODAL
+========================================================= -->
 <div class="modal-overlay hidden" id="modal-edit">
   <div class="modal-box" id="edit-modal-box">
     <div class="modal-drag-handle"></div>
@@ -644,20 +675,24 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- Hidden file inputs -->
 <input type="file" id="file-csv"  accept=".csv,text/csv" multiple style="display:none" />
 <input type="file" id="file-json" accept=".json,application/json" style="display:none" />
 
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 <script>
 'use strict';
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v18';
-const LS_COMPLETED = 'tripmh_completed_v18';
-const LS_BOOKED    = 'tripmh_booked_v18';
-const LS_EXPANDED  = 'tripmh_expanded_v18';
-const LS_TAB       = 'tripmh_tab_v18';
-const LS_DARK      = 'tripmh_dark_v18';
+const LS_DATA      = 'tripmh_data_v19';
+const LS_COMPLETED = 'tripmh_completed_v19';
+const LS_BOOKED    = 'tripmh_booked_v19';
+const LS_EXPANDED  = 'tripmh_expanded_v19';
+const LS_TAB       = 'tripmh_tab_v19';
+const LS_DARK      = 'tripmh_dark_v19';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -757,22 +792,24 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function autoLink(text) {
-  // Find URLs and wrap them in <a> tags, opening in new tab.
-  // Using event.stopPropagation() so clicking the link doesn't collapse the card.
-  const urlRegex = /(https?:\/\/[^\s]+)/gi;
-  return text.replace(urlRegex, function(url) {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
+function formatTextWithLinks(text, q) {
+  if (!text) return '';
+  let s = escHtml(text);
+  
+  // 1. AutoLink URLs robustly
+  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/gi;
+  s = s.replace(urlRegex, function(url) {
+      let href = url.startsWith('http') ? url : 'https://' + url;
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
   });
-}
-
-function hlHtml(raw, q) {
-  let s = escHtml(raw);
-  s = autoLink(s);
-  if (!q) return s;
-  // Safely highlight text without breaking HTML tags
-  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![^<]*>)','gi');
-  return s.replace(re,'<mark>$1</mark>');
+  
+  // 2. Highlight exactly the search term (Negative lookahead prevents matching inside HTML tags)
+  if (q) {
+      const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      const re = new RegExp(`(${safeQ})(?![^<]*>)`, 'gi');
+      s = s.replace(re, '<mark>$1</mark>');
+  }
+  return s;
 }
 
 /* =========================================================
@@ -935,8 +972,7 @@ function needsBooking(bookText, desc) {
 // REAL GOOGLE MAPS API LINKS (FIXED!)
 // =========================================================
 function getMapQuery(item) {
-  // Use area as primary map query to avoid errors, fallback to placeName
-  return (item.area || item.placeName || '').trim();
+  return [item.placeName, item.area].filter(Boolean).join(' ').trim();
 }
 
 function buildMapUrl(item) {
@@ -957,7 +993,10 @@ function buildDailyUrl(items, mode='driving') {
     .map(a => encodeURIComponent(getMapQuery(a)));
     
   if (!locs.length) return '';
-  if (locs.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${locs[0]}&travelmode=${mode}`;
+  if (locs.length === 1) {
+    if (mode === 'transit') return `https://www.google.com/maps/dir/?api=1&destination=${locs[0]}&travelmode=transit`;
+    return `https://www.google.com/maps/search/?api=1&query=${locs[0]}`;
+  }
   
   const origin = locs[0];
   const dest = locs[locs.length-1];
@@ -972,7 +1011,7 @@ function formatCost(s) {
   if (!s) return '';
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
-  if (!/\d/.test(c)) return c; // Only text (e.g. "כלול בפס") - Don't add currency symbol
+  if (!/\d/.test(c)) return c; 
   return '₪' + c;
 }
 function formatTime(s) {
@@ -1003,7 +1042,7 @@ async function readFileText(f) {
   }
 }
 
-// SMART DEDUPLICATION: Check Name + Day + Time + Desc so we don't lose items!
+// SMART DEDUPLICATION: Check Name + Day + Time + Desc
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) {
@@ -1058,7 +1097,7 @@ async function processFiles(files) {
       if (bBase) finalBookingArr.push(bBase);
       if (bWhen) finalBookingArr.push(`מתי: ${bWhen}`);
       if (bHow) finalBookingArr.push(`פלטפורמה: ${bHow}`);
-      const finalBooking = finalBookingArr.join('\n');
+      const finalBooking = finalBookingArr.join(' | ');
       
       const checkIn  = getCol(obj,'checkIn');
       const checkOut = getCol(obj,'checkOut');
@@ -1108,6 +1147,8 @@ async function processFiles(files) {
           link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
           requiresBooking: needsBooking(finalBooking, desc),
           icon: detectIcon([place, desc, area].join(' ')),
+          mapUrl: buildMapUrl({placeName: place, area: area}),
+          transitUrl: buildTransitUrl({placeName: place, area: area}),
         };
         const dest = isOpt ? state.data.options : state.data.itinerary;
         const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
@@ -1288,7 +1329,7 @@ function exportJSON(data, completedIds, bookedIds) {
 }
 
 function exportKML(data) {
-  const e = s => (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+  const e = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n<name>TripMH</name>\n`;
   [...data.itinerary, ...data.options].filter(i => i.area || i.placeName).forEach(i => {
       const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `הזמנה: ${i.booking}` : ''].filter(Boolean).join('\n');
@@ -1416,7 +1457,7 @@ function renderTripCard(item, q) {
       <div class="booking-top">
         <div class="booking-info">
           ${svgIcon(isBooked ? 'ok' : 'warn')}
-          <span style="word-break:break-word; white-space:pre-wrap;">${hlHtml(label, q)}</span>
+          <span style="word-break:break-word; white-space:pre-wrap;">${formatTextWithLinks(label, q)}</span>
         </div>
         <div class="booking-actions">
           ${calendarBtn}
@@ -1448,8 +1489,8 @@ function renderTripCard(item, q) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
-  const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
+  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${formatTextWithLinks(item.booking,q)}</span></div>` : '';
+  const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${formatTextWithLinks(item.transport,q)}</span></div>` : '';
 
   return `
 <article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
@@ -1471,7 +1512,7 @@ function renderTripCard(item, q) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
-    ${item.description ? `<div class="card-desc">${hlHtml(item.description,q)}</div>` : ''}
+    ${item.description ? `<div class="card-desc">${formatTextWithLinks(item.description,q)}</div>` : ''}
     ${ciRow}${coRow}${bookingRow}${transRow}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
@@ -1508,7 +1549,7 @@ function renderTipCard(item, q) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
-    ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
+    ${item.content ? `<div class="card-desc">${formatTextWithLinks(item.content,q)}</div>` : ''}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
 </article>`;
@@ -1524,7 +1565,7 @@ function renderChecklistCard(item, q) {
     </button>
     <div style="flex:1; cursor:pointer;" onclick="openEdit('${item.id}')">
       <div style="font-size:14px; font-weight:600; color:var(--text); ${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title,q)}</div>
-      ${item.description ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${hlHtml(item.description,q)}</div>` : ''}
+      ${item.description ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${formatTextWithLinks(item.description,q)}</div>` : ''}
     </div>
     <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0;">${svgIcon('edit')}</button>
   </article>`;
@@ -1541,7 +1582,7 @@ function renderDictionaryCard(item, q) {
       </div>
       <button class="icon-btn" onclick="openEdit('${item.id}')">${svgIcon('edit')}</button>
     </div>
-    ${item.context ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
+    ${item.context ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">${formatTextWithLinks(item.context, q)}</div>` : ''}
   </article>`;
 }
 
@@ -1759,6 +1800,8 @@ function readEditForm(item) {
     timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
   };
+  updated.mapUrl = buildMapUrl(updated);
+  updated.transitUrl = buildTransitUrl(updated);
   updated.requiresBooking = needsBooking(updated.booking, updated.description);
   if (!updated.icon || updated.icon === '📍') updated.icon = detectIcon([updated.placeName, updated.description, updated.area].join(' '));
   return updated;
@@ -1783,7 +1826,7 @@ function openAdd(type) {
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
   else {
-    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍' });
+    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍', mapUrl:'', transitUrl:'' });
   }
   
   state.editItem = item;
