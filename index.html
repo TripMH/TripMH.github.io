@@ -63,6 +63,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .pill-counter{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;
   background:var(--bg-muted);font-size:11px;font-family:'Courier New',monospace;color:var(--text-muted)}
 .pill-counter .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
+
 .icon-btn{width:32px;height:32px;border-radius:var(--r-sm);border:none;background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   color:var(--text-muted);transition:color .15s,background .15s;position:relative}
@@ -163,15 +164,16 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
 
-.card-booking-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px; border-bottom:1px solid;}
+.card-booking-bar{display:flex;flex-direction:column;gap:8px;padding:10px 12px; border-bottom:1px solid;}
 .card-booking-bar.unbooked {background:var(--danger-glow); border-color:rgba(248,113,113,.18);}
 .card-booking-bar.booked {background:var(--success-glow); border-color:rgba(74,222,128,.18);}
-.booking-info{display:flex;align-items:center;gap:6px; color:var(--danger);}
+.booking-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;width:100%;}
+.booking-info{display:flex;align-items:flex-start;gap:6px;font-size:12px;font-weight:600;line-height:1.4;color:var(--danger);}
 .booked .booking-info{color:var(--success);}
-.booking-info svg{width:12px;height:12px;flex-shrink:0}
-.booking-info span{font-size:11px;font-weight:600;}
+.booking-info svg{width:12px;height:12px;flex-shrink:0;margin-top:2px;}
+.booking-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
 
-.book-toggle-btn{background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:10px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:4px; transition:opacity .2s;}
+.book-toggle-btn{background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:10px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; transition:opacity .2s; font-family:inherit;}
 .book-toggle-btn:hover{opacity:.85;}
 .unbooked .book-toggle-btn{border-color:var(--danger); color:var(--danger);}
 .booked .book-toggle-btn{border-color:var(--success); color:var(--success);}
@@ -274,12 +276,12 @@ select.edit-input{appearance:none}
   animation:fadeUp .3s ease forwards; overflow:hidden; position:relative;
 }
 .toast-content {
-  display:flex; align-items:center; gap:14px; padding:10px 14px; width:100%; position:relative; z-index:2;
+  display:flex; align-items:center; justify-content:space-between; gap:14px; padding:10px 14px; width:100%; position:relative; z-index:2;
 }
 .toast-msg.success{border-color:color-mix(in srgb,var(--success) 30%,transparent);color:var(--success)}
 .toast-msg.error{border-color:color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)}
 .toast-msg .undo-btn{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);
-  border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;margin-right:auto;border:none;font-family:inherit;}
+  border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;border:none;font-family:inherit;}
 
 .undo-progress {
   position:absolute; bottom:0; left:0; height:4px; background:currentColor; width:100%;
@@ -320,7 +322,7 @@ select.edit-input{appearance:none}
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .25s ease both}
+/* .fade-up is purposefully removed from rendering logic to prevent glitchy jumps when opening cards */
 .loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .loading-spinner{width:52px;height:52px;border-radius:var(--r-lg);background:var(--accent-glow);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
 .loading-spinner svg{width:22px;height:22px;color:var(--accent)}
@@ -366,7 +368,7 @@ select.edit-input{appearance:none}
         </div>
       </div>
       <div class="header-actions">
-        <div class="pill-counter" id="pill-counter" style="display:none" title="פריטים הושלמו">
+        <div class="pill-counter" id="pill-counter" style="display:none" title="סה״כ פריטים שהושלמו">
           <div class="dot"></div>
           <span id="pill-text">0/0</span>
         </div>
@@ -686,12 +688,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v15';
-const LS_COMPLETED = 'tripmh_completed_v15';
-const LS_BOOKED    = 'tripmh_booked_v15';
-const LS_EXPANDED  = 'tripmh_expanded_v15';
-const LS_TAB       = 'tripmh_tab_v15';
-const LS_DARK      = 'tripmh_dark_v15';
+const LS_DATA      = 'tripmh_data_v16';
+const LS_COMPLETED = 'tripmh_completed_v16';
+const LS_BOOKED    = 'tripmh_booked_v16';
+const LS_EXPANDED  = 'tripmh_expanded_v16';
+const LS_TAB       = 'tripmh_tab_v16';
+const LS_DARK      = 'tripmh_dark_v16';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -759,7 +761,6 @@ function addToast(msg, type = 'neutral', undoCallback = null) {
   
   container.prepend(toast);
   
-  // 5000ms = 5 seconds to match the CSS shrinkBar animation
   timeoutId = setTimeout(() => {
     if (toast.parentNode) {
       toast.style.opacity = '0';
@@ -789,14 +790,14 @@ function showConfirm(title, text, onConfirm, isDanger=false) {
    SMART LINKS
 ========================================================= */
 function getSmartLinkLabel(url, label) {
-  if (label && label !== 'מידע נוסף' && label !== 'למידע נוסף') return label; // Trust the user if explicitly provided
+  if (label && label !== 'מידע נוסף' && label !== 'למידע נוסף') return label; 
   if (!url) return 'מידע נוסף';
   const u = url.toLowerCase();
   
   if (u.includes('mailto:')) return 'שליחת אימייל';
   if (u.includes('booking.com') || u.includes('agoda.com') || u.includes('airbnb') || u.includes('hotels.com')) return 'הזמנת לינה / מלון';
   if (u.includes('klook.com') || u.includes('getyourguide') || u.includes('kkday')) return 'הזמנת אטרקציה / כרטיסים';
-  if (u.includes('lawson') || u.includes('eplus') || u.includes('ticket') || u.includes('pia.jp') || u.includes('l-tike')) return 'רכישת כרטיסים להופעה';
+  if (u.includes('lawson') || u.includes('eplus') || u.includes('ticket') || u.includes('pia.jp') || u.includes('l-tike') || u.includes('viagogo')) return 'רכישת כרטיסים להופעה';
   if (u.includes('tabelog') || u.includes('tripadvisor') || u.includes('google.com/maps')) return 'ביקורות ומידע על המקום';
   if (u.includes('instagram.com') || u.includes('facebook.com') || u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
   
@@ -857,14 +858,11 @@ const ALIASES = {
   dur:       ['משך','זמן מוערך','duration','זמן ביקור'],
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
-  
-  // NEW ALIASES TO CATCH ALL BOOKING & CHECK-IN/OUT FIELDS
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation'],
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
   bookWhen:  ['מתי להזמין','זמן מומלץ להזמנה','תזמון'],
   checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה'],
   checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה'],
-  
   desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
   area:      ['אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood'],
   category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
@@ -959,32 +957,19 @@ function buildDailyRouteUrl(items) {
   if (wps.length) url += `&waypoints=${wps.join('|')}`;
   return url;
 }
-
-// Fixed Cost Formatting - only show ₪ if there is an actual number!
 function formatCost(s) {
   if (!s) return '';
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
-  if (!/\d/.test(c)) return c; // Just text (e.g. "כלול בפס", "כבר שולם") - no currency symbol needed
+  if (!/\d/.test(c)) return c; 
   return '₪' + c;
 }
-
 function formatTime(s) {
   if (!s) return '';
   return s.replace(/[\u2013\u2014\u2012\u2010\u2011\uFE58\uFE63\uFF0D]/g,' – ')
           .replace(/\s*-\s*/g,' – ')
           .replace(/\s{2,}/g,' ')
           .trim();
-}
-function extractBookingAdvance(booking) {
-  if (!booking) return null;
-  const m = booking.match(/(\d+)\s*(ימים?|days?|weeks?|שבוע|שבועות|שעות?|hours?)/i);
-  if (!m) return null;
-  const n = parseInt(m[1]);
-  const unit = m[2].toLowerCase();
-  if (/שעות?|hours?/.test(unit)) return `${n} שעות מראש`;
-  if (/שבוע|שבועות|weeks?/.test(unit)) return `${n * 7} ימים מראש`;
-  return `${n} ימים מראש`;
 }
 function extractBookingAdvDays(txt) {
   const m = (txt||'').match(/(\d+)\s*(ימים|days|שבוע|שבועות)/i);
@@ -1016,7 +1001,6 @@ async function readFileText(f) {
   }
 }
 
-// SMART DEDUPLICATION: Includes place, day, AND time to prevent losing items (111 -> 107 fix)
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) arr[idx] = { ...arr[idx], ...newItem, id: arr[idx].id };
@@ -1060,17 +1044,19 @@ async function processFiles(files) {
       const desc  = getCol(obj,'desc'),  area = getCol(obj,'area'), catCol = getCol(obj,'category');
       const link  = getCol(obj,'link');
       
-      // BOOKING AND CHECK-IN LOGIC
       const bBase = getCol(obj,'book');
       const bHow  = getCol(obj,'bookHow');
       const bWhen = getCol(obj,'bookWhen');
-      const finalBooking = [bBase, bHow, bWhen].filter(Boolean).join(' | ');
+      let finalBookingArr = [];
+      if (bBase) finalBookingArr.push(bBase);
+      if (bWhen) finalBookingArr.push(`מתי להזמין: ${bWhen}`);
+      if (bHow) finalBookingArr.push(`איך: ${bHow}`);
+      const finalBooking = finalBookingArr.join('\n');
       
       const checkIn  = getCol(obj,'checkIn');
       const checkOut = getCol(obj,'checkOut');
 
-      const rawTime = getCol(obj,'time');
-      const timeStr = formatTime(rawTime);
+      const timeStr = formatTime(getCol(obj,'time'));
 
       if (fileType === 'dictionary') {
         const hebrew = getCol(obj, 'hebrew') || place;
@@ -1121,8 +1107,7 @@ async function processFiles(files) {
           mapUrl: buildMapUrl(place || 'ללא שם', area),
         };
         const dest = isOpt ? state.data.options : state.data.itinerary;
-        // Fix: Deduplication now requires the same place, same day, AND same time. Prevents data loss (111 items issue)
-        mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr);
+        mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
         stats.added++;
       }
     }
@@ -1156,7 +1141,7 @@ function setCalendarReminder(id) {
 
   const fmt = d => d.toISOString().replace(/-|:|\.\d+/g, '').substring(0, 15) + 'Z';
   const title = encodeURIComponent(`תזכורת הזמנה: ${item.placeName}`);
-  const desc = encodeURIComponent(`תזכורת ממערכת TripMH!\n\nהגיע הזמן לשריין עבור: ${item.placeName}\nפירוט: ${item.booking}\n\n${item.link ? 'קישור: '+item.link : ''}`);
+  const desc = encodeURIComponent(`תזכורת ממערכת TripMH!\n\nהגיע הזמן לשריין עבור: ${item.placeName}\nפירוט:\n${item.booking}\n\n${item.link ? 'קישור: '+item.link : ''}`);
   const loc = encodeURIComponent(item.area || '');
   
   const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(reminderDate)}/${fmt(endDate)}&details=${desc}&location=${loc}`;
@@ -1165,7 +1150,7 @@ function setCalendarReminder(id) {
 }
 
 /* =========================================================
-   CSV / TXT EXPORT (CURRENT TAB ONLY)
+   CSV / TXT EXPORT
 ========================================================= */
 function csvField(v) {
   const s = String(v == null ? '' : v);
@@ -1297,7 +1282,7 @@ function svgIcon(name) {
 }
 
 /* =========================================================
-   CARD RENDERERS
+   UI ACTIONS
 ========================================================= */
 function toggleBooked(id) {
   const isBooked = state.bookedIds.has(id);
@@ -1314,28 +1299,74 @@ function toggleBooked(id) {
   }
 }
 
+function toggleComplete(id) {
+  const wasCompleted = state.completedIds.has(id);
+  if (wasCompleted) state.completedIds.delete(id);
+  else state.completedIds.add(id);
+  
+  addToast(wasCompleted ? 'הוסר סימון הושלם' : 'סומן כהושלם', 'neutral', () => {
+    if (wasCompleted) state.completedIds.add(id);
+    else state.completedIds.delete(id);
+    updateUI(); persistState();
+  });
+  
+  updateUI();
+  persistState();
+}
+
+function completeAllInGroup(idsCsv) {
+  const ids = String(idsCsv).split(',').map(s => s.trim()).filter(Boolean);
+  ids.forEach(id => state.completedIds.add(id));
+  addToast(`${ids.length} פריטים סומנו כהושלמו`, 'neutral', () => {
+    ids.forEach(id => state.completedIds.delete(id));
+    updateUI(); persistState();
+  });
+  updateUI();
+  persistState();
+}
+
+// FIX: Expands the card seamlessly directly through the DOM without re-rendering the whole page!
+function toggleExpand(id) {
+  const card = document.querySelector(`.card[data-id="${id}"]`);
+  if (state.expandedIds.has(id)) {
+    state.expandedIds.delete(id);
+    if(card) card.classList.remove('expanded');
+  } else {
+    state.expandedIds.add(id);
+    if(card) card.classList.add('expanded');
+  }
+  persistState();
+}
+
+/* =========================================================
+   CARD RENDERERS
+========================================================= */
 function renderTripCard(item, q) {
   const done     = state.completedIds.has(item.id);
   const expanded = state.expandedIds.has(item.id);
   const cost     = formatCost(item.cost);
   const showWarn = item.requiresBooking;
   const timeDisp = formatTime(item.timeRange);
-  const advanceNotice = extractBookingAdvance(item.booking);
   
   let bookingBar = '';
   if (showWarn) {
     const isBooked = state.bookedIds.has(item.id);
     let calendarBtn = '';
     if (!isBooked && item.dateVal) {
-        calendarBtn = `<button class="book-toggle-btn" style="border-color:var(--accent); color:var(--accent); background:var(--accent-glow);" onclick="event.stopPropagation(); setCalendarReminder('${item.id}')">📅 תזכורת</button>`;
+        calendarBtn = `<button class="book-toggle-btn" style="border-color:var(--accent); color:var(--accent); background:var(--accent-glow);" onclick="event.stopPropagation(); setCalendarReminder('${item.id}')">📅 ליומן</button>`;
     }
-    const label = isBooked ? 'הוזמן / שולם' : `דורש הזמנה מראש${advanceNotice ? ' ('+advanceNotice+')' : ''}`;
+    const label = isBooked ? 'הוזמן / שולם / טופל' : `לשריון: ${item.booking}`;
     bookingBar = `
     <div class="card-booking-bar ${isBooked ? 'booked' : 'unbooked'}" onclick="event.stopPropagation()">
-      <div class="booking-info">${svgIcon(isBooked ? 'ok' : 'warn')}<span>${label}</span></div>
-      <div style="display:flex; gap:6px;">
-        ${calendarBtn}
-        <button class="book-toggle-btn" onclick="toggleBooked('${item.id}')">${isBooked ? 'בטל' : 'סמן כטופל'}</button>
+      <div class="booking-top">
+        <div class="booking-info">
+          ${svgIcon(isBooked ? 'ok' : 'warn')}
+          <span style="word-break:break-word; white-space:pre-wrap;">${hlHtml(label, q)}</span>
+        </div>
+        <div class="booking-actions">
+          ${calendarBtn}
+          <button class="book-toggle-btn" onclick="toggleBooked('${item.id}')">${isBooked ? 'בטל שריון' : 'סמן כטופל'}</button>
+        </div>
       </div>
     </div>`;
   }
@@ -1362,16 +1393,15 @@ function renderTripCard(item, q) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">פרטי הזמנה:</span><span class="dr-value">${hlHtml(item.booking,q)}</span></div>` : '';
+  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מנהלות הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
   const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
+  // Removed 'fade-up' so it doesn't blink when the screen refreshes on check/uncheck
   return `
-<article class="card${done?' done':''}${expanded?' expanded':''} fade-up" data-id="${item.id}">
+<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
   ${bookingBar}
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" aria-expanded="${expanded}" tabindex="0"
-    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleExpand('${item.id}')}">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')"
-      aria-label="${done?'הסר סימון':'סמן כהושלם'}" style="${checkStyle}">
+  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
+    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
     <div class="card-main">
@@ -1406,8 +1436,8 @@ function renderTipCard(item, q) {
   ].filter(Boolean).join('');
 
   return `
-<article class="card${done?' done':''}${expanded?' expanded':''} fade-up" data-id="${item.id}">
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" aria-expanded="${expanded}" tabindex="0">
+<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
+  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
     <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
@@ -1434,7 +1464,7 @@ function renderChecklistCard(item, q) {
   const done = state.completedIds.has(item.id);
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
   return `
-  <article class="card ${done?'done':''} fade-up" data-id="${item.id}" style="padding:10px 12px; display:flex; gap:10px; align-items:center;">
+  <article class="card ${done?'done':''}" data-id="${item.id}" style="padding:10px 12px; display:flex; gap:10px; align-items:center;">
     <button class="card-check" onclick="toggleComplete('${item.id}')" style="flex-shrink:0; ${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
@@ -1448,7 +1478,7 @@ function renderChecklistCard(item, q) {
 
 function renderDictionaryCard(item, q) {
   return `
-  <article class="card fade-up" data-id="${item.id}" style="padding:12px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
+  <article class="card" data-id="${item.id}" style="padding:12px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <div>
         <div style="font-size:15px; font-weight:700; color:var(--accent);">${hlHtml(item.hebrew, q)}</div>
@@ -1528,6 +1558,9 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
    FULL UI UPDATE
 ========================================================= */
 function updateUI() {
+  const contentDiv = document.getElementById('tab-content');
+  const scrollPos = contentDiv ? contentDiv.scrollTop : 0;
+
   const d = state.data;
   const q = state.searchQuery.toLowerCase();
 
@@ -1563,7 +1596,7 @@ function updateUI() {
 
   document.getElementById('pill-counter').style.display = totalItems > 0 ? 'flex' : 'none';
   document.getElementById('pill-text').textContent = `${totalCompleted}/${totalItems}`;
-  
+
   for (const id of ['btn-share','btn-export','btn-clear']) {
     document.getElementById(id).style.display = hasData ? 'flex' : 'none';
   }
@@ -1573,6 +1606,10 @@ function updateUI() {
   document.getElementById('stat-done').textContent        = totalCompleted;
   document.getElementById('stat-booking').textContent     = state.bookedIds.size + '/' + bookingCount;
   document.getElementById('stat-tips').textContent        = d.tips.length;
+
+  if (contentDiv) {
+    requestAnimationFrame(() => contentDiv.scrollTop = scrollPos);
+  }
 }
 
 /* =========================================================
@@ -1635,7 +1672,7 @@ function buildEditForm(item) {
   <div class="edit-group"><label class="edit-label">משך ביקור</label><input class="edit-input" id="ef-duration" value="${escHtml(item.duration)}" autocomplete="off" /></div>
 </div>
 <div class="edit-group"><label class="edit-label">תחבורה / הגעה</label><input class="edit-input" id="ef-transport" value="${escHtml(item.transport)}" autocomplete="off" /></div>
-<div class="edit-group"><label class="edit-label">פרטי הזמנה (מתי, איך ואיפה משריינים)</label><input class="edit-input" id="ef-booking" value="${escHtml(item.booking)}" autocomplete="off" /></div>
+<div class="edit-group"><label class="edit-label">פרטי הזמנה (מתי, איך ואיפה משריינים)</label><textarea class="edit-input" id="ef-booking" rows="2">${escHtml(item.booking)}</textarea></div>
 <div class="edit-group"><label class="edit-label">כתובת / מיקום לניווט</label><input class="edit-input" id="ef-area" value="${escHtml(item.area)}" autocomplete="off" /></div>
 <div class="edit-row"><div class="edit-group"><label class="edit-label">קישור</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" type="url" /></div><div class="edit-group" style="flex:0 0 140px"><label class="edit-label">שם הקישור</label><input class="edit-input" id="ef-linkLabel" value="${escHtml(item.linkLabel)}" /></div></div>
 <div class="edit-group">
