@@ -310,14 +310,6 @@ select.edit-input{appearance:none}
 .add-fab svg{width:14px;height:14px}
 
 /* =========================================================
-   UPLOAD HINT GRID
-========================================================= */
-.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.format-hint-item{padding:8px 10px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
-.format-hint-item strong{display:block;font-size:11px;color:var(--accent);margin-bottom:3px}
-.format-hint-item span{font-size:11px;color:var(--text-muted)}
-
-/* =========================================================
    ANIMATIONS & LOADING
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -349,11 +341,7 @@ select.edit-input{appearance:none}
 </head>
 <body>
 
-<!-- =========================================================
-     APP SHELL
-========================================================= -->
 <div id="app">
-  <!-- HEADER -->
   <header id="app-header">
     <div class="header-top">
       <div class="logo">
@@ -371,33 +359,28 @@ select.edit-input{appearance:none}
           <div class="dot"></div>
           <span id="pill-text">0/0</span>
         </div>
-        <!-- Theme toggle -->
         <button class="icon-btn" id="btn-theme" aria-label="שנה ערכת צבעים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
         </button>
-        <!-- Share -->
         <button class="icon-btn" id="btn-share" aria-label="שתף מסלול" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
           </svg>
         </button>
-        <!-- Export -->
         <button class="icon-btn" id="btn-export" aria-label="ייצוא נתונים" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
-        <!-- Clear -->
         <button class="icon-btn danger" id="btn-clear" aria-label="מחק הכל" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
           </svg>
         </button>
-        <!-- Upload -->
         <button class="upload-btn" id="btn-upload" title="העלאת קבצים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
@@ -407,7 +390,6 @@ select.edit-input{appearance:none}
       </div>
     </div>
 
-    <!-- Search -->
     <div class="search-wrap">
       <span class="search-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -422,7 +404,6 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
-    <!-- Tab bar -->
     <nav id="tab-bar">
       <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -462,7 +443,6 @@ select.edit-input{appearance:none}
       </button>
     </nav>
 
-    <!-- Stats bar -->
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
       <div class="stat-item accent">
         <span class="stat-num" id="stat-attractions">0</span>
@@ -483,7 +463,6 @@ select.edit-input{appearance:none}
     </div>
   </header>
 
-  <!-- TAB PANELS -->
   <main id="tab-content">
     <div id="panel-itinerary"></div>
     <div id="panel-options"   style="display:none"></div>
@@ -493,9 +472,6 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
-<!-- =========================================================
-     LOADING OVERLAY
-========================================================= -->
 <div class="loading-overlay" id="loading-overlay" style="display:none">
   <div class="loading-spinner">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -505,14 +481,8 @@ select.edit-input{appearance:none}
   <p class="loading-label">מעבד קבצים...</p>
 </div>
 
-<!-- =========================================================
-     STACKING TOAST CONTAINER (WITH PROGRESS BAR)
-========================================================= -->
 <div id="toast-container"></div>
 
-<!-- =========================================================
-     CONFIRM MODAL (For deletion / actions)
-========================================================= -->
 <div class="modal-overlay hidden" id="modal-confirm">
   <div class="modal-box">
     <div class="modal-title" id="mc-title">אישור פעולה</div>
@@ -524,9 +494,6 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
-<!-- =========================================================
-     UPLOAD MODAL
-========================================================= -->
 <div class="modal-overlay hidden" id="modal-upload">
   <div class="modal-box">
     <div class="modal-drag-handle"></div>
@@ -576,9 +543,6 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
-<!-- =========================================================
-     EXPORT MODAL
-========================================================= -->
 <div class="modal-overlay hidden" id="modal-export">
   <div class="modal-box">
     <div class="modal-drag-handle"></div>
@@ -646,9 +610,6 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
-<!-- =========================================================
-     EDIT MODAL
-========================================================= -->
 <div class="modal-overlay hidden" id="modal-edit">
   <div class="modal-box" id="edit-modal-box">
     <div class="modal-drag-handle"></div>
@@ -675,24 +636,20 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
-<!-- Hidden file inputs -->
 <input type="file" id="file-csv"  accept=".csv,text/csv" multiple style="display:none" />
 <input type="file" id="file-json" accept=".json,application/json" style="display:none" />
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
 <script>
 'use strict';
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v19';
-const LS_COMPLETED = 'tripmh_completed_v19';
-const LS_BOOKED    = 'tripmh_booked_v19';
-const LS_EXPANDED  = 'tripmh_expanded_v19';
-const LS_TAB       = 'tripmh_tab_v19';
-const LS_DARK      = 'tripmh_dark_v19';
+const LS_DATA      = 'tripmh_data_v20';
+const LS_COMPLETED = 'tripmh_completed_v20';
+const LS_BOOKED    = 'tripmh_booked_v20';
+const LS_EXPANDED  = 'tripmh_expanded_v20';
+const LS_TAB       = 'tripmh_tab_v20';
+const LS_DARK      = 'tripmh_dark_v20';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -796,14 +753,12 @@ function formatTextWithLinks(text, q) {
   if (!text) return '';
   let s = escHtml(text);
   
-  // 1. AutoLink URLs robustly
   const urlRegex = /((https?:\/\/|www\.)[^\s]+)/gi;
   s = s.replace(urlRegex, function(url) {
       let href = url.startsWith('http') ? url : 'https://' + url;
       return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
   });
   
-  // 2. Highlight exactly the search term (Negative lookahead prevents matching inside HTML tags)
   if (q) {
       const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
       const re = new RegExp(`(${safeQ})(?![^<]*>)`, 'gi');
@@ -969,7 +924,7 @@ function needsBooking(bookText, desc) {
 }
 
 // =========================================================
-// REAL GOOGLE MAPS API LINKS (FIXED!)
+// REAL GOOGLE MAPS API LINKS
 // =========================================================
 function getMapQuery(item) {
   return [item.placeName, item.area].filter(Boolean).join(' ').trim();
@@ -990,20 +945,21 @@ function buildTransitUrl(item) {
 function buildDailyUrl(items, mode='driving') {
   const locs = items
     .filter(a => (a.type === 'itinerary' || a.type === 'option') && getMapQuery(a))
-    .map(a => encodeURIComponent(getMapQuery(a)));
+    .map(a => getMapQuery(a));
     
   if (!locs.length) return '';
   if (locs.length === 1) {
-    if (mode === 'transit') return `https://www.google.com/maps/dir/?api=1&destination=${locs[0]}&travelmode=transit`;
-    return `https://www.google.com/maps/search/?api=1&query=${locs[0]}`;
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locs[0])}&travelmode=${mode}`;
   }
   
   const origin = locs[0];
   const dest = locs[locs.length-1];
-  const wps = locs.slice(1,-1).join('|');
+  const wps = locs.slice(1,-1);
   
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=${mode}`;
-  if (wps && mode !== 'transit') url += `&waypoints=${wps}`;
+  let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=${mode}`;
+  if (wps.length && mode !== 'transit') {
+      url += `&waypoints=${encodeURIComponent(wps.join('|'))}`;
+  }
   return url;
 }
 
@@ -1011,7 +967,7 @@ function formatCost(s) {
   if (!s) return '';
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
-  if (!/\d/.test(c)) return c; 
+  if (!/\d/.test(c)) return c; // Only text (e.g. "כלול בפס") - Don't add currency symbol
   return '₪' + c;
 }
 function formatTime(s) {
@@ -1042,7 +998,7 @@ async function readFileText(f) {
   }
 }
 
-// SMART DEDUPLICATION: Check Name + Day + Time + Desc
+// EXACT MATCH DEDUPLICATION: Ensures no items are lost randomly
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) {
@@ -1050,7 +1006,7 @@ function mergeItem(arr, newItem, matchFn) {
       return false; // Updated
   }
   arr.push(newItem);
-  return true; // Added newly
+  return true; // Added
 }
 
 async function processFiles(files) {
@@ -1096,8 +1052,8 @@ async function processFiles(files) {
       let finalBookingArr = [];
       if (bBase) finalBookingArr.push(bBase);
       if (bWhen) finalBookingArr.push(`מתי: ${bWhen}`);
-      if (bHow) finalBookingArr.push(`פלטפורמה: ${bHow}`);
-      const finalBooking = finalBookingArr.join(' | ');
+      if (bHow) finalBookingArr.push(`איך: ${bHow}`);
+      const finalBooking = finalBookingArr.join('\n');
       
       const checkIn  = getCol(obj,'checkIn');
       const checkOut = getCol(obj,'checkOut');
@@ -1147,11 +1103,13 @@ async function processFiles(files) {
           link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
           requiresBooking: needsBooking(finalBooking, desc),
           icon: detectIcon([place, desc, area].join(' ')),
-          mapUrl: buildMapUrl({placeName: place, area: area}),
-          transitUrl: buildTransitUrl({placeName: place, area: area}),
         };
+        // Generate URLs
+        item.mapUrl = buildMapUrl(item);
+        item.transitUrl = buildTransitUrl(item);
+
         const dest = isOpt ? state.data.options : state.data.itinerary;
-        const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
+        const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc && x.area === area);
         if(isNew) stats.added++; else stats.updated++;
       }
     }
@@ -1219,7 +1177,7 @@ function downloadFilesSequentially(files) {
   files.forEach((file, index) => {
     setTimeout(() => {
       downloadBlob(file.content, file.filename, file.mime);
-    }, index * 400); // 400ms delay to prevent browser block
+    }, index * 800); 
   });
 }
 
@@ -1312,24 +1270,22 @@ function exportTxt() {
 
   if (files.length === 0) { addToast('אין נתונים לייצוא', 'error'); return; }
 
-  // Downloads files sequentially
   downloadFilesSequentially(files);
   document.getElementById('modal-export').classList.add('hidden');
   addToast(`הורדת ${files.length} קבצי טקסט החלה`, 'success');
 
-  // Also puts the combined text on the clipboard for easy mobile sharing
   if (navigator.clipboard) {
     navigator.clipboard.writeText(fullClipboardText);
   }
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 7, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 8, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
 function exportKML(data) {
-  const e = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const e = s => (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
   let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n<name>TripMH</name>\n`;
   [...data.itinerary, ...data.options].filter(i => i.area || i.placeName).forEach(i => {
       const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `הזמנה: ${i.booking}` : ''].filter(Boolean).join('\n');
@@ -1451,7 +1407,7 @@ function renderTripCard(item, q) {
     if (!isBooked && item.dateVal) {
         calendarBtn = `<button class="book-toggle-btn" style="border-color:var(--accent); color:var(--accent); background:var(--accent-glow);" onclick="event.stopPropagation(); setCalendarReminder('${item.id}')">📅 ליומן</button>`;
     }
-    const label = isBooked ? 'הוזמן / שולם / טופל' : `לשריון: ${item.booking}`;
+    const label = isBooked ? 'הוזמן / שולם / טופל' : `לשריון:\n${item.booking}`;
     bookingBar = `
     <div class="card-booking-bar ${isBooked ? 'booked' : 'unbooked'}" onclick="event.stopPropagation()">
       <div class="booking-top">
@@ -1474,15 +1430,12 @@ function renderTripCard(item, q) {
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area,q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
+    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${formatTextWithLinks(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
-  const mapUrl = buildMapUrl(item);
-  const transitUrl = buildTransitUrl(item);
-
   const navBtns = [
-    mapUrl     ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
-    transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
+    item.mapUrl     ? `<a href="${item.mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
+    item.transitUrl ? `<a href="${item.transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
     item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
