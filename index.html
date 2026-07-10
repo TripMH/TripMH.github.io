@@ -310,6 +310,14 @@ select.edit-input{appearance:none}
 .add-fab svg{width:14px;height:14px}
 
 /* =========================================================
+   UPLOAD HINT GRID
+========================================================= */
+.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.format-hint-item{padding:8px 10px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
+.format-hint-item strong{display:block;font-size:11px;color:var(--accent);margin-bottom:3px}
+.format-hint-item span{font-size:11px;color:var(--text-muted)}
+
+/* =========================================================
    ANIMATIONS & LOADING
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -454,7 +462,7 @@ select.edit-input{appearance:none}
       </div>
       <div class="stat-item warning" title="מעקב אחר אטרקציות ומקומות שדורשים הזמנה או שריון מראש">
         <span class="stat-num" id="stat-booking">0</span>
-        <span class="stat-lbl">הוזמן / לשריון</span>
+        <span class="stat-lbl">מעקב הזמנות</span>
       </div>
       <div class="stat-item purple">
         <span class="stat-num" id="stat-tips">0</span>
@@ -563,7 +571,7 @@ select.edit-input{appearance:none}
         </div>
         <div class="eo-info">
           <div class="eo-title">ייצוא ל-CSV — כל הנתונים בנפרד</div>
-          <div class="eo-desc">מוריד ברצף קבצי אקסל נפרדים ומסודרים לכל הלשוניות במערכת.</div>
+          <div class="eo-desc">מוריד ברצף קובץ אקסל נפרד ומסודר לכל לשונית פעילה במערכת.</div>
         </div>
       </button>
       <button class="export-option eo-json" id="exp-json">
@@ -644,12 +652,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v20';
-const LS_COMPLETED = 'tripmh_completed_v20';
-const LS_BOOKED    = 'tripmh_booked_v20';
-const LS_EXPANDED  = 'tripmh_expanded_v20';
-const LS_TAB       = 'tripmh_tab_v20';
-const LS_DARK      = 'tripmh_dark_v20';
+const LS_DATA      = 'tripmh_data_v19';
+const LS_COMPLETED = 'tripmh_completed_v19';
+const LS_BOOKED    = 'tripmh_booked_v19';
+const LS_EXPANDED  = 'tripmh_expanded_v19';
+const LS_TAB       = 'tripmh_tab_v19';
+const LS_DARK      = 'tripmh_dark_v19';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -749,22 +757,19 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function formatTextWithLinks(text, q) {
-  if (!text) return '';
-  let s = escHtml(text);
-  
-  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/gi;
-  s = s.replace(urlRegex, function(url) {
-      let href = url.startsWith('http') ? url : 'https://' + url;
-      return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
+function autoLink(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/gi;
+  return text.replace(urlRegex, function(url) {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
   });
-  
-  if (q) {
-      const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      const re = new RegExp(`(${safeQ})(?![^<]*>)`, 'gi');
-      s = s.replace(re, '<mark>$1</mark>');
-  }
-  return s;
+}
+
+function hlHtml(raw, q) {
+  let s = escHtml(raw);
+  s = autoLink(s);
+  if (!q) return s;
+  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![^<]*>)','gi');
+  return s.replace(re,'<mark>$1</mark>');
 }
 
 /* =========================================================
@@ -828,7 +833,7 @@ function parseCSV(raw) {
 }
 
 /* =========================================================
-   COLUMN ALIASES & PARSING HELPERS
+   COLUMN ALIASES & PARSING HELPERS (IMPROVED MATCHING)
 ========================================================= */
 const ALIASES = {
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -845,7 +850,7 @@ const ALIASES = {
   checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה'],
   checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה'],
   desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
-  area:      ['אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood'],
+  area:      ['מיקום במפה','לינק למפה','קואורדינטות','אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood','map'],
   category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
   hebrew:    ['עברית','hebrew','מילה בעברית','משמעות'],
   foreign:   ['יפנית','japanese','שפה זרה','מילה','foreign'],
@@ -854,11 +859,21 @@ const ALIASES = {
   link:      ['קישור','אתר','url','link','website'],
   linkLabel: ['שם הקישור','טקסט קישור','link label','link name'],
 };
+
 function getCol(obj, type) {
-  for (const alias of (ALIASES[type]||[])) {
-    const al = alias.toLowerCase();
-    const k = Object.keys(obj).find(x => x.toLowerCase().includes(al));
-    if (k !== undefined && obj[k]?.trim()) return obj[k].trim();
+  const aliases = ALIASES[type] || [];
+  const keys = Object.keys(obj);
+  
+  // 1. קודם כל מחפשים התאמה מדויקת לשם העמודה
+  for (const alias of aliases) {
+    const exactKey = keys.find(k => k.trim().toLowerCase() === alias.toLowerCase());
+    if (exactKey && obj[exactKey]?.trim()) return obj[exactKey].trim();
+  }
+  
+  // 2. רק אם לא נמצא התאמה מדויקת, מחפשים התאמה חלקית
+  for (const alias of aliases) {
+    const incKey = keys.find(k => k.toLowerCase().includes(alias.toLowerCase()));
+    if (incKey && obj[incKey]?.trim()) return obj[incKey].trim();
   }
   return '';
 }
@@ -924,42 +939,57 @@ function needsBooking(bookText, desc) {
 }
 
 // =========================================================
-// REAL GOOGLE MAPS API LINKS
+// REAL GOOGLE MAPS API LINKS (URL AWARE)
 // =========================================================
-function getMapQuery(item) {
-  return [item.placeName, item.area].filter(Boolean).join(' ').trim();
+function extractUrl(str) {
+  const match = str.match(/https?:\/\/[^\s]+/i);
+  return match ? match[0] : null;
 }
 
 function buildMapUrl(item) {
-  const q = getMapQuery(item);
+  const area = (item.area || '').trim();
+  // אם משתמש הכניס לינק של מפות ישר לעמודת "מיקום במפה" – ננווט לשם ישירות!
+  const urlInArea = extractUrl(area);
+  if (urlInArea) return urlInArea; 
+  
+  const q = area || (item.placeName || '').trim();
   if (!q) return '';
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
 
 function buildTransitUrl(item) {
-  const q = getMapQuery(item);
+  const area = (item.area || '').trim();
+  const place = (item.placeName || '').trim();
+  
+  // מסירים לינק אם יש כדי שאפשר יהיה לחפש את השם / הכתובת בטקסט עצמו
+  let q = area.replace(/https?:\/\/[^\s]+/i, '').trim(); 
+  if (!q) q = place;
   if (!q) return '';
+  
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}&travelmode=transit`;
 }
 
 function buildDailyUrl(items, mode='driving') {
-  const locs = items
-    .filter(a => (a.type === 'itinerary' || a.type === 'option') && getMapQuery(a))
-    .map(a => getMapQuery(a));
+  const locs = [];
+  items.filter(a => a.type === 'itinerary' || a.type === 'option').forEach(a => {
+    const area = (a.area || '').trim();
+    const place = (a.placeName || '').trim();
+    
+    // בניתוב נקודות, לינקים שוברים את גוגל מפות, לכן אנו מנקים לינקים מהכתובת.
+    let q = area.replace(/https?:\/\/[^\s]+/i, '').trim(); 
+    if (!q) q = place;
+    if (q) locs.push(encodeURIComponent(q));
+  });
     
   if (!locs.length) return '';
-  if (locs.length === 1) {
-    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(locs[0])}&travelmode=${mode}`;
-  }
+  if (locs.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${locs[0]}&travelmode=${mode}`;
   
   const origin = locs[0];
   const dest = locs[locs.length-1];
-  const wps = locs.slice(1,-1);
+  const wps = locs.slice(1,-1).join('|');
   
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=${mode}`;
-  if (wps.length && mode !== 'transit') {
-      url += `&waypoints=${encodeURIComponent(wps.join('|'))}`;
-  }
+  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=${mode}`;
+  if (wps && mode !== 'transit') url += `&waypoints=${wps}`;
   return url;
 }
 
@@ -967,7 +997,7 @@ function formatCost(s) {
   if (!s) return '';
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
-  if (!/\d/.test(c)) return c; // Only text (e.g. "כלול בפס") - Don't add currency symbol
+  if (!/\d/.test(c)) return c; 
   return '₪' + c;
 }
 function formatTime(s) {
@@ -998,7 +1028,6 @@ async function readFileText(f) {
   }
 }
 
-// EXACT MATCH DEDUPLICATION: Ensures no items are lost randomly
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) {
@@ -1006,7 +1035,7 @@ function mergeItem(arr, newItem, matchFn) {
       return false; // Updated
   }
   arr.push(newItem);
-  return true; // Added
+  return true; // Added newly
 }
 
 async function processFiles(files) {
@@ -1052,7 +1081,7 @@ async function processFiles(files) {
       let finalBookingArr = [];
       if (bBase) finalBookingArr.push(bBase);
       if (bWhen) finalBookingArr.push(`מתי: ${bWhen}`);
-      if (bHow) finalBookingArr.push(`איך: ${bHow}`);
+      if (bHow) finalBookingArr.push(`פלטפורמה: ${bHow}`);
       const finalBooking = finalBookingArr.join('\n');
       
       const checkIn  = getCol(obj,'checkIn');
@@ -1104,12 +1133,8 @@ async function processFiles(files) {
           requiresBooking: needsBooking(finalBooking, desc),
           icon: detectIcon([place, desc, area].join(' ')),
         };
-        // Generate URLs
-        item.mapUrl = buildMapUrl(item);
-        item.transitUrl = buildTransitUrl(item);
-
         const dest = isOpt ? state.data.options : state.data.itinerary;
-        const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc && x.area === area);
+        const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
         if(isNew) stats.added++; else stats.updated++;
       }
     }
@@ -1177,7 +1202,7 @@ function downloadFilesSequentially(files) {
   files.forEach((file, index) => {
     setTimeout(() => {
       downloadBlob(file.content, file.filename, file.mime);
-    }, index * 800); 
+    }, index * 400); // 400ms delay to prevent browser block
   });
 }
 
@@ -1280,7 +1305,7 @@ function exportTxt() {
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 8, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 7, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
@@ -1407,13 +1432,13 @@ function renderTripCard(item, q) {
     if (!isBooked && item.dateVal) {
         calendarBtn = `<button class="book-toggle-btn" style="border-color:var(--accent); color:var(--accent); background:var(--accent-glow);" onclick="event.stopPropagation(); setCalendarReminder('${item.id}')">📅 ליומן</button>`;
     }
-    const label = isBooked ? 'הוזמן / שולם / טופל' : `לשריון:\n${item.booking}`;
+    const label = isBooked ? 'הוזמן / שולם / טופל' : `לשריון: ${item.booking}`;
     bookingBar = `
     <div class="card-booking-bar ${isBooked ? 'booked' : 'unbooked'}" onclick="event.stopPropagation()">
       <div class="booking-top">
         <div class="booking-info">
           ${svgIcon(isBooked ? 'ok' : 'warn')}
-          <span style="word-break:break-word; white-space:pre-wrap;">${formatTextWithLinks(label, q)}</span>
+          <span style="word-break:break-word; white-space:pre-wrap;">${hlHtml(label, q)}</span>
         </div>
         <div class="booking-actions">
           ${calendarBtn}
@@ -1427,23 +1452,26 @@ function renderTripCard(item, q) {
 
   const badges = [
     timeDisp       ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(timeDisp,q)}</span>` : '',
-    item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area,q)}</span>` : '',
+    item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/https?:\/\/[^\s]+/i, '').trim() || 'מפה',q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${formatTextWithLinks(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
+    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
+  const mapUrl = buildMapUrl(item);
+  const transitUrl = buildTransitUrl(item);
+
   const navBtns = [
-    item.mapUrl     ? `<a href="${item.mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
-    item.transitUrl ? `<a href="${item.transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
+    mapUrl     ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
+    transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
     item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${formatTextWithLinks(item.booking,q)}</span></div>` : '';
-  const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${formatTextWithLinks(item.transport,q)}</span></div>` : '';
+  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
+  const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
 <article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
@@ -1465,7 +1493,7 @@ function renderTripCard(item, q) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
-    ${item.description ? `<div class="card-desc">${formatTextWithLinks(item.description,q)}</div>` : ''}
+    ${item.description ? `<div class="card-desc">${hlHtml(item.description,q)}</div>` : ''}
     ${ciRow}${coRow}${bookingRow}${transRow}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
@@ -1502,7 +1530,7 @@ function renderTipCard(item, q) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
-    ${item.content ? `<div class="card-desc">${formatTextWithLinks(item.content,q)}</div>` : ''}
+    ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
 </article>`;
@@ -1518,7 +1546,7 @@ function renderChecklistCard(item, q) {
     </button>
     <div style="flex:1; cursor:pointer;" onclick="openEdit('${item.id}')">
       <div style="font-size:14px; font-weight:600; color:var(--text); ${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title,q)}</div>
-      ${item.description ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${formatTextWithLinks(item.description,q)}</div>` : ''}
+      ${item.description ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${hlHtml(item.description,q)}</div>` : ''}
     </div>
     <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0;">${svgIcon('edit')}</button>
   </article>`;
@@ -1535,7 +1563,7 @@ function renderDictionaryCard(item, q) {
       </div>
       <button class="icon-btn" onclick="openEdit('${item.id}')">${svgIcon('edit')}</button>
     </div>
-    ${item.context ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">${formatTextWithLinks(item.context, q)}</div>` : ''}
+    ${item.context ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
   </article>`;
 }
 
@@ -1753,8 +1781,6 @@ function readEditForm(item) {
     timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
   };
-  updated.mapUrl = buildMapUrl(updated);
-  updated.transitUrl = buildTransitUrl(updated);
   updated.requiresBooking = needsBooking(updated.booking, updated.description);
   if (!updated.icon || updated.icon === '📍') updated.icon = detectIcon([updated.placeName, updated.description, updated.area].join(' '));
   return updated;
@@ -1779,7 +1805,7 @@ function openAdd(type) {
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
   else {
-    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍', mapUrl:'', transitUrl:'' });
+    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍' });
   }
   
   state.editItem = item;
