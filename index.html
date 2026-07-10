@@ -205,9 +205,9 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card-details{display:none;padding:0 12px 12px;gap:10px;flex-direction:column}
 .card.expanded .card-details{display:flex}
 .details-divider{height:1px;background:var(--border);border-radius:1px;margin-bottom:2px}
-.card-desc{font-size:13px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap}
+.card-desc{font-size:13px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
 
-.detail-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text-muted);line-height:1.55}
+.detail-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text-muted);line-height:1.55;word-break:break-word;}
 .detail-row svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
 .detail-row.booking svg{color:var(--danger)}
 .detail-row .dr-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:1px;flex-shrink:0}
@@ -322,7 +322,6 @@ select.edit-input{appearance:none}
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-/* .fade-up is purposefully removed from rendering logic to prevent glitchy jumps when opening cards */
 .loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .loading-spinner{width:52px;height:52px;border-radius:var(--r-lg);background:var(--accent-glow);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
 .loading-spinner svg{width:22px;height:22px;color:var(--accent)}
@@ -461,7 +460,7 @@ select.edit-input{appearance:none}
         <span class="stat-num" id="stat-done">0</span>
         <span class="stat-lbl">הושלמו</span>
       </div>
-      <div class="stat-item warning" title="אטרקציות שדורשות הזמנה/שריון מראש">
+      <div class="stat-item warning" title="מעקב אחר אטרקציות ומקומות שדורשים הזמנה או שריון מראש">
         <span class="stat-num" id="stat-booking">0</span>
         <span class="stat-lbl">מעקב הזמנות</span>
       </div>
@@ -571,8 +570,8 @@ select.edit-input{appearance:none}
           </svg>
         </div>
         <div class="eo-info">
-          <div class="eo-title">ייצוא ל-CSV — כל הנתונים</div>
-          <div class="eo-desc">מוריד קובץ אקסל מסודר ובו כל הנתונים והשינויים מכל הלשוניות במערכת.</div>
+          <div class="eo-title">ייצוא ל-CSV — כל הנתונים בנפרד</div>
+          <div class="eo-desc">מוריד ברצף קובץ אקסל נפרד ומסודר לכל לשונית פעילה במערכת.</div>
         </div>
       </button>
       <button class="export-option eo-json" id="exp-json">
@@ -584,7 +583,7 @@ select.edit-input{appearance:none}
         </div>
         <div class="eo-info">
           <div class="eo-title">גיבוי JSON מלא</div>
-          <div class="eo-desc">שומר את כל הנתונים מכל הלשוניות לגיבוי מלא או לשחזור באפליקציה.</div>
+          <div class="eo-desc">שומר את כל הנתונים לגיבוי מלא או לשחזור באפליקציה.</div>
         </div>
       </button>
       <button class="export-option eo-kml" id="exp-kml">
@@ -596,7 +595,7 @@ select.edit-input{appearance:none}
         </div>
         <div class="eo-info">
           <div class="eo-title">Google My Maps — KML</div>
-          <div class="eo-desc">ייצא את כל המיקומים למפה אינטראקטיבית.</div>
+          <div class="eo-desc">ייצא את כל המיקומים במערכת למפה אינטראקטיבית.</div>
         </div>
       </button>
       <button class="export-option eo-txt" id="exp-txt">
@@ -608,8 +607,8 @@ select.edit-input{appearance:none}
           </svg>
         </div>
         <div class="eo-info">
-          <div class="eo-title">העתקה כטקסט — כל הנתונים</div>
-          <div class="eo-desc">מעתיק את כל הנתונים ללוח לשליחה בוואטסאפ או במייל.</div>
+          <div class="eo-title">הורדת / העתקת טקסט — כל הנתונים</div>
+          <div class="eo-desc">מוריד קבצי טקסט נפרדים או מעתיק את כולם ללוח בטלפון (לשיתוף בוואטסאפ).</div>
         </div>
       </button>
     </div>
@@ -653,12 +652,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v17';
-const LS_COMPLETED = 'tripmh_completed_v17';
-const LS_BOOKED    = 'tripmh_booked_v17';
-const LS_EXPANDED  = 'tripmh_expanded_v17';
-const LS_TAB       = 'tripmh_tab_v17';
-const LS_DARK      = 'tripmh_dark_v17';
+const LS_DATA      = 'tripmh_data_v18';
+const LS_COMPLETED = 'tripmh_completed_v18';
+const LS_BOOKED    = 'tripmh_booked_v18';
+const LS_EXPANDED  = 'tripmh_expanded_v18';
+const LS_TAB       = 'tripmh_tab_v18';
+const LS_DARK      = 'tripmh_dark_v18';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -749,6 +748,31 @@ function showConfirm(title, text, onConfirm, isDanger=false) {
   btnC.onclick = () => { onConfirm(); m.classList.add('hidden'); };
   document.getElementById('mc-btn-cancel').onclick = () => m.classList.add('hidden');
   m.classList.remove('hidden');
+}
+
+/* =========================================================
+   TEXT ESCAPING & AUTO-LINKING
+========================================================= */
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function autoLink(text) {
+  // Find URLs and wrap them in <a> tags, opening in new tab.
+  // Using event.stopPropagation() so clicking the link doesn't collapse the card.
+  const urlRegex = /(https?:\/\/[^\s]+)/gi;
+  return text.replace(urlRegex, function(url) {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
+  });
+}
+
+function hlHtml(raw, q) {
+  let s = escHtml(raw);
+  s = autoLink(s);
+  if (!q) return s;
+  // Safely highlight text without breaking HTML tags
+  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![^<]*>)','gi');
+  return s.replace(re,'<mark>$1</mark>');
 }
 
 /* =========================================================
@@ -907,28 +931,40 @@ function needsBooking(bookText, desc) {
   return false;
 }
 
-// REAL GOOGLE MAPS API LINKS
-function buildMapUrl(placeName, area) {
-  const q = [placeName, area].filter(Boolean).join(' ').trim();
+// =========================================================
+// REAL GOOGLE MAPS API LINKS (FIXED!)
+// =========================================================
+function getMapQuery(item) {
+  // Use area as primary map query to avoid errors, fallback to placeName
+  return (item.area || item.placeName || '').trim();
+}
+
+function buildMapUrl(item) {
+  const q = getMapQuery(item);
   if (!q) return '';
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
-function buildTransitUrl(placeName, area) {
-  const q = [placeName, area].filter(Boolean).join(' ').trim();
+
+function buildTransitUrl(item) {
+  const q = getMapQuery(item);
   if (!q) return '';
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}&travelmode=transit`;
 }
+
 function buildDailyUrl(items, mode='driving') {
   const locs = items
-    .filter(a => (a.type === 'itinerary' || a.type === 'option') && (a.area || a.placeName))
-    .map(a => [a.placeName, a.area].filter(Boolean).join(' ').trim());
+    .filter(a => (a.type === 'itinerary' || a.type === 'option') && getMapQuery(a))
+    .map(a => encodeURIComponent(getMapQuery(a)));
+    
   if (!locs.length) return '';
-  if (locs.length === 1) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locs[0])}`;
+  if (locs.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${locs[0]}&travelmode=${mode}`;
   
-  const origin = locs[0], dest = locs[locs.length-1], wps = locs.slice(1,-1);
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=${mode}`;
-  // Note: Google Maps ignores waypoints when travelmode=transit, but keeping it for driving/biking
-  if (wps.length && mode !== 'transit') url += `&waypoints=${encodeURIComponent(wps.join('|'))}`;
+  const origin = locs[0];
+  const dest = locs[locs.length-1];
+  const wps = locs.slice(1,-1).join('|');
+  
+  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=${mode}`;
+  if (wps && mode !== 'transit') url += `&waypoints=${wps}`;
   return url;
 }
 
@@ -936,7 +972,7 @@ function formatCost(s) {
   if (!s) return '';
   const c = s.replace(/[₪]/g,'').replace(/ש"ח/g,'').replace(/שקלים/g,'').replace(/שקל/g,'').trim();
   if (/^(חינם|free|0)$/i.test(c)) return 'חינם';
-  if (!/\d/.test(c)) return c; 
+  if (!/\d/.test(c)) return c; // Only text (e.g. "כלול בפס") - Don't add currency symbol
   return '₪' + c;
 }
 function formatTime(s) {
@@ -951,15 +987,6 @@ function extractBookingAdvDays(txt) {
   if (!m) return 7; 
   if (/שבוע/.test(m[2])) return parseInt(m[1]) * 7;
   return parseInt(m[1]);
-}
-function escHtml(s) {
-  return (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
-}
-function hlHtml(raw, q) {
-  const s = escHtml(raw);
-  if (!q) return s;
-  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-  return s.replace(re,'<mark>$1</mark>');
 }
 
 /* =========================================================
@@ -976,7 +1003,7 @@ async function readFileText(f) {
   }
 }
 
-// SMART DEDUPLICATION: Check Name + Day + Time + Desc
+// SMART DEDUPLICATION: Check Name + Day + Time + Desc so we don't lose items!
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) {
@@ -1031,7 +1058,7 @@ async function processFiles(files) {
       if (bBase) finalBookingArr.push(bBase);
       if (bWhen) finalBookingArr.push(`מתי: ${bWhen}`);
       if (bHow) finalBookingArr.push(`פלטפורמה: ${bHow}`);
-      const finalBooking = finalBookingArr.join(' | ');
+      const finalBooking = finalBookingArr.join('\n');
       
       const checkIn  = getCol(obj,'checkIn');
       const checkOut = getCol(obj,'checkOut');
@@ -1081,8 +1108,6 @@ async function processFiles(files) {
           link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
           requiresBooking: needsBooking(finalBooking, desc),
           icon: detectIcon([place, desc, area].join(' ')),
-          mapUrl: buildMapUrl(place || 'ללא שם', area),
-          transitUrl: buildTransitUrl(place || 'ללא שם', area),
         };
         const dest = isOpt ? state.data.options : state.data.itinerary;
         const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
@@ -1128,7 +1153,7 @@ function setCalendarReminder(id) {
 }
 
 /* =========================================================
-   EXPORT: ALL TABS TO 1 FILE (AS REQUESTED)
+   EXPORT: SEPARATE FILES CASCADED
 ========================================================= */
 function csvField(v) {
   const s = String(v == null ? '' : v);
@@ -1137,95 +1162,128 @@ function csvField(v) {
 }
 function csvRow(arr) { return arr.map(csvField).join(',') + '\r\n'; }
 
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; 
+  a.download = filename; 
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadFilesSequentially(files) {
+  files.forEach((file, index) => {
+    setTimeout(() => {
+      downloadBlob(file.content, file.filename, file.mime);
+    }, index * 400); // 400ms delay to prevent browser block
+  });
+}
+
 function exportCSV() {
   const BOM = '\uFEFF';
-  let csv = BOM;
-  
-  const addSection = (title, headers, items, rowMapper) => {
-    if(!items.length) return;
-    csv += `\r\n--- ${title} ---\r\n`;
-    csv += csvRow(headers);
-    items.forEach(i => { csv += csvRow(rowMapper(i)); });
-  };
+  const files = [];
 
-  addSection('מסלול ואופציות',
-    ['סוג','יום/תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה ומידע','אזור/כתובת','תיאור','קישור','הושלם','טופל/הוזמן'],
-    [...state.data.itinerary, ...state.data.options],
-    i => [i.type==='itinerary'?'מסלול':'אופציה', i.dayLabel, i.placeName, i.icon||'📍', i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']
-  );
+  const itiItems = [...state.data.itinerary, ...state.data.options];
+  if (itiItems.length > 0) {
+      let csv = BOM + csvRow(['סוג','יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה (מתי ואיך)','אזור / כתובת','תיאור','קישור','הושלם','טופל/הוזמן']);
+      itiItems.forEach(i => csv += csvRow([i.type==='itinerary'?'מסלול':'אופציה', i.dayLabel, i.placeName, i.icon, i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']));
+      files.push({ content: csv, filename: 'TripMH_מסלול_ואופציות.csv', mime: 'text/csv;charset=utf-8' });
+  }
 
-  addSection('צ\'ק ליסט',
-    ['משימה','קטגוריה','תיאור','הושלם'],
-    state.data.checklist,
-    i => [i.title, i.category, i.description, state.completedIds.has(i.id)?'כן':'לא']
-  );
+  if (state.data.checklist.length > 0) {
+      let csv = BOM + csvRow(['משימה','תיאור','קטגוריה','הושלם']);
+      state.data.checklist.forEach(i => csv += csvRow([i.title, i.description, i.category, state.completedIds.has(i.id)?'כן':'לא']));
+      files.push({ content: csv, filename: 'TripMH_צק_ליסט.csv', mime: 'text/csv;charset=utf-8' });
+  }
 
-  addSection('טיפים',
-    ['כותרת','קטגוריה','תוכן','קישור'],
-    state.data.tips,
-    i => [i.title, i.category, i.content, i.link]
-  );
+  if (state.data.tips.length > 0) {
+      let csv = BOM + csvRow(['כותרת','קטגוריה','תוכן','קישור']);
+      state.data.tips.forEach(i => csv += csvRow([i.title, i.category, i.content, i.link]));
+      files.push({ content: csv, filename: 'TripMH_טיפים.csv', mime: 'text/csv;charset=utf-8' });
+  }
 
-  addSection('מילון',
-    ['עברית','שפה זרה','הגייה','הקשר'],
-    state.data.dictionary,
-    i => [i.hebrew, i.foreign, i.romaji, i.context]
-  );
+  if (state.data.dictionary.length > 0) {
+      let csv = BOM + csvRow(['עברית','שפה זרה','הגייה','הקשר']);
+      state.data.dictionary.forEach(i => csv += csvRow([i.hebrew, i.foreign, i.romaji, i.context]));
+      files.push({ content: csv, filename: 'TripMH_מילון.csv', mime: 'text/csv;charset=utf-8' });
+  }
 
-  downloadBlob(csv, `TripMH_All_Data_Export.csv`, 'text/csv;charset=utf-8');
+  if (files.length === 0) { addToast('אין נתונים לייצוא', 'error'); return; }
+
+  downloadFilesSequentially(files);
+  document.getElementById('modal-export').classList.add('hidden');
+  addToast(`הורדת ${files.length} קבצי נתונים החלה`, 'success');
 }
 
 function exportTxt() {
-  let text = `TripMH – ייצוא נתונים מלא\n\n`;
+  const files = [];
+  let fullClipboardText = `TripMH – נתוני טיול מלאים\n====================\n\n`;
 
-  const dayMap = new Map();
-  [...state.data.itinerary, ...state.data.options].forEach(i => {
-    const k = i.dayLabel||'ללא תאריך';
-    if (!dayMap.has(k)) dayMap.set(k,[]);
-    dayMap.get(k).push(i);
-  });
-  
-  if (dayMap.size > 0) {
-      text += `=== מסלול ואופציות ===\n`;
+  const itiItems = [...state.data.itinerary, ...state.data.options];
+  if (itiItems.length > 0) {
+      let text = `TripMH – מסלול ואופציות\n\n`;
+      const dayMap = new Map();
+      itiItems.forEach(i => {
+        const k = i.dayLabel||'ללא תאריך';
+        if (!dayMap.has(k)) dayMap.set(k,[]);
+        dayMap.get(k).push(i);
+      });
       dayMap.forEach((arr, day) => {
-        text += `\n[ ${day} ]\n`;
+        text += `[ ${day} ]\n`;
         arr.forEach(i => {
             let ln = `  ${i.icon} ${i.placeName}`;
             if (i.timeRange) ln += ` (${i.timeRange})`;
             if (i.cost) ln += ` – ${i.cost}`;
             if (i.checkIn) ln += ` | צ'ק-אין: ${i.checkIn}`;
+            if (i.checkOut) ln += ` | צ'ק-אאוט: ${i.checkOut}`;
             text += ln + '\n';
-            if (i.booking) text += `      הזמנה: ${i.booking.replace(/\n/g, ' ')}\n`;
+            if (i.booking) text += `      הזמנה: ${i.booking.replace(/\n/g, ' | ')}\n`;
         });
+        text += '\n';
       });
+      files.push({ content: text, filename: 'TripMH_מסלול_ואופציות.txt', mime: 'text/plain;charset=utf-8' });
+      fullClipboardText += text + '\n====================\n\n';
   }
 
-  if (state.data.checklist.length) {
-      text += `\n=== צ'ק ליסט ===\n`;
+  if (state.data.checklist.length > 0) {
+      let text = `TripMH – צ'ק ליסט\n\n`;
       state.data.checklist.forEach(i => text += `[${state.completedIds.has(i.id)?'V':' '}] ${i.title}${i.description ? ' - '+i.description : ''}\n`);
+      files.push({ content: text, filename: 'TripMH_צק_ליסט.txt', mime: 'text/plain;charset=utf-8' });
+      fullClipboardText += text + '\n====================\n\n';
   }
   
-  if (state.data.tips.length) {
-      text += `\n=== טיפים ===\n`;
-      state.data.tips.forEach(i => text += `💡 ${i.title}: ${i.content}\n`);
+  if (state.data.tips.length > 0) {
+      let text = `TripMH – טיפים\n\n`;
+      state.data.tips.forEach(i => text += `💡 ${i.title}:\n${i.content}\n\n`);
+      files.push({ content: text, filename: 'TripMH_טיפים.txt', mime: 'text/plain;charset=utf-8' });
+      fullClipboardText += text + '\n====================\n\n';
   }
   
-  if (state.data.dictionary.length) {
-      text += `\n=== מילון ===\n`;
+  if (state.data.dictionary.length > 0) {
+      let text = `TripMH – מילון\n\n`;
       state.data.dictionary.forEach(i => text += `📖 ${i.hebrew} - ${i.foreign} (${i.romaji})\n`);
+      files.push({ content: text, filename: 'TripMH_מילון.txt', mime: 'text/plain;charset=utf-8' });
+      fullClipboardText += text;
   }
 
-  if (navigator.share) {
-    navigator.share({ title:'TripMH', text }).catch(()=>{});
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => addToast('כל הנתונים הועתקו ללוח!','success'));
-  } else {
-    downloadBlob(text,`TripMH_All_Data.txt`,'text/plain;charset=utf-8');
+  if (files.length === 0) { addToast('אין נתונים לייצוא', 'error'); return; }
+
+  // Downloads files sequentially
+  downloadFilesSequentially(files);
+  document.getElementById('modal-export').classList.add('hidden');
+  addToast(`הורדת ${files.length} קבצי טקסט החלה`, 'success');
+
+  // Also puts the combined text on the clipboard for easy mobile sharing
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(fullClipboardText);
   }
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 6, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 7, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
@@ -1238,14 +1296,6 @@ function exportKML(data) {
   });
   kml += `</Document>\n</kml>`;
   downloadBlob(kml, 'tripmh_map.kml', 'application/vnd.google-earth.kml+xml');
-}
-
-function downloadBlob(content, filename, mime) {
-  const blob = new Blob([content],{type:mime});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /* =========================================================
@@ -1331,7 +1381,6 @@ function completeAllInGroup(idsCsv, isAllDone) {
   persistState();
 }
 
-// Seamless DOM Expansion
 function toggleExpand(id) {
   const card = document.querySelector(`.card[data-id="${id}"]`);
   if (state.expandedIds.has(id)) {
@@ -1387,13 +1436,13 @@ function renderTripCard(item, q) {
     item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
-  const mapUrl = item.mapUrl || '';
-  const transitUrl = item.transitUrl || '';
+  const mapUrl = buildMapUrl(item);
+  const transitUrl = buildTransitUrl(item);
 
   const navBtns = [
-    mapUrl     ? `<a href="${escHtml(mapUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
-    transitUrl ? `<a href="${escHtml(transitUrl)}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
-    item.link  ? `<a href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
+    mapUrl     ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
+    transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
+    item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
@@ -1422,7 +1471,7 @@ function renderTripCard(item, q) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
-    ${item.description ? `<p class="card-desc">${hlHtml(item.description,q)}</p>` : ''}
+    ${item.description ? `<div class="card-desc">${hlHtml(item.description,q)}</div>` : ''}
     ${ciRow}${coRow}${bookingRow}${transRow}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
@@ -1436,7 +1485,7 @@ function renderTipCard(item, q) {
   const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
 
   const navBtns = [
-    item.link ? `<a href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>` : '',
+    item.link ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
   ].filter(Boolean).join('');
 
@@ -1459,7 +1508,7 @@ function renderTipCard(item, q) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
-    ${item.content ? `<p class="card-desc">${hlHtml(item.content,q)}</p>` : ''}
+    ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
   </div>
 </article>`;
@@ -1544,8 +1593,8 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
   <div class="section-header" style="border-right-color:${color}">
     <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
-      ${routeUrl ? `<a href="${escHtml(routeUrl)}" target="_blank" rel="noopener noreferrer" class="daily-route-btn">${svgIcon('map')} ניווט יומי</a>` : ''}
-      ${transitUrl ? `<a href="${escHtml(transitUrl)}" target="_blank" rel="noopener noreferrer" class="transit-route-btn">${svgIcon('transit')} תחבורה</a>` : ''}
+      ${routeUrl ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" class="daily-route-btn">${svgIcon('map')} ניווט יומי</a>` : ''}
+      ${transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="transit-route-btn">${svgIcon('transit')} תחבורה</a>` : ''}
       ${completeAllBtn}
     </div>
     <span class="section-badge${allDone?' all-done':''}">${arr[0].type !== 'dictionary' ? done+'/' : ''}${arr.length}</span>
@@ -1710,8 +1759,6 @@ function readEditForm(item) {
     timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
   };
-  updated.mapUrl = buildMapUrl(updated.placeName, updated.area);
-  updated.transitUrl = buildTransitUrl(updated.placeName, updated.area);
   updated.requiresBooking = needsBooking(updated.booking, updated.description);
   if (!updated.icon || updated.icon === '📍') updated.icon = detectIcon([updated.placeName, updated.description, updated.area].join(' '));
   return updated;
@@ -1736,7 +1783,7 @@ function openAdd(type) {
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
   else {
-    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍', mapUrl:'', transitUrl:'' });
+    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'📍' });
   }
   
   state.editItem = item;
@@ -1899,8 +1946,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('exp-csv').addEventListener('click',  () => {
     exportCSV();
-    document.getElementById('modal-export').classList.add('hidden');
-    addToast('קובץ CSV של כלל הנתונים הורד בהצלחה', 'success');
   });
   document.getElementById('exp-json').addEventListener('click', () => {
     exportJSON(state.data, state.completedIds, state.bookedIds);
@@ -1913,7 +1958,6 @@ document.addEventListener('DOMContentLoaded', () => {
     addToast('מפת KML הורדה בהצלחה', 'success');
   });
   document.getElementById('exp-txt').addEventListener('click',  () => {
-    document.getElementById('modal-export').classList.add('hidden');
     exportTxt();
   });
 
