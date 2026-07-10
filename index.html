@@ -571,7 +571,7 @@ select.edit-input{appearance:none}
         </div>
         <div class="eo-info">
           <div class="eo-title">ייצוא ל-CSV — כל הנתונים בנפרד</div>
-          <div class="eo-desc">מוריד ברצף קובץ אקסל נפרד ומסודר לכל לשונית פעילה במערכת.</div>
+          <div class="eo-desc">מוריד ברצף קובץ אקסל נפרד לכל לשונית: מסלול, אופציות, מילון וכו'.</div>
         </div>
       </button>
       <button class="export-option eo-json" id="exp-json">
@@ -608,7 +608,7 @@ select.edit-input{appearance:none}
         </div>
         <div class="eo-info">
           <div class="eo-title">הורדת / העתקת טקסט — כל הנתונים</div>
-          <div class="eo-desc">מוריד קבצי טקסט נפרדים או מעתיק את כולם ללוח בטלפון (לשיתוף בוואטסאפ).</div>
+          <div class="eo-desc">מוריד קבצי טקסט נפרדים, ומעתיק את כולם ללוח בטלפון (לוואטסאפ).</div>
         </div>
       </button>
     </div>
@@ -939,45 +939,52 @@ function needsBooking(bookText, desc) {
 }
 
 // =========================================================
-// REAL GOOGLE MAPS API LINKS (URL AWARE)
+// REAL GOOGLE MAPS API LINKS (Point-to-Point Aware)
 // =========================================================
 function extractUrl(str) {
   const match = str.match(/https?:\/\/[^\s]+/i);
   return match ? match[0] : null;
 }
 
-function buildMapUrl(item) {
-  const area = (item.area || '').trim();
-  // אם משתמש הכניס לינק של מפות ישר לעמודת "מיקום במפה" – ננווט לשם ישירות!
-  const urlInArea = extractUrl(area);
-  if (urlInArea) return urlInArea; 
-  
-  const q = area || (item.placeName || '').trim();
-  if (!q) return '';
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+function getLocStr(item) {
+  if (!item) return '';
+  // מסיר כתובות URL מהטקסט כדי שיישאר רק שם הרחוב / המקום לחיפוש בגוגל
+  let a = (item.area || '').replace(/https?:\/\/[^\s]+/ig, '').trim();
+  return a || (item.placeName || '').trim();
 }
 
-function buildTransitUrl(item) {
-  const area = (item.area || '').trim();
-  const place = (item.placeName || '').trim();
+function buildMapUrl(item, prevItem) {
+  const dest = getLocStr(item);
+  if (!dest) return '';
   
-  // מסירים לינק אם יש כדי שאפשר יהיה לחפש את השם / הכתובת בטקסט עצמו
-  let q = area.replace(/https?:\/\/[^\s]+/i, '').trim(); 
-  if (!q) q = place;
-  if (!q) return '';
+  const orig = getLocStr(prevItem);
+  if (orig && orig !== dest) {
+    // ניווט ממיקום קודם למיקום הנוכחי
+    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(orig)}&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+  }
   
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}&travelmode=transit`;
+  // אם אין מיקום קודם, אבל המשתמש שם URL בלבד במיקום, פתח את הלינק
+  const urlInArea = extractUrl(item.area || '');
+  if (urlInArea) return urlInArea; 
+
+  // חיפוש המקום (ללא ניווט ממיקום קודם)
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest)}`;
+}
+
+function buildTransitUrl(item, prevItem) {
+  const dest = getLocStr(item);
+  if (!dest) return '';
+  const orig = getLocStr(prevItem);
+  if (orig && orig !== dest) {
+    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(orig)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
+  }
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`;
 }
 
 function buildDailyUrl(items, mode='driving') {
   const locs = [];
   items.filter(a => a.type === 'itinerary' || a.type === 'option').forEach(a => {
-    const area = (a.area || '').trim();
-    const place = (a.placeName || '').trim();
-    
-    // בניתוב נקודות, לינקים שוברים את גוגל מפות, לכן אנו מנקים לינקים מהכתובת.
-    let q = area.replace(/https?:\/\/[^\s]+/i, '').trim(); 
-    if (!q) q = place;
+    let q = getLocStr(a);
     if (q) locs.push(encodeURIComponent(q));
   });
     
@@ -1071,9 +1078,20 @@ async function processFiles(files) {
       const obj = {};
       hdrs.forEach((h,j) => { obj[h] = rows[ri][j] ?? ''; });
 
-      const place = getCol(obj,'place'), day = getCol(obj,'day'), date = getCol(obj,'date');
-      const desc  = getCol(obj,'desc'),  area = getCol(obj,'area'), catCol = getCol(obj,'category');
+      const place = getCol(obj,'place');
+      const desc  = getCol(obj,'desc'), area = getCol(obj,'area'), catCol = getCol(obj,'category');
       const link  = getCol(obj,'link');
+      
+      // איחוד חכם של "יום" ו"תאריך" לתצוגה בכותרת:
+      const dayCol = getCol(obj,'day');
+      const dateCol = getCol(obj,'date');
+      let combinedDay = dayCol;
+      if (dayCol && dateCol && dayCol !== dateCol) {
+          combinedDay = `${dayCol} (${dateCol})`;
+      } else if (!dayCol) {
+          combinedDay = dateCol;
+      }
+      const rawDay = combinedDay || 'ללא תאריך';
       
       const bBase = getCol(obj,'book');
       const bHow  = getCol(obj,'bookHow');
@@ -1121,8 +1139,7 @@ async function processFiles(files) {
           if(isNew) stats.added++; else stats.updated++;
         }
       } else {
-        const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(day);
-        const rawDay = day || date || 'ללא תאריך';
+        const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(dayCol);
         const item = {
           id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
           placeName: place || 'ללא שם', dayLabel: rawDay, dateVal: parseDateVal(rawDay),
@@ -1209,12 +1226,20 @@ function downloadFilesSequentially(files) {
 function exportCSV() {
   const BOM = '\uFEFF';
   const files = [];
+  const itiHeaders = ['יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה (מתי ואיך)','אזור / כתובת','תיאור','קישור','הושלם','טופל/הוזמן'];
 
-  const itiItems = [...state.data.itinerary, ...state.data.options];
-  if (itiItems.length > 0) {
-      let csv = BOM + csvRow(['סוג','יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה (מתי ואיך)','אזור / כתובת','תיאור','קישור','הושלם','טופל/הוזמן']);
-      itiItems.forEach(i => csv += csvRow([i.type==='itinerary'?'מסלול':'אופציה', i.dayLabel, i.placeName, i.icon, i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']));
-      files.push({ content: csv, filename: 'TripMH_מסלול_ואופציות.csv', mime: 'text/csv;charset=utf-8' });
+  // יצירת קובץ מסלול נפרד
+  if (state.data.itinerary.length > 0) {
+      let csv = BOM + csvRow(itiHeaders);
+      state.data.itinerary.forEach(i => csv += csvRow([i.dayLabel, i.placeName, i.icon, i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']));
+      files.push({ content: csv, filename: 'TripMH_מסלול.csv', mime: 'text/csv;charset=utf-8' });
+  }
+
+  // יצירת קובץ אופציות נפרד
+  if (state.data.options.length > 0) {
+      let csv = BOM + csvRow(itiHeaders);
+      state.data.options.forEach(i => csv += csvRow([i.dayLabel, i.placeName, i.icon, i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']));
+      files.push({ content: csv, filename: 'TripMH_אופציות.csv', mime: 'text/csv;charset=utf-8' });
   }
 
   if (state.data.checklist.length > 0) {
@@ -1246,11 +1271,11 @@ function exportTxt() {
   const files = [];
   let fullClipboardText = `TripMH – נתוני טיול מלאים\n====================\n\n`;
 
-  const itiItems = [...state.data.itinerary, ...state.data.options];
-  if (itiItems.length > 0) {
-      let text = `TripMH – מסלול ואופציות\n\n`;
+  function buildItiText(items, title) {
+      if (items.length === 0) return;
+      let text = `TripMH – ${title}\n\n`;
       const dayMap = new Map();
-      itiItems.forEach(i => {
+      items.forEach(i => {
         const k = i.dayLabel||'ללא תאריך';
         if (!dayMap.has(k)) dayMap.set(k,[]);
         dayMap.get(k).push(i);
@@ -1268,9 +1293,13 @@ function exportTxt() {
         });
         text += '\n';
       });
-      files.push({ content: text, filename: 'TripMH_מסלול_ואופציות.txt', mime: 'text/plain;charset=utf-8' });
+      files.push({ content: text, filename: `TripMH_${title}.txt`, mime: 'text/plain;charset=utf-8' });
       fullClipboardText += text + '\n====================\n\n';
   }
+
+  // הפרדה מוחלטת של קבצי הטקסט
+  buildItiText(state.data.itinerary, 'מסלול');
+  buildItiText(state.data.options, 'אופציות');
 
   if (state.data.checklist.length > 0) {
       let text = `TripMH – צ'ק ליסט\n\n`;
@@ -1418,7 +1447,7 @@ function toggleExpand(id) {
 /* =========================================================
    CARD RENDERERS
 ========================================================= */
-function renderTripCard(item, q) {
+function renderTripCard(item, q, prevItem) {
   const done     = state.completedIds.has(item.id);
   const expanded = state.expandedIds.has(item.id);
   const cost     = formatCost(item.cost);
@@ -1458,8 +1487,9 @@ function renderTripCard(item, q) {
     item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
-  const mapUrl = buildMapUrl(item);
-  const transitUrl = buildTransitUrl(item);
+  // מעבירים את המיקום של האייטם הקודם לפונקציית הניווט
+  const mapUrl = buildMapUrl(item, prevItem);
+  const transitUrl = buildTransitUrl(item, prevItem);
 
   const navBtns = [
     mapUrl     ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
@@ -1623,11 +1653,13 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
   </div>
   ${arr[0].type !== 'dictionary' ? `<div class="progress-bar-wrap"><div class="progress-bar-fill${allDone?' done':''}" style="width:${pct}%;background:${allDone?'var(--success)':color}"></div></div>` : ''}
   <div class="cards-list">
-    ${arr.map(item => {
+    ${arr.map((item, index) => {
+      const prevItem = index > 0 ? arr[index - 1] : null;
       if (item.type === 'tip') return renderTipCard(item, q);
       if (item.type === 'task') return renderChecklistCard(item, q);
       if (item.type === 'dictionary') return renderDictionaryCard(item, q);
-      return renderTripCard(item, q);
+      // מעבירים את prevItem לפונקציית הרינדור
+      return renderTripCard(item, q, prevItem);
     }).join('')}
   </div>
 </div>`;
