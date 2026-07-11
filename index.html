@@ -652,12 +652,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v19';
-const LS_COMPLETED = 'tripmh_completed_v19';
-const LS_BOOKED    = 'tripmh_booked_v19';
-const LS_EXPANDED  = 'tripmh_expanded_v19';
-const LS_TAB       = 'tripmh_tab_v19';
-const LS_DARK      = 'tripmh_dark_v19';
+const LS_DATA      = 'tripmh_data_v20';
+const LS_COMPLETED = 'tripmh_completed_v20';
+const LS_BOOKED    = 'tripmh_booked_v20';
+const LS_EXPANDED  = 'tripmh_expanded_v20';
+const LS_TAB       = 'tripmh_tab_v20';
+const LS_DARK      = 'tripmh_dark_v20';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -864,13 +864,11 @@ function getCol(obj, type) {
   const aliases = ALIASES[type] || [];
   const keys = Object.keys(obj);
   
-  // 1. קודם כל מחפשים התאמה מדויקת לשם העמודה
   for (const alias of aliases) {
     const exactKey = keys.find(k => k.trim().toLowerCase() === alias.toLowerCase());
     if (exactKey && obj[exactKey]?.trim()) return obj[exactKey].trim();
   }
   
-  // 2. רק אם לא נמצא התאמה מדויקת, מחפשים התאמה חלקית
   for (const alias of aliases) {
     const incKey = keys.find(k => k.toLowerCase().includes(alias.toLowerCase()));
     if (incKey && obj[incKey]?.trim()) return obj[incKey].trim();
@@ -939,41 +937,56 @@ function needsBooking(bookText, desc) {
 }
 
 // =========================================================
-// REAL GOOGLE MAPS API LINKS (Point-to-Point Aware)
+// REAL GOOGLE MAPS API LINKS (Smart Point-to-Point Aware)
 // =========================================================
 function extractUrl(str) {
-  const match = str.match(/https?:\/\/[^\s]+/i);
+  const match = str.match(/(https?:\/\/[^\s\)]+)/i);
   return match ? match[0] : null;
 }
 
+// מחלץ שם מיקום נקי וחכם (משלב מקום ואזור אם צריך כדי שגוגל ימצא מדויק)
 function getLocStr(item) {
   if (!item) return '';
-  // מסיר כתובות URL מהטקסט כדי שיישאר רק שם הרחוב / המקום לחיפוש בגוגל
-  let a = (item.area || '').replace(/https?:\/\/[^\s]+/ig, '').trim();
-  return a || (item.placeName || '').trim();
+  let a = (item.area || '').replace(/(https?:\/\/[^\s\)]+)/ig, '').trim();
+  let p = (item.placeName || '').trim();
+  
+  if (!a && !p) return '';
+  if (a && !p) return a;
+  if (!a && p) return p;
+  
+  // אם האזור מכיל נ"צ (קואורדינטות מדויקות), נשתמש בהן
+  if (/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/.test(a)) {
+      return a; 
+  }
+  
+  // אם האזור (עיר/שכונה) לא מכיל בתוכו את השם של המקום - שילוב שלהם מביא תוצאות מדויקות פי כמה
+  if (!a.includes(p) && !p.includes(a)) {
+     return `${p}, ${a}`;
+  }
+  return a || p;
 }
 
 function buildMapUrl(item, prevItem) {
+  const urlInArea = extractUrl(item.area || '');
+  if (urlInArea) return urlInArea; // אם יש לינק שהוזן ידנית - נשתמש בו
+  
   const dest = getLocStr(item);
   if (!dest) return '';
   
   const orig = getLocStr(prevItem);
   if (orig && orig !== dest) {
-    // ניווט ממיקום קודם למיקום הנוכחי
+    // ניווט מדויק ממיקום קודם למיקום הנוכחי
     return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(orig)}&destination=${encodeURIComponent(dest)}&travelmode=driving`;
   }
   
-  // אם אין מיקום קודם, אבל המשתמש שם URL בלבד במיקום, פתח את הלינק
-  const urlInArea = extractUrl(item.area || '');
-  if (urlInArea) return urlInArea; 
-
-  // חיפוש המקום (ללא ניווט ממיקום קודם)
+  // חיפוש המקום
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest)}`;
 }
 
 function buildTransitUrl(item, prevItem) {
   const dest = getLocStr(item);
   if (!dest) return '';
+  
   const orig = getLocStr(prevItem);
   if (orig && orig !== dest) {
     return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(orig)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
@@ -985,19 +998,31 @@ function buildDailyUrl(items, mode='driving') {
   const locs = [];
   items.filter(a => a.type === 'itinerary' || a.type === 'option').forEach(a => {
     let q = getLocStr(a);
-    if (q) locs.push(encodeURIComponent(q));
+    if (q) locs.push(q);
   });
-    
-  if (!locs.length) return '';
-  if (locs.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${locs[0]}&travelmode=${mode}`;
   
-  const origin = locs[0];
-  const dest = locs[locs.length-1];
-  const wps = locs.slice(1,-1).join('|');
+  // מסננים כפילויות עוקבות ומקומות זהים כדי לא למלא את הלינק סתם
+  const uniqueLocs = [...new Set(locs)];
+    
+  if (!uniqueLocs.length) return '';
+  if (uniqueLocs.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(uniqueLocs[0])}&travelmode=${mode}`;
+  
+  const origin = encodeURIComponent(uniqueLocs[0]);
+  const dest = encodeURIComponent(uniqueLocs[uniqueLocs.length-1]);
+  // הגבלת כמות waypoints לעד 9 כדי למנוע קריסה של Google Maps
+  const wps = uniqueLocs.slice(1, 10).map(w => encodeURIComponent(w)).join('|');
   
   let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=${mode}`;
-  if (wps && mode !== 'transit') url += `&waypoints=${wps}`;
+  if (wps && mode !== 'transit') url += `&waypoints=${wps}`; // תחבורה ציבורית בגוגל מפות לא תומכת ב-waypoints בלינק ישיר
   return url;
+}
+
+function buildAiUrl(item) {
+  const place = item.placeName || '';
+  const area = item.area ? item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() : '';
+  if (!place && !area) return '';
+  const q = `תן לי מידע תיירותי, טיפים לביקור, וזמנים מומלצים עבור: ${place} ${area ? 'באזור ' + area : ''}`;
+  return `https://www.perplexity.ai/?q=${encodeURIComponent(q)}`;
 }
 
 function formatCost(s) {
@@ -1082,7 +1107,6 @@ async function processFiles(files) {
       const desc  = getCol(obj,'desc'), area = getCol(obj,'area'), catCol = getCol(obj,'category');
       const link  = getCol(obj,'link');
       
-      // איחוד חכם של "יום" ו"תאריך" לתצוגה בכותרת:
       const dayCol = getCol(obj,'day');
       const dateCol = getCol(obj,'date');
       let combinedDay = dayCol;
@@ -1228,14 +1252,12 @@ function exportCSV() {
   const files = [];
   const itiHeaders = ['יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה (מתי ואיך)','אזור / כתובת','תיאור','קישור','הושלם','טופל/הוזמן'];
 
-  // יצירת קובץ מסלול נפרד
   if (state.data.itinerary.length > 0) {
       let csv = BOM + csvRow(itiHeaders);
       state.data.itinerary.forEach(i => csv += csvRow([i.dayLabel, i.placeName, i.icon, i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']));
       files.push({ content: csv, filename: 'TripMH_מסלול.csv', mime: 'text/csv;charset=utf-8' });
   }
 
-  // יצירת קובץ אופציות נפרד
   if (state.data.options.length > 0) {
       let csv = BOM + csvRow(itiHeaders);
       state.data.options.forEach(i => csv += csvRow([i.dayLabel, i.placeName, i.icon, i.timeRange, i.duration, i.cost, i.transport, i.checkIn, i.checkOut, i.booking, i.area, i.description, i.link, state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא']));
@@ -1297,7 +1319,6 @@ function exportTxt() {
       fullClipboardText += text + '\n====================\n\n';
   }
 
-  // הפרדה מוחלטת של קבצי הטקסט
   buildItiText(state.data.itinerary, 'מסלול');
   buildItiText(state.data.options, 'אופציות');
 
@@ -1374,6 +1395,7 @@ function svgIcon(name) {
     plus:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
     upload:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>`,
     ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    ai:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
   };
   return icons[name] || '';
 }
@@ -1481,19 +1503,21 @@ function renderTripCard(item, q, prevItem) {
 
   const badges = [
     timeDisp       ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(timeDisp,q)}</span>` : '',
-    item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/https?:\/\/[^\s]+/i, '').trim() || 'מפה',q)}</span>` : '',
+    item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() || 'מפה',q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
     item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
-  // מעבירים את המיקום של האייטם הקודם לפונקציית הניווט
+  // קישורים חכמים למפות ולמנוע AI
   const mapUrl = buildMapUrl(item, prevItem);
   const transitUrl = buildTransitUrl(item, prevItem);
+  const aiUrl = buildAiUrl(item);
 
   const navBtns = [
     mapUrl     ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
     transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
+    aiUrl      ? `<a href="${aiUrl}" target="_blank" rel="noopener noreferrer" class="link-btn" style="background:var(--purple-glow);color:var(--purple);border-color:color-mix(in srgb,var(--purple) 28%,transparent);font-weight:600">${svgIcon('ai')} שאל AI על המקום</a>` : '',
     item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
@@ -1658,7 +1682,6 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
       if (item.type === 'tip') return renderTipCard(item, q);
       if (item.type === 'task') return renderChecklistCard(item, q);
       if (item.type === 'dictionary') return renderDictionaryCard(item, q);
-      // מעבירים את prevItem לפונקציית הרינדור
       return renderTripCard(item, q, prevItem);
     }).join('')}
   </div>
