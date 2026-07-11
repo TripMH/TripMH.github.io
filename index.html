@@ -652,12 +652,13 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v21';
-const LS_COMPLETED = 'tripmh_completed_v21';
-const LS_BOOKED    = 'tripmh_booked_v21';
-const LS_EXPANDED  = 'tripmh_expanded_v21';
-const LS_TAB       = 'tripmh_tab_v21';
-const LS_DARK      = 'tripmh_dark_v21';
+// גרסה חדשה לאיפוס חכם של הקאש
+const LS_DATA      = 'tripmh_data_v22';
+const LS_COMPLETED = 'tripmh_completed_v22';
+const LS_BOOKED    = 'tripmh_booked_v22';
+const LS_EXPANDED  = 'tripmh_expanded_v22';
+const LS_TAB       = 'tripmh_tab_v22';
+const LS_DARK      = 'tripmh_dark_v22';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -833,7 +834,7 @@ function parseCSV(raw) {
 }
 
 /* =========================================================
-   COLUMN ALIASES (UPDATED FOR NEW DICTIONARY)
+   COLUMN ALIASES (UPDATED FOR NEW DICTIONARY & BOOKING)
 ========================================================= */
 const ALIASES = {
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -844,16 +845,18 @@ const ALIASES = {
   dur:       ['משך','זמן מוערך','duration','זמן ביקור'],
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
-  book:      ['הזמנה','שריון','כרטיסים','booking','reservation'],
+  
+  // זיהוי מדויק של עמודת ההזמנות - כולל המילה 'להזמין' שתופסת את העמודה המאוחדת שלך
+  book:      ['הזמנה','שריון','כרטיסים','booking','reservation', 'להזמין'],
+  
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
   bookWhen:  ['מתי להזמין','זמן מומלץ להזמנה','תזמון'],
-  checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה'],
-  checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה'],
+  checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה', 'צ\'ק-אין'],
+  checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה', 'צ\'ק-אאוט'],
   desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
   area:      ['מיקום במפה','לינק למפה','קואורדינטות','אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood','map'],
   category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
   
-  // New Dictionary Aliases
   hebrew:    ['עברית', 'hebrew'],
   english:   ['אנגלית', 'english'],
   japanese:  ['יפנית', 'japanese', 'שפה זרה'],
@@ -929,6 +932,20 @@ function detectIcon(text) {
   if (/גן חיות|zoo/.test(t))                                 return '🦁';
   if (/כנסיה|church|cathedral/.test(t))                      return '⛪';
   return '📍';
+}
+
+// פונקציה חכמה לזיהוי כוונת שריון אמיתית
+function needsBooking(bookText) {
+  const b = (bookText||'').trim().toLowerCase();
+  if (!b) return false;
+  if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
+  if (/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(b)) return false;
+  
+  // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
+  const isJustCheckIn = /^(צ'ק[-\s]?אין|צ'ק[-\s]?אאוט|check[-\s]?in|check[-\s]?out)[\s:\d\-]*$/i.test(b);
+  if (isJustCheckIn) return false;
+
+  return true; // אם הגענו לכאן, יש תוכן בעמודת ההזמנה שהוא כנראה "חובה להזמין"
 }
 
 // =========================================================
@@ -1099,33 +1116,39 @@ async function processFiles(files) {
       }
       const rawDay = combinedDay || 'ללא תאריך';
       
-      const checkIn  = getCol(obj,'checkIn');
-      const checkOut = getCol(obj,'checkOut');
+      // טיפול חכם בשליפת נתוני ההזמנה מהעמודה המאוחדת
+      let bBase = getCol(obj,'book'); 
+      
+      let checkIn  = getCol(obj,'checkIn');
+      let checkOut = getCol(obj,'checkOut');
       const timeStr = formatTime(getCol(obj,'time'));
 
-      // ---------------------------------------------------------
-      // טיפול חכם בכוונת שיריון (מונע סימון אוטומטי לדירות וצ'ק אין)
-      // ---------------------------------------------------------
-      const bBase = getCol(obj,'book');
-      const bWhen = getCol(obj,'bookWhen');
-      const bHow  = getCol(obj,'bookHow');
-      
+      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין ל-bBase, נחלץ אותם וננקה אותם
+      if (bBase) {
+          const ciMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in).*?(\d{1,2}:\d{2})/i);
+          if (ciMatch && !checkIn) checkIn = ciMatch[1];
+          
+          const coMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/i);
+          if (coMatch && !checkOut) checkOut = coMatch[1];
+      }
+
+      // נכין את טקסט ההזמנה הסופי (נטו הזמנה)
       let finalBookingArr = [];
       let reqBook = false;
+      
+      // הסרת שורות שהן רק צ'ק-אין / אאוט מתוך טקסט ההזמנה
+      let cleanBookingText = bBase;
+      if (cleanBookingText) {
+          cleanBookingText = cleanBookingText.replace(/.*(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in).*?\d{1,2}:\d{2}.*/gi, '')
+                                             .replace(/.*(?:צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?\d{1,2}:\d{2}.*/gi, '')
+                                             .trim();
+      }
 
-      if (bBase) {
-          const bLow = bBase.toLowerCase().trim();
-          if (!/^(לא|אין|חינם|0|free|none|false|no)$/i.test(bLow) && 
-              !/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(bLow)) {
+      if (cleanBookingText) {
+          if (needsBooking(cleanBookingText)) {
               reqBook = true;
-              finalBookingArr.push(bBase);
-              if (bWhen) finalBookingArr.push(`מתי להזמין: ${bWhen}`);
-              if (bHow) finalBookingArr.push(`איך להזמין: ${bHow}`);
+              finalBookingArr.push(cleanBookingText);
           }
-      } else if (bWhen && /(\d+)\s*(ימים|חודשים|שבועות|יום|חודש|שבוע)/i.test(bWhen)) {
-          reqBook = true;
-          finalBookingArr.push(`מתי להזמין: ${bWhen}`);
-          if (bHow) finalBookingArr.push(`איך להזמין: ${bHow}`);
       }
 
       const finalBooking = finalBookingArr.join('\n');
@@ -1211,17 +1234,17 @@ function setCalendarReminder(id) {
   const txt = (item.booking || '').toLowerCase();
   
   let daysToSub = 0;
-  let hour = 10; // שעת תזכורת ברירת מחדל (10:00 בבוקר)
+  let hour = 10; // שעת תזכורת ברירת מחדל
   let min = 0;
 
-  // חילוץ שעה ספציפית אם צויינה בהזמנה
+  // חילוץ שעה ספציפית אם צויינה בהזמנה (למשל ב-10:00)
   const timeMatch = txt.match(/([0-2]?\d):([0-5]\d)/);
   if (timeMatch) {
      hour = parseInt(timeMatch[1], 10);
      min = parseInt(timeMatch[2], 10);
   }
 
-  // חילוץ מתמטי מדוייק של זמן מקדים (חודשים, שבועות, ימים)
+  // חילוץ מתמטי מדוייק של זמן מקדים
   const m1 = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
   const m2 = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
   const m3 = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
@@ -1233,20 +1256,26 @@ function setCalendarReminder(id) {
   else if (txt.includes('חודש')) daysToSub = 30;
   else if (txt.includes('שבועיים')) daysToSub = 14;
   else if (txt.includes('שבוע')) daysToSub = 7;
-  else daysToSub = 14; // אם רשום שצריך להזמין אבל לא רשום מתי, התזכורת תהיה שבועיים לפני
+  else daysToSub = 14; // תזכורת ברירת מחדל: שבועיים לפני
 
-  // בניית הזמן הסופי להתראה
+  // חישוב הזמן הסופי להתראה
   targetDate.setDate(targetDate.getDate() - daysToSub);
   targetDate.setHours(hour, min, 0, 0);
   
+  // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר בבוקר באופן אוטומטי כדי למנוע פספוס
+  const now = new Date();
+  if (targetDate < now) {
+      targetDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
+      targetDate.setHours(hour, min, 0, 0);
+  }
+  
   const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
 
-  // פורמט YYYYMMDDTHHMMSS (זמן מקומי של המשתמש, לא UTC, כדי שההתרעה תקפוץ בדיוק בזמן הנכון בארץ!)
+  // פורמט תאריך נכון לשעון המקומי שלך! (לא UTC שמתבלבל בשעות)
   const pad = n => String(n).padStart(2, '0');
   const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 
-  // צבע היומן (11 = אדום בולט להזמנות)
-  const colorId = '11'; 
+  const colorId = '11'; // אדום עגבנייה בולט בגוגל קלנדר
 
   const title = encodeURIComponent(`🚨 שריון: ${item.placeName}`);
   
@@ -1295,7 +1324,7 @@ function downloadFilesSequentially(files) {
 function exportCSV() {
   const BOM = '\uFEFF';
   const files = [];
-  const itiHeaders = ['יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','הזמנה (מתי ואיך)','אזור / כתובת','תיאור','קישור','הושלם','טופל/הוזמן'];
+  const itiHeaders = ['יום / תאריך','שם המקום','סמל','שעות פעילות','משך ביקור','עלות','תחבורה','צ\'ק-אין','צ\'ק-אאוט','איך ומתי להזמין (צ\'ק-אין/אאוט)','אזור / כתובת','תיאור','קישור','הושלם','טופל/הוזמן'];
 
   if (state.data.itinerary.length > 0) {
       let csv = BOM + csvRow(itiHeaders);
@@ -1568,7 +1597,7 @@ function renderTripCard(item, q, prevItem) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  const bookingRow = item.booking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
+  const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
   const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
@@ -1686,6 +1715,7 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
   const groups = new Map();
   items.forEach(i => {
     let k = (groupKey === 'dayLabel' ? i.dayLabel : i.category) || 'כללי';
+    if (i.type === 'dictionary') k = i.category || 'מילון כללי';
     if (!groups.has(k)) groups.set(k,[]);
     groups.get(k).push(i);
   });
@@ -1715,8 +1745,8 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
   <div class="section-header" style="border-right-color:${color}">
     <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
-      ${routeUrl ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" class="daily-route-btn">${svgIcon('map')} ניווט יומי</a>` : ''}
-      ${transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="transit-route-btn">${svgIcon('transit')} תחבורה</a>` : ''}
+      ${routeUrl && arr[0].type !== 'dictionary' ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" class="daily-route-btn">${svgIcon('map')} ניווט יומי</a>` : ''}
+      ${transitUrl && arr[0].type !== 'dictionary' ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="transit-route-btn">${svgIcon('transit')} תחבורה</a>` : ''}
       ${completeAllBtn}
     </div>
     <span class="section-badge${allDone?' all-done':''}">${arr[0].type !== 'dictionary' ? done+'/' : ''}${arr.length}</span>
@@ -1892,12 +1922,7 @@ function readEditForm(item) {
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
   };
   
-  // Update requiresBooking flag based on new edit
-  const bLow = (updated.booking || '').toLowerCase().trim();
-  updated.requiresBooking = false;
-  if (bLow && !/^(לא|אין|חינם|0|free|none|false|no)$/i.test(bLow) && !/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(bLow)) {
-      updated.requiresBooking = true;
-  }
+  updated.requiresBooking = needsBooking(updated.booking);
   
   if (!updated.icon || updated.icon === '📍') updated.icon = detectIcon([updated.placeName, updated.description, updated.area].join(' '));
   return updated;
