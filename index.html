@@ -652,12 +652,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v20';
-const LS_COMPLETED = 'tripmh_completed_v20';
-const LS_BOOKED    = 'tripmh_booked_v20';
-const LS_EXPANDED  = 'tripmh_expanded_v20';
-const LS_TAB       = 'tripmh_tab_v20';
-const LS_DARK      = 'tripmh_dark_v20';
+const LS_DATA      = 'tripmh_data_v21';
+const LS_COMPLETED = 'tripmh_completed_v21';
+const LS_BOOKED    = 'tripmh_booked_v21';
+const LS_EXPANDED  = 'tripmh_expanded_v21';
+const LS_TAB       = 'tripmh_tab_v21';
+const LS_DARK      = 'tripmh_dark_v21';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -833,7 +833,7 @@ function parseCSV(raw) {
 }
 
 /* =========================================================
-   COLUMN ALIASES & PARSING HELPERS (IMPROVED MATCHING)
+   COLUMN ALIASES (UPDATED FOR NEW DICTIONARY)
 ========================================================= */
 const ALIASES = {
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -852,10 +852,15 @@ const ALIASES = {
   desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
   area:      ['מיקום במפה','לינק למפה','קואורדינטות','אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood','map'],
   category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
-  hebrew:    ['עברית','hebrew','מילה בעברית','משמעות'],
-  foreign:   ['יפנית','japanese','שפה זרה','מילה','foreign'],
-  romaji:    ['הגייה','romaji','קריאה','pronunciation'],
-  context:   ['הקשר','context'],
+  
+  // New Dictionary Aliases
+  hebrew:    ['עברית', 'hebrew'],
+  english:   ['אנגלית', 'english'],
+  japanese:  ['יפנית', 'japanese', 'שפה זרה'],
+  hebPronun: ['הגייה בעברית', 'ניקוד'],
+  romaji:    ['רומאג\'י', 'romaji', 'הגייה באנגלית', 'קריאה'],
+  context:   ['הקשר', 'סיטואציה', 'context'],
+  
   link:      ['קישור','אתר','url','link','website'],
   linkLabel: ['שם הקישור','טקסט קישור','link label','link name'],
 };
@@ -925,16 +930,6 @@ function detectIcon(text) {
   if (/כנסיה|church|cathedral/.test(t))                      return '⛪';
   return '📍';
 }
-function needsBooking(bookText, desc) {
-  const b = (bookText||'').trim().toLowerCase();
-  const d = (desc||'').toLowerCase();
-  if (!b) return false;
-  if (/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(b)) return false;
-  if (/^(חינם|free|0)$/.test(b)) return false;
-  if (b.length > 3) return true;
-  if (/(להזמין מראש|דורש שריון|חובה להזמין|must.?book|reservation required|book in advance|\d+\s*ימים|\d+\s*days)/i.test(b + d)) return true;
-  return false;
-}
 
 // =========================================================
 // REAL GOOGLE MAPS API LINKS (Smart Point-to-Point Aware)
@@ -944,7 +939,6 @@ function extractUrl(str) {
   return match ? match[0] : null;
 }
 
-// מחלץ שם מיקום נקי וחכם (משלב מקום ואזור אם צריך כדי שגוגל ימצא מדויק)
 function getLocStr(item) {
   if (!item) return '';
   let a = (item.area || '').replace(/(https?:\/\/[^\s\)]+)/ig, '').trim();
@@ -954,12 +948,10 @@ function getLocStr(item) {
   if (a && !p) return a;
   if (!a && p) return p;
   
-  // אם האזור מכיל נ"צ (קואורדינטות מדויקות), נשתמש בהן
   if (/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/.test(a)) {
       return a; 
   }
   
-  // אם האזור (עיר/שכונה) לא מכיל בתוכו את השם של המקום - שילוב שלהם מביא תוצאות מדויקות פי כמה
   if (!a.includes(p) && !p.includes(a)) {
      return `${p}, ${a}`;
   }
@@ -968,18 +960,16 @@ function getLocStr(item) {
 
 function buildMapUrl(item, prevItem) {
   const urlInArea = extractUrl(item.area || '');
-  if (urlInArea) return urlInArea; // אם יש לינק שהוזן ידנית - נשתמש בו
+  if (urlInArea) return urlInArea; 
   
   const dest = getLocStr(item);
   if (!dest) return '';
   
   const orig = getLocStr(prevItem);
   if (orig && orig !== dest) {
-    // ניווט מדויק ממיקום קודם למיקום הנוכחי
     return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(orig)}&destination=${encodeURIComponent(dest)}&travelmode=driving`;
   }
   
-  // חיפוש המקום
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest)}`;
 }
 
@@ -1001,7 +991,6 @@ function buildDailyUrl(items, mode='driving') {
     if (q) locs.push(q);
   });
   
-  // מסננים כפילויות עוקבות ומקומות זהים כדי לא למלא את הלינק סתם
   const uniqueLocs = [...new Set(locs)];
     
   if (!uniqueLocs.length) return '';
@@ -1009,11 +998,10 @@ function buildDailyUrl(items, mode='driving') {
   
   const origin = encodeURIComponent(uniqueLocs[0]);
   const dest = encodeURIComponent(uniqueLocs[uniqueLocs.length-1]);
-  // הגבלת כמות waypoints לעד 9 כדי למנוע קריסה של Google Maps
   const wps = uniqueLocs.slice(1, 10).map(w => encodeURIComponent(w)).join('|');
   
   let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=${mode}`;
-  if (wps && mode !== 'transit') url += `&waypoints=${wps}`; // תחבורה ציבורית בגוגל מפות לא תומכת ב-waypoints בלינק ישיר
+  if (wps && mode !== 'transit') url += `&waypoints=${wps}`; 
   return url;
 }
 
@@ -1038,12 +1026,6 @@ function formatTime(s) {
           .replace(/\s*-\s*/g,' – ')
           .replace(/\s{2,}/g,' ')
           .trim();
-}
-function extractBookingAdvDays(txt) {
-  const m = (txt||'').match(/(\d+)\s*(ימים|days|שבוע|שבועות)/i);
-  if (!m) return 7; 
-  if (/שבוע/.test(m[2])) return parseInt(m[1]) * 7;
-  return parseInt(m[1]);
 }
 
 /* =========================================================
@@ -1117,29 +1099,53 @@ async function processFiles(files) {
       }
       const rawDay = combinedDay || 'ללא תאריך';
       
-      const bBase = getCol(obj,'book');
-      const bHow  = getCol(obj,'bookHow');
-      const bWhen = getCol(obj,'bookWhen');
-      let finalBookingArr = [];
-      if (bBase) finalBookingArr.push(bBase);
-      if (bWhen) finalBookingArr.push(`מתי: ${bWhen}`);
-      if (bHow) finalBookingArr.push(`פלטפורמה: ${bHow}`);
-      const finalBooking = finalBookingArr.join('\n');
-      
       const checkIn  = getCol(obj,'checkIn');
       const checkOut = getCol(obj,'checkOut');
       const timeStr = formatTime(getCol(obj,'time'));
 
+      // ---------------------------------------------------------
+      // טיפול חכם בכוונת שיריון (מונע סימון אוטומטי לדירות וצ'ק אין)
+      // ---------------------------------------------------------
+      const bBase = getCol(obj,'book');
+      const bWhen = getCol(obj,'bookWhen');
+      const bHow  = getCol(obj,'bookHow');
+      
+      let finalBookingArr = [];
+      let reqBook = false;
+
+      if (bBase) {
+          const bLow = bBase.toLowerCase().trim();
+          if (!/^(לא|אין|חינם|0|free|none|false|no)$/i.test(bLow) && 
+              !/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(bLow)) {
+              reqBook = true;
+              finalBookingArr.push(bBase);
+              if (bWhen) finalBookingArr.push(`מתי להזמין: ${bWhen}`);
+              if (bHow) finalBookingArr.push(`איך להזמין: ${bHow}`);
+          }
+      } else if (bWhen && /(\d+)\s*(ימים|חודשים|שבועות|יום|חודש|שבוע)/i.test(bWhen)) {
+          reqBook = true;
+          finalBookingArr.push(`מתי להזמין: ${bWhen}`);
+          if (bHow) finalBookingArr.push(`איך להזמין: ${bHow}`);
+      }
+
+      const finalBooking = finalBookingArr.join('\n');
+
       if (fileType === 'dictionary') {
         const hebrew = getCol(obj, 'hebrew') || place;
-        const foreign = getCol(obj, 'foreign');
-        if (hebrew || foreign) {
+        const english = getCol(obj, 'english');
+        const japanese = getCol(obj, 'japanese');
+        
+        if (hebrew || japanese || english) {
             const isNew = mergeItem(state.data.dictionary, {
                 id: genId(), type: 'dictionary', _idx: ri,
-                hebrew: hebrew || '', foreign: foreign || '',
+                category: catCol || 'כללי',
+                hebrew: hebrew || '',
+                english: english || '',
+                japanese: japanese || '',
+                hebPronun: getCol(obj, 'hebPronun') || '',
                 romaji: getCol(obj, 'romaji') || '',
-                context: getCol(obj, 'context') || catCol || ''
-            }, x => x.hebrew === hebrew && x.foreign === foreign);
+                context: getCol(obj, 'context') || ''
+            }, x => x.hebrew === hebrew && x.japanese === japanese);
             if(isNew) stats.added++; else stats.updated++;
         }
       } else if (fileType === 'checklist') {
@@ -1171,7 +1177,7 @@ async function processFiles(files) {
           duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
           booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, 
           link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
-          requiresBooking: needsBooking(finalBooking, desc),
+          requiresBooking: reqBook,
           icon: detectIcon([place, desc, area].join(' ')),
         };
         const dest = isOpt ? state.data.options : state.data.itinerary;
@@ -1191,30 +1197,69 @@ async function processFiles(files) {
 }
 
 /* =========================================================
-   CALENDAR REMINDERS
+   CALENDAR REMINDERS (PRECISION TIMING ENGINE)
 ========================================================= */
 function setCalendarReminder(id) {
   const arr = [...state.data.itinerary, ...state.data.options];
   const item = arr.find(x => x.id === id);
   if (!item || !item.dateVal) {
-    addToast('לא הוגדר תאריך יעד לאטרקציה זו', 'error');
+    addToast('לא הוגדר תאריך יעד לאטרקציה זו (חסר תאריך בקובץ)', 'error');
     return;
   }
 
-  const daysAdv = extractBookingAdvDays(item.booking);
   const targetDate = new Date(item.dateVal);
-  const reminderDate = new Date(targetDate.getTime() - (daysAdv * 24 * 60 * 60 * 1000));
-  reminderDate.setHours(10, 0, 0, 0); 
-  const endDate = new Date(reminderDate.getTime() + (60 * 60 * 1000)); 
+  const txt = (item.booking || '').toLowerCase();
+  
+  let daysToSub = 0;
+  let hour = 10; // שעת תזכורת ברירת מחדל (10:00 בבוקר)
+  let min = 0;
 
-  const fmt = d => d.toISOString().replace(/-|:|\.\d+/g, '').substring(0, 15) + 'Z';
-  const title = encodeURIComponent(`תזכורת הזמנה: ${item.placeName}`);
-  const desc = encodeURIComponent(`תזכורת ממערכת TripMH!\n\nהגיע הזמן לשריין עבור: ${item.placeName}\nפירוט:\n${item.booking}\n\n${item.link ? 'קישור: '+item.link : ''}`);
+  // חילוץ שעה ספציפית אם צויינה בהזמנה
+  const timeMatch = txt.match(/([0-2]?\d):([0-5]\d)/);
+  if (timeMatch) {
+     hour = parseInt(timeMatch[1], 10);
+     min = parseInt(timeMatch[2], 10);
+  }
+
+  // חילוץ מתמטי מדוייק של זמן מקדים (חודשים, שבועות, ימים)
+  const m1 = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
+  const m2 = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
+  const m3 = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
+  
+  if (m1) daysToSub = parseInt(m1[1], 10) * 30;
+  else if (m2) daysToSub = parseInt(m2[1], 10) * 7;
+  else if (m3) daysToSub = parseInt(m3[1], 10);
+  else if (txt.includes('חודשיים')) daysToSub = 60;
+  else if (txt.includes('חודש')) daysToSub = 30;
+  else if (txt.includes('שבועיים')) daysToSub = 14;
+  else if (txt.includes('שבוע')) daysToSub = 7;
+  else daysToSub = 14; // אם רשום שצריך להזמין אבל לא רשום מתי, התזכורת תהיה שבועיים לפני
+
+  // בניית הזמן הסופי להתראה
+  targetDate.setDate(targetDate.getDate() - daysToSub);
+  targetDate.setHours(hour, min, 0, 0);
+  
+  const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
+
+  // פורמט YYYYMMDDTHHMMSS (זמן מקומי של המשתמש, לא UTC, כדי שההתרעה תקפוץ בדיוק בזמן הנכון בארץ!)
+  const pad = n => String(n).padStart(2, '0');
+  const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+
+  // צבע היומן (11 = אדום בולט להזמנות)
+  const colorId = '11'; 
+
+  const title = encodeURIComponent(`🚨 שריון: ${item.placeName}`);
+  
+  let descRaw = `תזכורת אוטומטית ממערכת TripMH!\n\nהגיע הזמן לשריין עבור:\n📌 ${item.placeName}\n\n`;
+  if (item.booking) descRaw += `📝 פירוט ההזמנה:\n${item.booking}\n\n`;
+  if (item.link) descRaw += `🔗 קישור ישיר להזמנה:\n${item.link}`;
+  
+  const desc = encodeURIComponent(descRaw);
   const loc = encodeURIComponent(item.area || '');
   
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(reminderDate)}/${fmt(endDate)}&details=${desc}&location=${loc}`;
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmtLocal(targetDate)}/${fmtLocal(endDate)}&details=${desc}&location=${loc}&colorId=${colorId}`;
   window.open(url, '_blank');
-  addToast('מעביר ליצירת תזכורת ב-Google Calendar...', 'success');
+  addToast('מעביר ליצירת תזכורת מדויקת ב-Google Calendar...', 'success');
 }
 
 /* =========================================================
@@ -1277,8 +1322,8 @@ function exportCSV() {
   }
 
   if (state.data.dictionary.length > 0) {
-      let csv = BOM + csvRow(['עברית','שפה זרה','הגייה','הקשר']);
-      state.data.dictionary.forEach(i => csv += csvRow([i.hebrew, i.foreign, i.romaji, i.context]));
+      let csv = BOM + csvRow(['קטגוריה', 'עברית', 'אנגלית', 'יפנית', 'הגייה בעברית (עם ניקוד)', 'רומאג\'י (הגייה באנגלית)', 'הקשר / סיטואציה']);
+      state.data.dictionary.forEach(i => csv += csvRow([i.category, i.hebrew, i.english, i.japanese, i.hebPronun, i.romaji, i.context]));
       files.push({ content: csv, filename: 'TripMH_מילון.csv', mime: 'text/csv;charset=utf-8' });
   }
 
@@ -1338,7 +1383,7 @@ function exportTxt() {
   
   if (state.data.dictionary.length > 0) {
       let text = `TripMH – מילון\n\n`;
-      state.data.dictionary.forEach(i => text += `📖 ${i.hebrew} - ${i.foreign} (${i.romaji})\n`);
+      state.data.dictionary.forEach(i => text += `📖 ${i.hebrew} - ${i.japanese} (${i.romaji})\n`);
       files.push({ content: text, filename: 'TripMH_מילון.txt', mime: 'text/plain;charset=utf-8' });
       fullClipboardText += text;
   }
@@ -1509,7 +1554,6 @@ function renderTripCard(item, q, prevItem) {
     item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
   ].filter(Boolean).join('');
 
-  // קישורים חכמים למפות ולמנוע AI
   const mapUrl = buildMapUrl(item, prevItem);
   const transitUrl = buildTransitUrl(item, prevItem);
   const aiUrl = buildAiUrl(item);
@@ -1610,14 +1654,17 @@ function renderDictionaryCard(item, q) {
   return `
   <article class="card" data-id="${item.id}" style="padding:12px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-      <div>
-        <div style="font-size:15px; font-weight:700; color:var(--accent);">${hlHtml(item.hebrew, q)}</div>
-        <div style="font-size:14px; font-weight:600; color:var(--text); margin-top:2px;">${hlHtml(item.foreign, q)}</div>
-        <div style="font-size:12px; color:var(--warning); font-family:'Courier New',monospace; margin-top:2px;">${hlHtml(item.romaji, q)}</div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:16px; font-weight:800; color:var(--accent); word-break:break-word;">${hlHtml(item.hebrew, q)}</div>
+        ${item.english ? `<div style="font-size:13px; font-weight:500; color:var(--text-muted); margin-bottom:6px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
+        
+        <div style="font-size:18px; font-weight:700; color:var(--text);">${hlHtml(item.japanese, q)}</div>
+        ${item.hebPronun ? `<div style="font-size:14px; font-weight:600; color:var(--success); margin-top:4px;">${hlHtml(item.hebPronun, q)}</div>` : ''}
+        ${item.romaji ? `<div style="font-size:12px; color:var(--warning); font-family:'Courier New',monospace; margin-top:2px;">${hlHtml(item.romaji, q)}</div>` : ''}
       </div>
-      <button class="icon-btn" onclick="openEdit('${item.id}')">${svgIcon('edit')}</button>
+      <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; margin-right:8px;">${svgIcon('edit')}</button>
     </div>
-    ${item.context ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
+    ${item.context ? `<div style="font-size:11px; font-weight:600; color:var(--text-dim); margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
   </article>`;
 }
 
@@ -1639,7 +1686,6 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
   const groups = new Map();
   items.forEach(i => {
     let k = (groupKey === 'dayLabel' ? i.dayLabel : i.category) || 'כללי';
-    if (i.type === 'dictionary') k = i.context || 'מילון כללי';
     if (!groups.has(k)) groups.set(k,[]);
     groups.get(k).push(i);
   });
@@ -1717,7 +1763,7 @@ function updateUI() {
   document.getElementById('panel-options').innerHTML   = fo.length || !q ? renderPanel(fo,'dayLabel','אופציה','option',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
   document.getElementById('panel-checklist').innerHTML = fc.length || !q ? renderPanel(fc,'category','משימה','checklist',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
   document.getElementById('panel-tips').innerHTML      = ft.length || !q ? renderPanel(ft,'category','טיפ','tip',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
-  document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'context','מילה','dictionary',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
+  document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
 
   document.getElementById('count-itinerary').textContent = d.itinerary.length;
   document.getElementById('count-options').textContent   = d.options.length;
@@ -1773,10 +1819,19 @@ function setTab(tab) {
 function buildEditForm(item) {
   if (item.type === 'dictionary') {
     return `
-<div class="edit-group"><label class="edit-label">עברית</label><input class="edit-input" id="ef-hebrew" value="${escHtml(item.hebrew)}" autocomplete="off" /></div>
-<div class="edit-group"><label class="edit-label">שפה זרה</label><input class="edit-input" id="ef-foreign" value="${escHtml(item.foreign)}" autocomplete="off" /></div>
-<div class="edit-group"><label class="edit-label">הגייה</label><input class="edit-input" id="ef-romaji" value="${escHtml(item.romaji)}" autocomplete="off" /></div>
-<div class="edit-group"><label class="edit-label">הקשר / קטגוריה</label><input class="edit-input" id="ef-context" value="${escHtml(item.context)}" autocomplete="off" /></div>`;
+<div class="edit-row">
+  <div class="edit-group" style="flex:1"><label class="edit-label">עברית</label><input class="edit-input" id="ef-hebrew" value="${escHtml(item.hebrew)}" autocomplete="off" /></div>
+  <div class="edit-group" style="flex:1"><label class="edit-label">אנגלית</label><input class="edit-input" id="ef-english" value="${escHtml(item.english)}" autocomplete="off" /></div>
+</div>
+<div class="edit-group"><label class="edit-label">יפנית</label><input class="edit-input" id="ef-japanese" value="${escHtml(item.japanese)}" autocomplete="off" /></div>
+<div class="edit-row">
+  <div class="edit-group" style="flex:1"><label class="edit-label">הגייה בעברית (ניקוד)</label><input class="edit-input" id="ef-hebPronun" value="${escHtml(item.hebPronun)}" autocomplete="off" /></div>
+  <div class="edit-group" style="flex:1"><label class="edit-label">רומאג'י</label><input class="edit-input" id="ef-romaji" value="${escHtml(item.romaji)}" autocomplete="off" /></div>
+</div>
+<div class="edit-row">
+  <div class="edit-group" style="flex:1"><label class="edit-label">קטגוריה</label><input class="edit-input" id="ef-category" value="${escHtml(item.category)}" autocomplete="off" /></div>
+  <div class="edit-group" style="flex:1"><label class="edit-label">סיטואציה / הקשר</label><input class="edit-input" id="ef-context" value="${escHtml(item.context)}" autocomplete="off" /></div>
+</div>`;
   }
   if (item.type === 'task') {
     return `
@@ -1824,7 +1879,7 @@ function buildEditForm(item) {
 
 function readEditForm(item) {
   const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
-  if (item.type === 'dictionary') return { ...item, hebrew:g('ef-hebrew'), foreign:g('ef-foreign'), romaji:g('ef-romaji'), context:g('ef-context') };
+  if (item.type === 'dictionary') return { ...item, hebrew:g('ef-hebrew'), english:g('ef-english'), japanese:g('ef-japanese'), hebPronun:g('ef-hebPronun'), romaji:g('ef-romaji'), context:g('ef-context'), category:g('ef-category') };
   if (item.type === 'task') return { ...item, title:g('ef-title'), category:g('ef-category'), description:g('ef-description') };
   if (item.type === 'tip') return { ...item, title:g('ef-title'), category:g('ef-category'), content:g('ef-content'), link:g('ef-link'), linkLabel:g('ef-linkLabel') };
 
@@ -1836,7 +1891,14 @@ function readEditForm(item) {
     timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
   };
-  updated.requiresBooking = needsBooking(updated.booking, updated.description);
+  
+  // Update requiresBooking flag based on new edit
+  const bLow = (updated.booking || '').toLowerCase().trim();
+  updated.requiresBooking = false;
+  if (bLow && !/^(לא|אין|חינם|0|free|none|false|no)$/i.test(bLow) && !/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(bLow)) {
+      updated.requiresBooking = true;
+  }
+  
   if (!updated.icon || updated.icon === '📍') updated.icon = detectIcon([updated.placeName, updated.description, updated.area].join(' '));
   return updated;
 }
@@ -1856,7 +1918,7 @@ function openEdit(id) {
 
 function openAdd(type) {
   const item = { id: genId(), type, _idx: Date.now() };
-  if (type === 'dictionary') { item.hebrew=''; item.foreign=''; item.romaji=''; item.context=''; }
+  if (type === 'dictionary') { item.hebrew=''; item.english=''; item.japanese=''; item.hebPronun=''; item.romaji=''; item.category='כללי'; item.context=''; }
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
   else {
