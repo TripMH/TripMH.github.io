@@ -653,12 +653,12 @@ select.edit-input{appearance:none}
    CONSTANTS
 ========================================================= */
 // גרסה חדשה לאיפוס חכם של הקאש
-const LS_DATA      = 'tripmh_data_v22';
-const LS_COMPLETED = 'tripmh_completed_v22';
-const LS_BOOKED    = 'tripmh_booked_v22';
-const LS_EXPANDED  = 'tripmh_expanded_v22';
-const LS_TAB       = 'tripmh_tab_v22';
-const LS_DARK      = 'tripmh_dark_v22';
+const LS_DATA      = 'tripmh_data_v24';
+const LS_COMPLETED = 'tripmh_completed_v24';
+const LS_BOOKED    = 'tripmh_booked_v24';
+const LS_EXPANDED  = 'tripmh_expanded_v24';
+const LS_TAB       = 'tripmh_tab_v24';
+const LS_DARK      = 'tripmh_dark_v24';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -941,11 +941,15 @@ function needsBooking(bookText) {
   if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
   if (/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(b)) return false;
   
+  // חוק חדש: אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
+  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(b)) return false;
+  
   // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
-  const isJustCheckIn = /^(צ'ק[-\s]?אין|צ'ק[-\s]?אאוט|check[-\s]?in|check[-\s]?out)[\s:\d\-]*$/i.test(b);
-  if (isJustCheckIn) return false;
+  // ננקה את המילים צ'ק אין/אאוט ושעות, ואם לא נשאר טקסט משמעותי, נחזיר false
+  const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
+  if (textWithoutCheckIn.length < 3) return false; // לא נשאר תוכן ממשי שדורש הזמנה
 
-  return true; // אם הגענו לכאן, יש תוכן בעמודת ההזמנה שהוא כנראה "חובה להזמין"
+  return true; 
 }
 
 // =========================================================
@@ -1116,41 +1120,36 @@ async function processFiles(files) {
       }
       const rawDay = combinedDay || 'ללא תאריך';
       
-      // טיפול חכם בשליפת נתוני ההזמנה מהעמודה המאוחדת
       let bBase = getCol(obj,'book'); 
-      
       let checkIn  = getCol(obj,'checkIn');
       let checkOut = getCol(obj,'checkOut');
       const timeStr = formatTime(getCol(obj,'time'));
 
-      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין ל-bBase, נחלץ אותם וננקה אותם
+      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין/אאוט ל-bBase, נחלץ אותם
       if (bBase) {
-          const ciMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in).*?(\d{1,2}:\d{2})/i);
+          const ciMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|כניסה).*?(\d{1,2}:\d{2})/i);
           if (ciMatch && !checkIn) checkIn = ciMatch[1];
           
-          const coMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/i);
+          const coMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out|יציאה).*?(\d{1,2}:\d{2})/i);
           if (coMatch && !checkOut) checkOut = coMatch[1];
       }
 
-      // נכין את טקסט ההזמנה הסופי (נטו הזמנה)
+      // נכין את טקסט ההזמנה הסופי
       let finalBookingArr = [];
       let reqBook = false;
-      
-      // הסרת שורות שהן רק צ'ק-אין / אאוט מתוך טקסט ההזמנה
-      let cleanBookingText = bBase;
-      if (cleanBookingText) {
-          cleanBookingText = cleanBookingText.replace(/.*(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in).*?\d{1,2}:\d{2}.*/gi, '')
-                                             .replace(/.*(?:צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?\d{1,2}:\d{2}.*/gi, '')
-                                             .trim();
-      }
 
-      if (cleanBookingText) {
-          if (needsBooking(cleanBookingText)) {
+      if (bBase) {
+          if (needsBooking(bBase)) {
               reqBook = true;
-              finalBookingArr.push(cleanBookingText);
           }
+          finalBookingArr.push(bBase);
       }
-
+      
+      const bWhen = getCol(obj,'bookWhen');
+      const bHow  = getCol(obj,'bookHow');
+      if (bWhen && bBase && !bBase.includes(bWhen)) finalBookingArr.push(`מתי: ${bWhen}`);
+      if (bHow && bBase && !bBase.includes(bHow)) finalBookingArr.push(`פלטפורמה: ${bHow}`);
+      
       const finalBooking = finalBookingArr.join('\n');
 
       if (fileType === 'dictionary') {
@@ -1262,20 +1261,37 @@ function setCalendarReminder(id) {
   targetDate.setDate(targetDate.getDate() - daysToSub);
   targetDate.setHours(hour, min, 0, 0);
   
-  // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר בבוקר באופן אוטומטי כדי למנוע פספוס
+  // מנגנון חדש: הגנה משעות הלילה (22:00 עד 06:00)
+  // אם התזכורת המקורית נופלת על השעות האלו, נקדים אותה לערב שלפני (20:00)
+  if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
+      if (targetDate.getHours() < 6) {
+          targetDate.setDate(targetDate.getDate() - 1); // הזזה ליום הקודם רק אם השעה היא לפנות בוקר
+      }
+      targetDate.setHours(20, 0, 0, 0); // קביעה לשעה 8 בערב (נוח ולא מפריע לשינה)
+  }
+  
+  // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר באותה שעה (או שעת ערב אם זה לילה)
   const now = new Date();
   if (targetDate < now) {
       targetDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
-      targetDate.setHours(hour, min, 0, 0);
+      if (hour >= 22 || hour < 6) {
+          targetDate.setHours(20, 0, 0, 0);
+      } else {
+          targetDate.setHours(hour, min, 0, 0);
+      }
   }
   
   const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
 
-  // פורמט תאריך נכון לשעון המקומי שלך! (לא UTC שמתבלבל בשעות)
+  // פורמט תאריך נכון לשעון המקומי שלך!
   const pad = n => String(n).padStart(2, '0');
   const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 
-  const colorId = '11'; // אדום עגבנייה בולט בגוגל קלנדר
+  // צבעים רנדומליים לגוגל יומן (1 עד 11) שיהיו עקביים לאותה אטרקציה (על בסיס המזהה שלה)
+  const calendarColors = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  let hash = 0;
+  for (let i = 0; i < item.id.length; i++) hash = item.id.charCodeAt(i) + ((hash << 5) - hash);
+  const colorId = calendarColors[Math.abs(hash) % calendarColors.length];
 
   const title = encodeURIComponent(`🚨 שריון: ${item.placeName}`);
   
