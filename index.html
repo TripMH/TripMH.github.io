@@ -932,22 +932,26 @@ function detectIcon(text) {
   return '📍';
 }
 
-// פונקציה חכמה לזיהוי כוונת שריון אמיתית (השיטה החדשה והמדויקת)
+// פונקציה חכמה לזיהוי כוונת שריון אמיתית (השיטה החדשה והמדויקת - מבוססת הכללה INCLUSION)
 function needsBooking(bookText) {
   const b = (bookText||'').trim().toLowerCase();
   if (!b) return false;
   
-  // שלב א': מחיקת טקסט שמעיד על כך שהפעולה כבר הסתיימה או לא רלוונטית
-  if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
-  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked|אצלך בכיס)/i.test(b)) return false;
+  // מסנן ראשוני - מחיקת מידע על צ'ק אין/אאוט כדי לראות אם נשאר טקסט מהותי
+  const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
+  if (textWithoutCheckIn.length < 3) return false;
+
+  // חוק 1 (Priority Exclusion): אם זה כבר הוזמן, שולם או טופל - בוודאות לא צריך להציג סרגל פעולה אדום! 
+  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked|אצלך בכיס|קוד ההזמנה במייל|הכרטיס המודפס|הכרטיס אצלך)/i.test(b)) return false;
   
-  // שלב ב': זיהוי INCLUSION (הכללה) חיובי - נפעיל את האזעקה האדומה *רק* אם המשתמש הורה במפורש להזמין מראש!
-  if (/(להזמין|לשריין|חובה למלא|מומלץ להזמין|שריון כרטיסים|קנייה מוקדמת|מראש באתר|לפני הטיסה|חובה להזמין|שבוע מראש|חודש מראש|הזמן מראש)/i.test(b)) {
-      return true;
-  }
+  // חוק 2 (Priority Inclusion): אם מצאנו פקודה מפורשת שדורשת פעולת שריון עתידית - בוודאות להציג סרגל אדום!
+  if (/(חובה להזמין|להזמין מראש|לשריין|שריון|מומלץ להזמין|לקנות מראש|לרכוש מראש|הזמנה מראש|מראש באתר|book in advance|must book|חובה למלא|להזמין|פתיחת הזמנות|לקנות כרטיסים מראש|ימים מראש|חודש מראש|שבוע מראש)/i.test(b)) return true;
   
-  // כל טקסט אחר (תשלומים בקופה, כרטיס IC במקום, שעות, ניווט וכו') יחשב למידע ויחזור כשלילי
-  return false; 
+  // חוק 3 (Weak Exclusion): אם זו סתם הערת מידע, תשלום במקום, מכונות או הוראת הגעה - לא דורש שריון
+  if (/(במקום|בקופה|בקופות|בכניסה|במכונות|במכונה|דלפק|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|כרטיס ic|סויקה|פאסמו|בשערי|בשערים|בתחנה|ללא הזמנה|אין צורך|לא צריך|תשלום נוח|באוטובוס|ניווט|אפליקציות מפות|כניסת שבת)/i.test(b)) return false;
+
+  // ברירת מחדל לא קיימת - אם כתבת שם משהו משמעותי שלא עונה על החוקים, המערכת תסמן אותו כמצריך קריאה ותשומת לב (שריון)
+  return true; 
 }
 
 // =========================================================
@@ -1123,7 +1127,7 @@ async function processFiles(files) {
       let checkOut = getCol(obj,'checkOut');
       const timeStr = formatTime(getCol(obj,'time'));
 
-      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין/אאוט ל-bBase, נחלץ אותם
+      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין/אאוט ל-bBase, נחלץ אותם בלי למחוק את המקור
       if (bBase) {
           const ciMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|כניסה).*?(\d{1,2}:\d{2})/i);
           if (ciMatch && !checkIn) checkIn = ciMatch[1];
@@ -1132,7 +1136,6 @@ async function processFiles(files) {
           if (coMatch && !checkOut) checkOut = coMatch[1];
       }
 
-      // נכין את טקסט ההזמנה הסופי
       let finalBookingArr = [];
       let reqBook = false;
 
@@ -1404,7 +1407,7 @@ function exportTxt() {
             if (i.checkIn) ln += ` | צ'ק-אין: ${i.checkIn}`;
             if (i.checkOut) ln += ` | צ'ק-אאוט: ${i.checkOut}`;
             text += ln + '\n';
-            if (i.booking) text += `      הזמנה: ${i.booking.replace(/\n/g, ' | ')}\n`;
+            if (i.booking) text += `      מידע: ${i.booking.replace(/\n/g, ' | ')}\n`;
         });
         text += '\n';
       });
@@ -1456,7 +1459,7 @@ function exportKML(data) {
   const e = s => (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
   let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n<name>TripMH</name>\n`;
   [...data.itinerary, ...data.options].filter(i => i.area || i.placeName).forEach(i => {
-      const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `הזמנה: ${i.booking}` : ''].filter(Boolean).join('\n');
+      const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `מידע: ${i.booking}` : ''].filter(Boolean).join('\n');
       kml += `<Placemark>\n<name>${e(i.placeName)}</name>\n<description>${e(desc)}</description>\n<address>${e(i.area||i.placeName)}</address>\n</Placemark>\n`;
   });
   kml += `</Document>\n</kml>`;
@@ -1616,7 +1619,10 @@ function renderTripCard(item, q, prevItem) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
+  
+  // כאן ההערה החשובה תיכנס פנימה לתוך הכרטיסייה במקום סרגל השריון!
   const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
+  
   const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
@@ -2116,7 +2122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('file-csv').value  = '';
-    document.getElementById('file-json').value  = '';
+    document.getElementById('file-json').value = '';
   }
   document.getElementById('file-csv').addEventListener('change',  e => handleFiles(e.target.files));
   document.getElementById('file-json').addEventListener('change', e => handleFiles(e.target.files));
