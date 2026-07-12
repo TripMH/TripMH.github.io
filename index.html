@@ -211,7 +211,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .detail-row svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
 .detail-row.booking svg{color:var(--danger)}
 .detail-row .dr-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:1px;flex-shrink:0}
-.detail-row .dr-value{flex:1;font-weight:500;}
+.detail-row .dr-value{flex:1}
 
 .nav-btns{display:flex;flex-direction:column;gap:6px}
 .link-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;
@@ -652,12 +652,13 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v27';
-const LS_COMPLETED = 'tripmh_completed_v27';
-const LS_BOOKED    = 'tripmh_booked_v27';
-const LS_EXPANDED  = 'tripmh_expanded_v27';
-const LS_TAB       = 'tripmh_tab_v27';
-const LS_DARK      = 'tripmh_dark_v27';
+// גרסה חדשה לאיפוס חכם של הקאש
+const LS_DATA      = 'tripmh_data_v26';
+const LS_COMPLETED = 'tripmh_completed_v26';
+const LS_BOOKED    = 'tripmh_booked_v26';
+const LS_EXPANDED  = 'tripmh_expanded_v26';
+const LS_TAB       = 'tripmh_tab_v26';
+const LS_DARK      = 'tripmh_dark_v26';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -845,6 +846,7 @@ const ALIASES = {
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
   
+  // זיהוי מדויק של עמודת ההזמנות - כולל המילה 'להזמין' שתופסת את העמודה המאוחדת שלך
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation', 'להזמין'],
   
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
@@ -932,25 +934,22 @@ function detectIcon(text) {
   return '📍';
 }
 
-// פונקציה חכמה לזיהוי כוונת שריון אמיתית (השיטה החדשה והמדויקת - מבוססת הכללה INCLUSION)
+// פונקציה חכמה לזיהוי כוונת שריון אמיתית
 function needsBooking(bookText) {
   const b = (bookText||'').trim().toLowerCase();
   if (!b) return false;
+  if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
   
-  // מסנן ראשוני - מחיקת מידע על צ'ק אין/אאוט כדי לראות אם נשאר טקסט מהותי
+  // לא דורש שריון מראש אם כתוב במפורש שזה תשלום במקום או שלא צריך:
+  if (/(אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|free entry|walk.?in|no booking|no reservation|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח)/i.test(b)) return false;
+  
+  // אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
+  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(b)) return false;
+  
+  // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
   const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
   if (textWithoutCheckIn.length < 3) return false;
 
-  // חוק 1 (Priority Exclusion): אם זה כבר הוזמן, שולם או טופל - בוודאות לא צריך להציג סרגל פעולה אדום! 
-  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked|אצלך בכיס|קוד ההזמנה במייל|הכרטיס המודפס|הכרטיס אצלך)/i.test(b)) return false;
-  
-  // חוק 2 (Priority Inclusion): אם מצאנו פקודה מפורשת שדורשת פעולת שריון עתידית - בוודאות להציג סרגל אדום!
-  if (/(חובה להזמין|להזמין מראש|לשריין|שריון|מומלץ להזמין|לקנות מראש|לרכוש מראש|הזמנה מראש|מראש באתר|book in advance|must book|חובה למלא|להזמין|פתיחת הזמנות|לקנות כרטיסים מראש|ימים מראש|חודש מראש|שבוע מראש)/i.test(b)) return true;
-  
-  // חוק 3 (Weak Exclusion): אם זו סתם הערת מידע, תשלום במקום, מכונות או הוראת הגעה - לא דורש שריון
-  if (/(במקום|בקופה|בקופות|בכניסה|במכונות|במכונה|דלפק|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|כרטיס ic|סויקה|פאסמו|בשערי|בשערים|בתחנה|ללא הזמנה|אין צורך|לא צריך|תשלום נוח|באוטובוס|ניווט|אפליקציות מפות|כניסת שבת)/i.test(b)) return false;
-
-  // ברירת מחדל לא קיימת - אם כתבת שם משהו משמעותי שלא עונה על החוקים, המערכת תסמן אותו כמצריך קריאה ותשומת לב (שריון)
   return true; 
 }
 
@@ -1127,7 +1126,7 @@ async function processFiles(files) {
       let checkOut = getCol(obj,'checkOut');
       const timeStr = formatTime(getCol(obj,'time'));
 
-      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין/אאוט ל-bBase, נחלץ אותם בלי למחוק את המקור
+      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין/אאוט ל-bBase, נחלץ אותם
       if (bBase) {
           const ciMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|כניסה).*?(\d{1,2}:\d{2})/i);
           if (ciMatch && !checkIn) checkIn = ciMatch[1];
@@ -1136,6 +1135,7 @@ async function processFiles(files) {
           if (coMatch && !checkOut) checkOut = coMatch[1];
       }
 
+      // נכין את טקסט ההזמנה הסופי
       let finalBookingArr = [];
       let reqBook = false;
 
@@ -1262,13 +1262,12 @@ function setCalendarReminder(id) {
   targetDate.setDate(targetDate.getDate() - daysToSub);
   targetDate.setHours(hour, min, 0, 0);
   
-  // הגנה משעות הלילה של ישראל (22:00 - 06:00)
-  // פועל לפי השעון המקומי של המכשיר שלך!
+  // הגנה משעות הלילה (22:00 עד 06:00)
   if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
       if (targetDate.getHours() < 6) {
           targetDate.setDate(targetDate.getDate() - 1); 
       }
-      targetDate.setHours(20, 0, 0, 0); // מקדים לשעה 20:00 בערב (לפני השינה)
+      targetDate.setHours(20, 0, 0, 0); 
   }
   
   // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר באותה שעה (או שעת ערב אם זה לילה)
@@ -1284,16 +1283,16 @@ function setCalendarReminder(id) {
   
   const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
 
-  // פורמט תאריך נכון לשעון המקומי שלך!
+  // פורמט תאריך נכון לשעון המקומי שלך
   const pad = n => String(n).padStart(2, '0');
   const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 
   // --- יצירת צבע ייחודי ועקבי לאטרקציה ---
+  // מחשבים מספר מזהה קבוע על בסיס שם המקום (או ה-ID שלו), כדי שהצבע תמיד יישאר אותו דבר לאותה אטרקציה
   let hash = 0;
   const strToHash = item.placeName || item.id;
   for (let i = 0; i < strToHash.length; i++) {
       hash = strToHash.charCodeAt(i) + ((hash << 5) - hash);
-      hash = hash & 0xFFFFFFFF; // הגנת 32-bit
   }
   
   const calendarColors = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
@@ -1407,7 +1406,7 @@ function exportTxt() {
             if (i.checkIn) ln += ` | צ'ק-אין: ${i.checkIn}`;
             if (i.checkOut) ln += ` | צ'ק-אאוט: ${i.checkOut}`;
             text += ln + '\n';
-            if (i.booking) text += `      מידע: ${i.booking.replace(/\n/g, ' | ')}\n`;
+            if (i.booking) text += `      הזמנה: ${i.booking.replace(/\n/g, ' | ')}\n`;
         });
         text += '\n';
       });
@@ -1459,7 +1458,7 @@ function exportKML(data) {
   const e = s => (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
   let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n<name>TripMH</name>\n`;
   [...data.itinerary, ...data.options].filter(i => i.area || i.placeName).forEach(i => {
-      const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `מידע: ${i.booking}` : ''].filter(Boolean).join('\n');
+      const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `הזמנה: ${i.booking}` : ''].filter(Boolean).join('\n');
       kml += `<Placemark>\n<name>${e(i.placeName)}</name>\n<description>${e(desc)}</description>\n<address>${e(i.area||i.placeName)}</address>\n</Placemark>\n`;
   });
   kml += `</Document>\n</kml>`;
@@ -1619,10 +1618,7 @@ function renderTripCard(item, q, prevItem) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  
-  // כאן ההערה החשובה תיכנס פנימה לתוך הכרטיסייה במקום סרגל השריון!
   const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
-  
   const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
