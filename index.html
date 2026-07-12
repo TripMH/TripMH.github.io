@@ -652,7 +652,6 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-// גרסה חדשה לאיפוס חכם של הקאש
 const LS_DATA      = 'tripmh_data_v26';
 const LS_COMPLETED = 'tripmh_completed_v26';
 const LS_BOOKED    = 'tripmh_booked_v26';
@@ -834,7 +833,7 @@ function parseCSV(raw) {
 }
 
 /* =========================================================
-   COLUMN ALIASES (UPDATED FOR NEW DICTIONARY & BOOKING)
+   COLUMN ALIASES
 ========================================================= */
 const ALIASES = {
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -845,10 +844,7 @@ const ALIASES = {
   dur:       ['משך','זמן מוערך','duration','זמן ביקור'],
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
-  
-  // זיהוי מדויק של עמודת ההזמנות - כולל המילה 'להזמין' שתופסת את העמודה המאוחדת שלך
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation', 'להזמין'],
-  
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
   bookWhen:  ['מתי להזמין','זמן מומלץ להזמנה','תזמון'],
   checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה', 'צ\'ק-אין'],
@@ -856,14 +852,12 @@ const ALIASES = {
   desc:      ['תיאור','הערות','מה לעשות','desc','content','notes','פרטים','תוכן','מידע','פירוט'],
   area:      ['מיקום במפה','לינק למפה','קואורדינטות','אזור','עיר','מיקום','כתובת','area','city','address','location','neighborhood','map'],
   category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
-  
   hebrew:    ['עברית', 'hebrew'],
   english:   ['אנגלית', 'english'],
   japanese:  ['יפנית', 'japanese', 'שפה זרה'],
   hebPronun: ['הגייה בעברית', 'ניקוד'],
   romaji:    ['רומאג\'י', 'romaji', 'הגייה באנגלית', 'קריאה'],
   context:   ['הקשר', 'סיטואציה', 'context'],
-  
   link:      ['קישור','אתר','url','link','website'],
   linkLabel: ['שם הקישור','טקסט קישור','link label','link name'],
 };
@@ -916,45 +910,59 @@ function parseDateVal(d) {
 function detectIcon(text) {
   const t = (text||'').toLowerCase();
   if (/מסעד|אוכל|food|ramen|sushi|restaurant|cafe|קפה|פיצה|pizza|eatery|dining/.test(t)) return '🍜';
-  if (/מוזיאון|museum/.test(t))                              return '🏛️';
-  if (/מקדש|shrine|temple|torii/.test(t))                   return '⛩️';
-  if (/פארק|גן|park|garden|טבע|nature/.test(t))             return '🌿';
-  if (/קניות|שוק|market|mall|shop|store/.test(t))           return '🛍️';
+  if (/מוזיאון|museum/.test(t))                               return '🏛️';
+  if (/מקדש|shrine|temple|torii/.test(t))                    return '⛩️';
+  if (/פארק|גן|park|garden|טבע|nature/.test(t))              return '🌿';
+  if (/קניות|שוק|market|mall|shop|store/.test(t))            return '🛍️';
   if (/מלון|hotel|hostel|ryokan|accommodation|בית מלון/.test(t)) return '🏨';
-  if (/תחנה|station|train|רכבת/.test(t))                    return '🚆';
-  if (/טיסה|flight|airport|נמל תעופה/.test(t))              return '✈️';
+  if (/תחנה|station|train|רכבת/.test(t))                     return '🚆';
+  if (/טיסה|flight|airport|נמל תעופה/.test(t))               return '✈️';
   if (/אוטובוס|bus/.test(t))                                 return '🚌';
   if (/חוף|beach|ים|sea|ocean/.test(t))                      return '🏖️';
   if (/הר|mount|peak|ski/.test(t))                           return '🏔️';
-  if (/מבצר|castle|fortress|palace|ארמון/.test(t))          return '🏯';
-  if (/גשר|bridge/.test(t))                                 return '🌉';
+  if (/מבצר|castle|fortress|palace|ארמון/.test(t))           return '🏯';
+  if (/גשר|bridge/.test(t))                                  return '🌉';
   if (/מפל|waterfall/.test(t))                               return '💧';
   if (/גן חיות|zoo/.test(t))                                 return '🦁';
   if (/כנסיה|church|cathedral/.test(t))                      return '⛪';
   return '📍';
 }
 
-// פונקציה חכמה לזיהוי כוונת שריון אמיתית
+// פונקציה חכמה ומדורגת לזיהוי כוונת שריון אמיתית
 function needsBooking(bookText) {
-  const b = (bookText||'').trim().toLowerCase();
-  if (!b) return false;
-  if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
-  
-  // לא דורש שריון מראש אם כתוב במפורש שזה תשלום במקום או שלא צריך:
-  if (/(אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|free entry|walk.?in|no booking|no reservation|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח)/i.test(b)) return false;
-  
-  // אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
-  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(b)) return false;
-  
-  // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
-  const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
-  if (textWithoutCheckIn.length < 3) return false;
+  if (!bookText) return false;
+  let b = String(bookText).trim().toLowerCase();
 
-  return true; 
+  // שכבה 1: ניקוי רעשי רקע
+  b = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out|כניסת|יציאת).*?(\d{1,2}:\d{2})/gi, '');
+  b = b.replace(/https?:\/\/[^\s]+/g, '');
+  b = b.replace(/[^\p{L}\p{N}\s🚨💡✅🚶‍♂️🚶‍♀️]/gu, ' ').trim();
+
+  // בדיקת סף מינימלית
+  if (b.length < 2) return false;
+  if (/^(לא|אין|חינם|free|none|false|no)$/i.test(b)) return false;
+
+  // שכבה 2: פטור ודאי מהזמנה (משלמים במקום / חינם / חופשי)
+  if (/(🚶|אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|כניסה חופשית|סיור חופשי|פתוח לקהל|פתוח לציבור|לא ניתן להזמין|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח|free entry|walk.?in|no booking|ללא תשלום)/i.test(b)) {
+    if (/(🚨|💡|חובה להזמין|מומלץ להזמין|מראש)/i.test(b)) return true;
+    return false;
+  }
+
+  // שכבה 3: דרישה ודאית להזמנה מראש (קריאה לפעולה)
+  if (/(🚨|💡|חובה להזמין|מומלץ להזמין|להזמין מראש|מראש באתר|חובה למלא|מראש ב|להזמין.*?מראש|לשריין|must book|book in advance|booking required|כרטיס מראש)/i.test(b)) {
+    return true;
+  }
+
+  // שכבה 4: רשת ביטחון אחרונה
+  if (/(להזמין|באתר|באפליקצי|reserve|ticket|online)/i.test(b)) {
+    return true;
+  }
+
+  return false;
 }
 
 // =========================================================
-// REAL GOOGLE MAPS API LINKS (Smart Point-to-Point Aware)
+// REAL GOOGLE MAPS API LINKS
 // =========================================================
 function extractUrl(str) {
   const match = str.match(/(https?:\/\/[^\s\)]+)/i);
@@ -1064,14 +1072,15 @@ async function readFileText(f) {
   }
 }
 
+// פונקציה משופרת שמחזירה תמיד את האובייקט עם ה-ID האמיתי כדי למנוע כפילויות ID
 function mergeItem(arr, newItem, matchFn) {
   const idx = arr.findIndex(matchFn);
   if (idx >= 0) {
       arr[idx] = { ...arr[idx], ...newItem, id: arr[idx].id };
-      return false; // Updated
+      return { isNew: false, id: arr[idx].id };
   }
   arr.push(newItem);
-  return true; // Added newly
+  return { isNew: true, id: newItem.id };
 }
 
 async function processFiles(files) {
@@ -1126,7 +1135,6 @@ async function processFiles(files) {
       let checkOut = getCol(obj,'checkOut');
       const timeStr = formatTime(getCol(obj,'time'));
 
-      // אם העמודה המאוחדת הכניסה את זמני הצ'ק-אין/אאוט ל-bBase, נחלץ אותם
       if (bBase) {
           const ciMatch = bBase.match(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|כניסה).*?(\d{1,2}:\d{2})/i);
           if (ciMatch && !checkIn) checkIn = ciMatch[1];
@@ -1135,12 +1143,15 @@ async function processFiles(files) {
           if (coMatch && !checkOut) checkOut = coMatch[1];
       }
 
-      // נכין את טקסט ההזמנה הסופי
       let finalBookingArr = [];
       let reqBook = false;
+      let autoBooked = false;
 
       if (bBase) {
-          if (needsBooking(bBase)) {
+          if (/(✅|כבר הוזמן|הוזמן מראש|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(bBase)) {
+              reqBook = true;
+              autoBooked = true;
+          } else if (needsBooking(bBase)) {
               reqBook = true;
           }
           finalBookingArr.push(bBase);
@@ -1159,7 +1170,7 @@ async function processFiles(files) {
         const japanese = getCol(obj, 'japanese');
         
         if (hebrew || japanese || english) {
-            const isNew = mergeItem(state.data.dictionary, {
+            const res = mergeItem(state.data.dictionary, {
                 id: genId(), type: 'dictionary', _idx: ri,
                 category: catCol || 'כללי',
                 hebrew: hebrew || '',
@@ -1169,27 +1180,27 @@ async function processFiles(files) {
                 romaji: getCol(obj, 'romaji') || '',
                 context: getCol(obj, 'context') || ''
             }, x => x.hebrew === hebrew && x.japanese === japanese);
-            if(isNew) stats.added++; else stats.updated++;
+            if(res.isNew) stats.added++; else stats.updated++;
         }
       } else if (fileType === 'checklist') {
         const taskTitle = getCol(obj, 'task') || place; 
         if (taskTitle) {
-            const isNew = mergeItem(state.data.checklist, {
+            const res = mergeItem(state.data.checklist, {
                 id: genId(), type: 'task', _idx: ri,
                 title: taskTitle, description: desc || '', category: catCol || 'כללי'
             }, x => x.title === taskTitle);
-            if(isNew) stats.added++; else stats.updated++;
+            if(res.isNew) stats.added++; else stats.updated++;
         }
       } else if (fileType === 'tips') {
         const anyValue = place || desc || catCol || Object.values(obj).some(v => v.trim());
         if (anyValue) {
           const title = place || catCol || Object.values(obj).find(v => v.trim()) || `טיפ ${ri}`;
           const content = desc || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
-          const isNew = mergeItem(state.data.tips, {
+          const res = mergeItem(state.data.tips, {
             id:genId(), type:'tip', _idx:ri, title, content, category: catCol || area || 'כללי',
             link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')), icon:'💡'
           }, x => x.title === title && x.content === content);
-          if(isNew) stats.added++; else stats.updated++;
+          if(res.isNew) stats.added++; else stats.updated++;
         }
       } else {
         const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(dayCol);
@@ -1203,9 +1214,14 @@ async function processFiles(files) {
           requiresBooking: reqBook,
           icon: detectIcon([place, desc, area].join(' ')),
         };
+        
         const dest = isOpt ? state.data.options : state.data.itinerary;
-        const isNew = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
-        if(isNew) stats.added++; else stats.updated++;
+        const res = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
+        
+        // הוספת ה-ID האמיתי לרשימת המשוריינים אם פריט זה סומן ששולם/הוזמן מראש
+        if (autoBooked) state.bookedIds.add(res.id);
+
+        if(res.isNew) stats.added++; else stats.updated++;
       }
     }
   }
@@ -1237,14 +1253,12 @@ function setCalendarReminder(id) {
   let hour = 10; // שעת תזכורת ברירת מחדל
   let min = 0;
 
-  // חילוץ שעה ספציפית אם צויינה בהזמנה (למשל ב-10:00)
   const timeMatch = txt.match(/([0-2]?\d):([0-5]\d)/);
   if (timeMatch) {
      hour = parseInt(timeMatch[1], 10);
      min = parseInt(timeMatch[2], 10);
   }
 
-  // חילוץ מתמטי מדוייק של זמן מקדים
   const m1 = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
   const m2 = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
   const m3 = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
@@ -1258,7 +1272,6 @@ function setCalendarReminder(id) {
   else if (txt.includes('שבוע')) daysToSub = 7;
   else daysToSub = 14; // תזכורת ברירת מחדל: שבועיים לפני
 
-  // חישוב הזמן הסופי להתראה
   targetDate.setDate(targetDate.getDate() - daysToSub);
   targetDate.setHours(hour, min, 0, 0);
   
@@ -1270,7 +1283,7 @@ function setCalendarReminder(id) {
       targetDate.setHours(20, 0, 0, 0); 
   }
   
-  // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר באותה שעה (או שעת ערב אם זה לילה)
+  // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר באותה שעה
   const now = new Date();
   if (targetDate < now) {
       targetDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
@@ -1281,14 +1294,11 @@ function setCalendarReminder(id) {
       }
   }
   
-  const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
+  const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000));
 
-  // פורמט תאריך נכון לשעון המקומי שלך
   const pad = n => String(n).padStart(2, '0');
   const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 
-  // --- יצירת צבע ייחודי ועקבי לאטרקציה ---
-  // מחשבים מספר מזהה קבוע על בסיס שם המקום (או ה-ID שלו), כדי שהצבע תמיד יישאר אותו דבר לאותה אטרקציה
   let hash = 0;
   const strToHash = item.placeName || item.id;
   for (let i = 0; i < strToHash.length; i++) {
@@ -1338,7 +1348,7 @@ function downloadFilesSequentially(files) {
   files.forEach((file, index) => {
     setTimeout(() => {
       downloadBlob(file.content, file.filename, file.mime);
-    }, index * 400); // 400ms delay to prevent browser block
+    }, index * 400);
   });
 }
 
