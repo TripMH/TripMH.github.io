@@ -211,7 +211,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .detail-row svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
 .detail-row.booking svg{color:var(--danger)}
 .detail-row .dr-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:1px;flex-shrink:0}
-.detail-row .dr-value{flex:1}
+.detail-row .dr-value{flex:1;font-weight:500;}
 
 .nav-btns{display:flex;flex-direction:column;gap:6px}
 .link-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;
@@ -652,13 +652,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-// גרסה חדשה לאיפוס חכם של הקאש
-const LS_DATA      = 'tripmh_data_v26';
-const LS_COMPLETED = 'tripmh_completed_v26';
-const LS_BOOKED    = 'tripmh_booked_v26';
-const LS_EXPANDED  = 'tripmh_expanded_v26';
-const LS_TAB       = 'tripmh_tab_v26';
-const LS_DARK      = 'tripmh_dark_v26';
+const LS_DATA      = 'tripmh_data_v27';
+const LS_COMPLETED = 'tripmh_completed_v27';
+const LS_BOOKED    = 'tripmh_booked_v27';
+const LS_EXPANDED  = 'tripmh_expanded_v27';
+const LS_TAB       = 'tripmh_tab_v27';
+const LS_DARK      = 'tripmh_dark_v27';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -846,7 +845,6 @@ const ALIASES = {
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
   
-  // זיהוי מדויק של עמודת ההזמנות - כולל המילה 'להזמין' שתופסת את העמודה המאוחדת שלך
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation', 'להזמין'],
   
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
@@ -934,23 +932,22 @@ function detectIcon(text) {
   return '📍';
 }
 
-// פונקציה חכמה לזיהוי כוונת שריון אמיתית
+// פונקציה חכמה לזיהוי כוונת שריון אמיתית (השיטה החדשה והמדויקת)
 function needsBooking(bookText) {
   const b = (bookText||'').trim().toLowerCase();
   if (!b) return false;
+  
+  // שלב א': מחיקת טקסט שמעיד על כך שהפעולה כבר הסתיימה או לא רלוונטית
   if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
+  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked|אצלך בכיס)/i.test(b)) return false;
   
-  // לא דורש שריון מראש אם כתוב במפורש שזה תשלום במקום או שלא צריך:
-  if (/(אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|free entry|walk.?in|no booking|no reservation|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח)/i.test(b)) return false;
+  // שלב ב': זיהוי INCLUSION (הכללה) חיובי - נפעיל את האזעקה האדומה *רק* אם המשתמש הורה במפורש להזמין מראש!
+  if (/(להזמין|לשריין|חובה למלא|מומלץ להזמין|שריון כרטיסים|קנייה מוקדמת|מראש באתר|לפני הטיסה|חובה להזמין|שבוע מראש|חודש מראש|הזמן מראש)/i.test(b)) {
+      return true;
+  }
   
-  // אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
-  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(b)) return false;
-  
-  // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
-  const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
-  if (textWithoutCheckIn.length < 3) return false;
-
-  return true; 
+  // כל טקסט אחר (תשלומים בקופה, כרטיס IC במקום, שעות, ניווט וכו') יחשב למידע ויחזור כשלילי
+  return false; 
 }
 
 // =========================================================
@@ -1262,12 +1259,13 @@ function setCalendarReminder(id) {
   targetDate.setDate(targetDate.getDate() - daysToSub);
   targetDate.setHours(hour, min, 0, 0);
   
-  // הגנה משעות הלילה (22:00 עד 06:00)
+  // הגנה משעות הלילה של ישראל (22:00 - 06:00)
+  // פועל לפי השעון המקומי של המכשיר שלך!
   if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
       if (targetDate.getHours() < 6) {
           targetDate.setDate(targetDate.getDate() - 1); 
       }
-      targetDate.setHours(20, 0, 0, 0); 
+      targetDate.setHours(20, 0, 0, 0); // מקדים לשעה 20:00 בערב (לפני השינה)
   }
   
   // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר באותה שעה (או שעת ערב אם זה לילה)
@@ -1283,16 +1281,16 @@ function setCalendarReminder(id) {
   
   const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
 
-  // פורמט תאריך נכון לשעון המקומי שלך
+  // פורמט תאריך נכון לשעון המקומי שלך!
   const pad = n => String(n).padStart(2, '0');
   const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 
   // --- יצירת צבע ייחודי ועקבי לאטרקציה ---
-  // מחשבים מספר מזהה קבוע על בסיס שם המקום (או ה-ID שלו), כדי שהצבע תמיד יישאר אותו דבר לאותה אטרקציה
   let hash = 0;
   const strToHash = item.placeName || item.id;
   for (let i = 0; i < strToHash.length; i++) {
       hash = strToHash.charCodeAt(i) + ((hash << 5) - hash);
+      hash = hash & 0xFFFFFFFF; // הגנת 32-bit
   }
   
   const calendarColors = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
@@ -2118,7 +2116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('file-csv').value  = '';
-    document.getElementById('file-json').value = '';
+    document.getElementById('file-json').value  = '';
   }
   document.getElementById('file-csv').addEventListener('change',  e => handleFiles(e.target.files));
   document.getElementById('file-json').addEventListener('change', e => handleFiles(e.target.files));
