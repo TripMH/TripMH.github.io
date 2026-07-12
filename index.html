@@ -653,12 +653,12 @@ select.edit-input{appearance:none}
    CONSTANTS
 ========================================================= */
 // גרסה חדשה לאיפוס חכם של הקאש
-const LS_DATA      = 'tripmh_data_v24';
-const LS_COMPLETED = 'tripmh_completed_v24';
-const LS_BOOKED    = 'tripmh_booked_v24';
-const LS_EXPANDED  = 'tripmh_expanded_v24';
-const LS_TAB       = 'tripmh_tab_v24';
-const LS_DARK      = 'tripmh_dark_v24';
+const LS_DATA      = 'tripmh_data_v25';
+const LS_COMPLETED = 'tripmh_completed_v25';
+const LS_BOOKED    = 'tripmh_booked_v25';
+const LS_EXPANDED  = 'tripmh_expanded_v25';
+const LS_TAB       = 'tripmh_tab_v25';
+const LS_DARK      = 'tripmh_dark_v25';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -939,15 +939,16 @@ function needsBooking(bookText) {
   const b = (bookText||'').trim().toLowerCase();
   if (!b) return false;
   if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
-  if (/(אין צורך|לא צריך|במקום|בקופה|ללא הזמנה|free entry|walk.?in|no booking|no reservation)/i.test(b)) return false;
   
-  // חוק חדש: אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
+  // לא דורש שריון מראש אם כתוב במפורש שזה תשלום במקום או שלא צריך:
+  if (/(אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|free entry|walk.?in|no booking|no reservation|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח)/i.test(b)) return false;
+  
+  // אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
   if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(b)) return false;
   
   // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
-  // ננקה את המילים צ'ק אין/אאוט ושעות, ואם לא נשאר טקסט משמעותי, נחזיר false
   const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
-  if (textWithoutCheckIn.length < 3) return false; // לא נשאר תוכן ממשי שדורש הזמנה
+  if (textWithoutCheckIn.length < 3) return false;
 
   return true; 
 }
@@ -1613,7 +1614,7 @@ function renderTripCard(item, q, prevItem) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע הזמנה:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
+  const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
   const transRow = item.transport ? `<div class="detail-row">${svgIcon('bus')}<span class="dr-label">הגעה:</span><span class="dr-value">${hlHtml(item.transport,q)}</span></div>` : '';
 
   return `
