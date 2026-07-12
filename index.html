@@ -653,12 +653,12 @@ select.edit-input{appearance:none}
    CONSTANTS
 ========================================================= */
 // גרסה חדשה לאיפוס חכם של הקאש
-const LS_DATA      = 'tripmh_data_v25';
-const LS_COMPLETED = 'tripmh_completed_v25';
-const LS_BOOKED    = 'tripmh_booked_v25';
-const LS_EXPANDED  = 'tripmh_expanded_v25';
-const LS_TAB       = 'tripmh_tab_v25';
-const LS_DARK      = 'tripmh_dark_v25';
+const LS_DATA      = 'tripmh_data_v26';
+const LS_COMPLETED = 'tripmh_completed_v26';
+const LS_BOOKED    = 'tripmh_booked_v26';
+const LS_EXPANDED  = 'tripmh_expanded_v26';
+const LS_TAB       = 'tripmh_tab_v26';
+const LS_DARK      = 'tripmh_dark_v26';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1262,13 +1262,12 @@ function setCalendarReminder(id) {
   targetDate.setDate(targetDate.getDate() - daysToSub);
   targetDate.setHours(hour, min, 0, 0);
   
-  // מנגנון חדש: הגנה משעות הלילה (22:00 עד 06:00)
-  // אם התזכורת המקורית נופלת על השעות האלו, נקדים אותה לערב שלפני (20:00)
+  // הגנה משעות הלילה (22:00 עד 06:00)
   if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
       if (targetDate.getHours() < 6) {
-          targetDate.setDate(targetDate.getDate() - 1); // הזזה ליום הקודם רק אם השעה היא לפנות בוקר
+          targetDate.setDate(targetDate.getDate() - 1); 
       }
-      targetDate.setHours(20, 0, 0, 0); // קביעה לשעה 8 בערב (נוח ולא מפריע לשינה)
+      targetDate.setHours(20, 0, 0, 0); 
   }
   
   // מנגנון חכם: אם מועד ההזמנה המחושב כבר עבר, המערכת תתזמן את ההתראה למחר באותה שעה (או שעת ערב אם זה לילה)
@@ -1284,14 +1283,19 @@ function setCalendarReminder(id) {
   
   const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000)); // אורך האירוע ביומן (חצי שעה)
 
-  // פורמט תאריך נכון לשעון המקומי שלך!
+  // פורמט תאריך נכון לשעון המקומי שלך
   const pad = n => String(n).padStart(2, '0');
   const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 
-  // צבעים רנדומליים לגוגל יומן (1 עד 11) שיהיו עקביים לאותה אטרקציה (על בסיס המזהה שלה)
-  const calendarColors = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  // --- יצירת צבע ייחודי ועקבי לאטרקציה ---
+  // מחשבים מספר מזהה קבוע על בסיס שם המקום (או ה-ID שלו), כדי שהצבע תמיד יישאר אותו דבר לאותה אטרקציה
   let hash = 0;
-  for (let i = 0; i < item.id.length; i++) hash = item.id.charCodeAt(i) + ((hash << 5) - hash);
+  const strToHash = item.placeName || item.id;
+  for (let i = 0; i < strToHash.length; i++) {
+      hash = strToHash.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const calendarColors = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
   const colorId = calendarColors[Math.abs(hash) % calendarColors.length];
 
   const title = encodeURIComponent(`🚨 שריון: ${item.placeName}`);
