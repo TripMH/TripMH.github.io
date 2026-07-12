@@ -652,13 +652,13 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-// גרסה חדשה לאיפוס חכם של הקאש
-const LS_DATA      = 'tripmh_data_v26';
-const LS_COMPLETED = 'tripmh_completed_v26';
-const LS_BOOKED    = 'tripmh_booked_v26';
-const LS_EXPANDED  = 'tripmh_expanded_v26';
-const LS_TAB       = 'tripmh_tab_v26';
-const LS_DARK      = 'tripmh_dark_v26';
+// איפוס קאש לגרסה החדשה
+const LS_DATA      = 'tripmh_data_v27';
+const LS_COMPLETED = 'tripmh_completed_v27';
+const LS_BOOKED    = 'tripmh_booked_v27';
+const LS_EXPANDED  = 'tripmh_expanded_v27';
+const LS_TAB       = 'tripmh_tab_v27';
+const LS_DARK      = 'tripmh_dark_v27';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -834,7 +834,7 @@ function parseCSV(raw) {
 }
 
 /* =========================================================
-   COLUMN ALIASES (UPDATED FOR NEW DICTIONARY & BOOKING)
+   COLUMN ALIASES
 ========================================================= */
 const ALIASES = {
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -846,7 +846,6 @@ const ALIASES = {
   cost:      ['עלות','מחיר','כסף','cost','price','תשלום','entrance fee'],
   trans:     ['תחבורה','הגעה','איך','transport','transit','how to get','getting there'],
   
-  // זיהוי מדויק של עמודת ההזמנות - כולל המילה 'להזמין' שתופסת את העמודה המאוחדת שלך
   book:      ['הזמנה','שריון','כרטיסים','booking','reservation', 'להזמין'],
   
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
@@ -916,39 +915,59 @@ function parseDateVal(d) {
 function detectIcon(text) {
   const t = (text||'').toLowerCase();
   if (/מסעד|אוכל|food|ramen|sushi|restaurant|cafe|קפה|פיצה|pizza|eatery|dining/.test(t)) return '🍜';
-  if (/מוזיאון|museum/.test(t))                              return '🏛️';
-  if (/מקדש|shrine|temple|torii/.test(t))                   return '⛩️';
-  if (/פארק|גן|park|garden|טבע|nature/.test(t))             return '🌿';
-  if (/קניות|שוק|market|mall|shop|store/.test(t))           return '🛍️';
+  if (/מוזיאון|museum/.test(t))                               return '🏛️';
+  if (/מקדש|shrine|temple|torii/.test(t))                    return '⛩️';
+  if (/פארק|גן|park|garden|טבע|nature/.test(t))              return '🌿';
+  if (/קניות|שוק|market|mall|shop|store/.test(t))            return '🛍️';
   if (/מלון|hotel|hostel|ryokan|accommodation|בית מלון/.test(t)) return '🏨';
-  if (/תחנה|station|train|רכבת/.test(t))                    return '🚆';
-  if (/טיסה|flight|airport|נמל תעופה/.test(t))              return '✈️';
+  if (/תחנה|station|train|רכבת/.test(t))                     return '🚆';
+  if (/טיסה|flight|airport|נמל תעופה/.test(t))               return '✈️';
   if (/אוטובוס|bus/.test(t))                                 return '🚌';
   if (/חוף|beach|ים|sea|ocean/.test(t))                      return '🏖️';
   if (/הר|mount|peak|ski/.test(t))                           return '🏔️';
-  if (/מבצר|castle|fortress|palace|ארמון/.test(t))          return '🏯';
-  if (/גשר|bridge/.test(t))                                 return '🌉';
+  if (/מבצר|castle|fortress|palace|ארמון/.test(t))           return '🏯';
+  if (/גשר|bridge/.test(t))                                  return '🌉';
   if (/מפל|waterfall/.test(t))                               return '💧';
   if (/גן חיות|zoo/.test(t))                                 return '🦁';
   if (/כנסיה|church|cathedral/.test(t))                      return '⛪';
   return '📍';
 }
 
-// פונקציה חכמה לזיהוי כוונת שריון אמיתית
+// פונקציה חכמה לזיהוי כוונת שריון אמיתית - גרסה מתוקנת ומקצועית
 function needsBooking(bookText) {
   const b = (bookText||'').trim().toLowerCase();
   if (!b) return false;
   if (/^(לא|אין|חינם|0|free|none|false|no|-|—|\/)$/i.test(b)) return false;
   
-  // לא דורש שריון מראש אם כתוב במפורש שזה תשלום במקום או שלא צריך:
-  if (/(אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|free entry|walk.?in|no booking|no reservation|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח)/i.test(b)) return false;
+  // 1. מילים המעידות באופן מובהק שהפעולה כבר בוצעה או שיש כרטיס ביד
+  if (/(הוזמן( מראש)?|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked|קוד ההזמנה|הכרטיס המודפס|הכרטיס.*אצלך|ביצוע תפעולי|יש כרטיס)/i.test(b)) {
+      return false;
+  }
+
+  // 2. ביטויים חזקים שמעידים שחובה/כדאי להזמין מראש - דורסים שלילות קלות
+  const mustBook = /(חובה להזמין|להזמין מראש|לשריין מראש|לקנות מראש|מומלץ להזמין|הזמנה מראש|book in advance|must book|reservation required|לשריין כרטיס|להזמין כרטיס|חובה לשריין|לקנות באתר|להזמין באתר|כרטיסים באתר|reservation|להזמין מקום|לשריין מקום)/i.test(b);
   
-  // אם זה כבר הוזמן, לא צריך להציג סרגל פעולה אדום של "דורש שריון"
-  if (/(הוזמן מראש|כבר הוזמן|שולם|בסיס קבוע|טופל|בוצע|already booked)/i.test(b)) return false;
+  // 3. ביטויים שמציינים חד משמעית שזה במקום, בדלפק, באוטובוס, או לא דורש שריון מקדים (Walk-in)
+  const onSiteOrNoBooking = /(אין צורך|לא צריך|במקום|בקופה|בקופות|במכונות|מכונות האוטומטיות|בכניסה|בדלפק|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח|ללא הזמנה|free entry|walk.?in|no booking|no reservation|תשלום באוטובוס|באמצעות כרטיס|כרטיס.*ic|suica|pasmo|ניווט מהיר|ניווט|הגעה)/i.test(b);
+
+  if (mustBook && !onSiteOrNoBooking) return true;
+  if (onSiteOrNoBooking && !mustBook) return false; // אם נרשם רק שזה במקום ולא רשום להזמין מראש - אין צורך בהתראה שריון
+
+  // 4. הסרת משפטי צ'ק-אין / צ'ק-אאוט באופן מלא כדי למנוע התראות שווא (גם כשלא מופיעה שעה)
+  let withoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out|קבלת חדרים|קבלת חדר|פינוי חדרים|פינוי חדר).*?(?:[.;\n]|$)/gi, '').trim();
   
-  // אם הטקסט מכיל *רק* מידע על שעות צ'ק-אין / אאוט - זו לא פקודת הזמנה!
-  const textWithoutCheckIn = b.replace(/(?:צ'ק\s*[-]?\s*אין|check\s*[-]?\s*in|צ'ק\s*[-]?\s*אאוט|check\s*[-]?\s*out).*?(\d{1,2}:\d{2})/gi, '').trim();
-  if (textWithoutCheckIn.length < 3) return false;
+  // ניקוי שאריות של סימני פיסוק ותווים ריקים
+  withoutCheckIn = withoutCheckIn.replace(/^[^a-zא-ת0-9]+$/i, '').trim();
+
+  // אם אחרי ניקוי הצ'ק-אין נשאר טקסט מאוד קצר או חסר משמעות - זה לא דורש הזמנה
+  if (withoutCheckIn.length < 4 && !/[a-zא-ת]/i.test(withoutCheckIn)) {
+      return false;
+  }
+
+  // 5. סינון תנועה, מפות, וניווט כלליים ללא כוונת רכישה מפורשת
+  if (/(אפליקציה|מפות|רכבת|נסיעה|אוטובוס|תחנה|קו|רציף|יציאה|כניסה|הליכה|רגל|מונית)/i.test(withoutCheckIn) && !/(להזמין|לשריין|לרכוש|לקנות|כרטיס|הזמנה|ticket|book|reserve)/i.test(withoutCheckIn)) {
+      return false;
+  }
 
   return true; 
 }
