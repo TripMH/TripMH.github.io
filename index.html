@@ -820,20 +820,50 @@ function copyField(id, field, e) {
   });
 }
 
+// התיקון המעמיק והיציב לפונקציית ההקראה
 function speakField(id, field, lang, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
-  const allItems = [...state.data.dictionary];
-  const item = allItems.find(x => x.id === id);
+  
+  const item = state.data.dictionary.find(x => x.id === id);
   if (!item || !item[field]) return;
   
+  const textToSpeak = item[field];
+
   if (!('speechSynthesis' in window)) {
-    addToast('הדפדפן שלך לא תומך בהקראה', 'error');
+    addToast('הדפדפן שלך לא תומך בהקראה (TTS)', 'error');
     return;
   }
+
+  // 1. איפוס וניקוי - עוצר כל הקראה קודמת שאולי נתקעה ברקע
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(item[field]);
-  utterance.lang = lang;
+
+  // 2. יצירת אובייקט ההקראה
+  const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  utterance.lang = lang; // במקרה שלנו: 'ja-JP'
+  utterance.rate = 0.85; // האטה קלה מאוד כדי שהמילה היפנית תישמע ברור ולא תיבלע
+  utterance.pitch = 1.0;
+
+  // 3. ניסיון אקטיבי למשוך קול יפני מותקן (פותר באגים של ספארי וכרום)
+  const voices = window.speechSynthesis.getVoices();
+  const targetVoice = voices.find(v => v.lang.replace('_', '-').toLowerCase() === lang.toLowerCase() || v.lang.toLowerCase().includes('ja'));
+  if (targetVoice) {
+    utterance.voice = targetVoice;
+  }
+
+  // 4. שמירת האובייקט גלובלית - מונע את הבאג שבו כרום מוחק את הקול מהזיכרון לפני ההשמעה!
+  window.currentUtterance = utterance;
+
+  // 5. ניהול שגיאות
+  utterance.onerror = (event) => {
+    console.error('SpeechSynthesis Error:', event);
+    if (event.error !== 'interrupted') { // מתעלמים משגיאות של ביטול יזום שלנו
+      addToast('שגיאה בהקראה. ייתכן שחסרה חבילת שפה במכשיר.', 'error');
+    }
+  };
+
+  // הפעלת הדיבור + חיווי ויזואלי למשתמש
   window.speechSynthesis.speak(utterance);
+  addToast('🔊 ' + textToSpeak, 'neutral');
 }
 
 /* =========================================================
