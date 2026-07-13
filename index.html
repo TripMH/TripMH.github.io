@@ -70,6 +70,8 @@ html.light mark{background:rgba(217,119,6,.22)}
 .icon-btn:hover{color:var(--text);background:var(--bg-muted)}
 .icon-btn svg{width:16px;height:16px}
 .icon-btn.danger:hover{color:var(--danger);background:var(--danger-glow)}
+.icon-btn.warning{color:var(--warning);}
+.icon-btn.warning:hover{color:var(--warning);background:var(--warning-glow);}
 
 .upload-btn{width:32px;height:32px;border-radius:var(--r-sm);border:none;cursor:pointer;
   background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;
@@ -122,6 +124,18 @@ html.light mark{background:rgba(217,119,6,.22)}
 .stat-item.success .stat-num{color:var(--success)}
 .stat-item.warning .stat-num{color:var(--warning)}
 .stat-item.purple .stat-num{color:var(--purple)}
+
+/* =========================================================
+   INLINE ACTION BUTTONS (COPY / TTS)
+========================================================= */
+.action-icon-btn {
+  background:transparent; border:none; color:var(--text-dim); cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:4px; border-radius:4px; transition:color .2s, background .2s;
+  margin-right:2px; vertical-align:middle; flex-shrink:0;
+}
+.action-icon-btn:hover { color:var(--accent); background:var(--accent-glow); }
+.action-icon-btn svg { width:14px; height:14px; }
 
 /* =========================================================
    MAIN CONTENT
@@ -265,7 +279,7 @@ select.edit-input{appearance:none}
 .edit-row .edit-group{flex:1;margin-bottom:0}
 
 /* =========================================================
-   STACKABLE TOASTS (WITH PROGRESS BAR)
+   STACKABLE TOASTS
 ========================================================= */
 #toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;gap:8px;z-index:9999;width:90%;max-width:320px;pointer-events:none;}
@@ -370,6 +384,11 @@ select.edit-input{appearance:none}
         <button class="icon-btn" id="btn-theme" aria-label="שנה ערכת צבעים">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+        </button>
+        <button class="icon-btn warning" id="btn-undo" aria-label="ביטול פעולה אחרונה (Undo)" style="display:none" title="ביטול פעולה אחרונה (Ctrl+Z)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
           </svg>
         </button>
         <button class="icon-btn" id="btn-share" aria-label="שתף מסלול" style="display:none">
@@ -664,6 +683,9 @@ const DAY_COLORS = [
   '#f87171','#60a5fa','#f472b6','#34d399','#fb923c','#a78bfa',
 ];
 
+const MAX_HISTORY = 20;
+let historyStack = [];
+
 /* =========================================================
    STATE
 ========================================================= */
@@ -680,7 +702,7 @@ let state = {
 };
 
 /* =========================================================
-   LOCAL STORAGE
+   LOCAL STORAGE & HISTORY (UNDO)
 ========================================================= */
 function lsGet(key, fb) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fb; } catch { return fb; }
@@ -695,6 +717,39 @@ function persistState() {
   lsSet(LS_EXPANDED,  [...state.expandedIds]);
   lsSet(LS_TAB,       state.activeTab);
   localStorage.setItem(LS_DARK, String(state.isDark));
+}
+
+function updateUndoBtn() {
+  const btn = document.getElementById('btn-undo');
+  if (btn) btn.style.display = historyStack.length > 0 ? 'flex' : 'none';
+}
+
+function saveToHistory() {
+  historyStack.push({
+    data: JSON.parse(JSON.stringify(state.data)),
+    completedIds: new Set(state.completedIds),
+    bookedIds: new Set(state.bookedIds),
+    expandedIds: new Set(state.expandedIds)
+  });
+  if (historyStack.length > MAX_HISTORY) historyStack.shift();
+  updateUndoBtn();
+}
+
+function undoLastAction() {
+  if (historyStack.length === 0) {
+    addToast('אין פעולות לביטול', 'error');
+    return;
+  }
+  const prev = historyStack.pop();
+  state.data = JSON.parse(JSON.stringify(prev.data));
+  state.completedIds = new Set(prev.completedIds);
+  state.bookedIds = new Set(prev.bookedIds);
+  state.expandedIds = new Set(prev.expandedIds);
+  
+  updateUI();
+  persistState();
+  updateUndoBtn();
+  addToast('פעולה אחרונה בוטלה בהצלחה', 'neutral');
 }
 
 /* =========================================================
@@ -748,6 +803,37 @@ function showConfirm(title, text, onConfirm, isDanger=false) {
   btnC.onclick = () => { onConfirm(); m.classList.add('hidden'); };
   document.getElementById('mc-btn-cancel').onclick = () => m.classList.add('hidden');
   m.classList.remove('hidden');
+}
+
+/* =========================================================
+   COPY & TTS HELPERS
+========================================================= */
+function copyField(id, field, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const allItems = [...state.data.itinerary, ...state.data.options, ...state.data.tips, ...state.data.checklist, ...state.data.dictionary];
+  const item = allItems.find(x => x.id === id);
+  if (!item || !item[field]) return;
+  navigator.clipboard.writeText(item[field]).then(() => {
+    addToast('הועתק: ' + item[field], 'success');
+  }).catch(() => {
+    addToast('שגיאה בהעתקה', 'error');
+  });
+}
+
+function speakField(id, field, lang, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const allItems = [...state.data.dictionary];
+  const item = allItems.find(x => x.id === id);
+  if (!item || !item[field]) return;
+  
+  if (!('speechSynthesis' in window)) {
+    addToast('הדפדפן שלך לא תומך בהקראה', 'error');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(item[field]);
+  utterance.lang = lang;
+  window.speechSynthesis.speak(utterance);
 }
 
 /* =========================================================
@@ -921,20 +1007,20 @@ function detectIcon(text) {
   const t = (text||'').toLowerCase();
   if (/מסעד|אוכל|food|ramen|sushi|restaurant|cafe|קפה|פיצה|pizza|eatery|dining/.test(t)) return '🍜';
   if (/מוזיאון|museum/.test(t))                                return '🏛️';
-  if (/מקדש|shrine|temple|torii/.test(t))                     return '⛩️';
-  if (/פארק|גן|park|garden|טבע|nature/.test(t))              return '🌿';
-  if (/קניות|שוק|market|mall|shop|store/.test(t))            return '🛍️';
+  if (/מקדש|shrine|temple|torii/.test(t))                      return '⛩️';
+  if (/פארק|גן|park|garden|טבע|nature/.test(t))               return '🌿';
+  if (/קניות|שוק|market|mall|shop|store/.test(t))             return '🛍️';
   if (/מלון|hotel|hostel|ryokan|accommodation|בית מלון/.test(t)) return '🏨';
-  if (/תחנה|station|train|רכבת/.test(t))                     return '🚆';
-  if (/טיסה|flight|airport|נמל תעופה/.test(t))               return '✈️';
-  if (/אוטובוס|bus/.test(t))                                 return '🚌';
-  if (/חוף|beach|ים|sea|ocean/.test(t))                      return '🏖️';
-  if (/הר|mount|peak|ski/.test(t))                           return '🏔️';
-  if (/מבצר|castle|fortress|palace|ארמון/.test(t))           return '🏯';
-  if (/גשר|bridge/.test(t))                                  return '🌉';
-  if (/מפל|waterfall/.test(t))                               return '💧';
-  if (/גן חיות|zoo/.test(t))                                 return '🦁';
-  if (/כנסיה|church|cathedral/.test(t))                      return '⛪';
+  if (/תחנה|station|train|רכבת/.test(t))                       return '🚆';
+  if (/טיסה|flight|airport|נמל תעופה/.test(t))                return '✈️';
+  if (/אוטובוס|bus/.test(t))                                   return '🚌';
+  if (/חוף|beach|ים|sea|ocean/.test(t))                       return '🏖️';
+  if (/הר|mount|peak|ski/.test(t))                             return '🏔️';
+  if (/מבצר|castle|fortress|palace|ארמון/.test(t))            return '🏯';
+  if (/גשר|bridge/.test(t))                                    return '🌉';
+  if (/מפל|waterfall/.test(t))                                 return '💧';
+  if (/גן חיות|zoo/.test(t))                                   return '🦁';
+  if (/כנסיה|church|cathedral/.test(t))                       return '⛪';
   return '📍';
 }
 
@@ -1090,6 +1176,7 @@ function mergeItem(arr, newItem, matchFn) {
 }
 
 async function processFiles(files) {
+  saveToHistory();
   const stats = { added: 0, updated: 0 };
   let importedCompleted, importedBooked;
 
@@ -1255,7 +1342,7 @@ async function processFiles(files) {
 }
 
 /* =========================================================
-   CALENDAR REMINDERS (PRECISION TIMING ENGINE)
+   CALENDAR REMINDERS
 ========================================================= */
 function setCalendarReminder(id) {
   const arr = [...state.data.itinerary, ...state.data.options];
@@ -1479,7 +1566,7 @@ function exportTxt() {
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 7, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 8, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
@@ -1520,6 +1607,8 @@ function svgIcon(name) {
     upload:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>`,
     ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
     ai:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
+    copy:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+    speaker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`
   };
   return icons[name] || '';
 }
@@ -1530,28 +1619,27 @@ function svgIcon(name) {
 function toggleBooked(id) {
   const isBooked = state.bookedIds.has(id);
   if (isBooked) {
+    saveToHistory();
     state.bookedIds.delete(id);
     updateUI(); persistState();
-    addToast('סימון הזמנה בוטל', 'neutral', () => { state.bookedIds.add(id); updateUI(); persistState(); });
+    addToast('סימון הזמנה בוטל', 'neutral', undoLastAction);
   } else {
     showConfirm('אישור הזמנה', 'האם אתה בטוח שהזמנת/שילמת על פריט זה?', () => {
+      saveToHistory();
       state.bookedIds.add(id);
       updateUI(); persistState();
-      addToast('סומן כהוזמן בהצלחה', 'success', () => { state.bookedIds.delete(id); updateUI(); persistState(); });
+      addToast('סומן כהוזמן בהצלחה', 'success', undoLastAction);
     });
   }
 }
 
 function toggleComplete(id) {
+  saveToHistory();
   const wasCompleted = state.completedIds.has(id);
   if (wasCompleted) state.completedIds.delete(id);
   else state.completedIds.add(id);
   
-  addToast(wasCompleted ? 'הוסר סימון הושלם' : 'סומן כהושלם', 'neutral', () => {
-    if (wasCompleted) state.completedIds.add(id);
-    else state.completedIds.delete(id);
-    updateUI(); persistState();
-  });
+  addToast(wasCompleted ? 'הוסר סימון הושלם' : 'סומן כהושלם', 'neutral', undoLastAction);
   
   updateUI();
   persistState();
@@ -1559,19 +1647,13 @@ function toggleComplete(id) {
 
 function completeAllInGroup(idsCsv, isAllDone) {
   const ids = String(idsCsv).split(',').map(s => s.trim()).filter(Boolean);
-  
+  saveToHistory();
   if (isAllDone) {
     ids.forEach(id => state.completedIds.delete(id));
-    addToast(`בוטל סימון ל-${ids.length} פריטים`, 'neutral', () => {
-      ids.forEach(id => state.completedIds.add(id));
-      updateUI(); persistState();
-    });
+    addToast(`בוטל סימון ל-${ids.length} פריטים`, 'neutral', undoLastAction);
   } else {
     ids.forEach(id => state.completedIds.add(id));
-    addToast(`סומנו ${ids.length} פריטים כהושלמו`, 'success', () => {
-      ids.forEach(id => state.completedIds.delete(id));
-      updateUI(); persistState();
-    });
+    addToast(`סומנו ${ids.length} פריטים כהושלמו`, 'success', undoLastAction);
   }
   
   updateUI();
@@ -1653,7 +1735,7 @@ function renderTripCard(item, q, prevItem) {
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
   const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
   
-  const addressRow = item.address ? `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value">${hlHtml(item.address,q)}</span></div>` : '';
+  const addressRow = item.address ? `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value" style="display:inline-flex;align-items:center;gap:6px;"><span>${hlHtml(item.address,q)}</span> <button class="action-icon-btn" onclick="copyField('${item.id}', 'address', event)" title="העתק כתובת">${svgIcon('copy')}</button></span></div>` : '';
   const notesRow = item.notes ? `<div class="detail-row">${svgIcon('warn')}<span class="dr-label">הערות וסגירה:</span><span class="dr-value" style="color:var(--warning); font-weight:600;">${hlHtml(item.notes,q)}</span></div>` : '';
   const facilitiesRow = item.facilities ? `<div class="detail-row">${svgIcon('pin')}<span class="dr-label">מתקנים:</span><span class="dr-value">${hlHtml(item.facilities,q)}</span></div>` : '';
   const prepareRow = item.prepare ? `<div class="detail-row">${svgIcon('check')}<span class="dr-label">להכין מראש:</span><span class="dr-value" style="color:var(--success); font-weight:600;">${hlHtml(item.prepare,q)}</span></div>` : '';
@@ -1670,6 +1752,9 @@ function renderTripCard(item, q, prevItem) {
         <div class="card-title-inner">
           <span class="card-icon" aria-hidden="true">${escHtml(item.icon||'📍')}</span>
           <h3 class="card-title">${hlHtml(item.placeName,q)}</h3>
+          <button class="action-icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום">
+            ${svgIcon('copy')}
+          </button>
         </div>
         <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
       </div>
@@ -1745,7 +1830,12 @@ function renderDictionaryCard(item, q) {
         <div style="font-size:16px; font-weight:800; color:var(--accent); word-break:break-word;">${hlHtml(item.hebrew, q)}</div>
         ${item.english ? `<div style="font-size:13px; font-weight:500; color:var(--text-muted); margin-bottom:6px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
         
-        <div style="font-size:18px; font-weight:700; color:var(--text);">${hlHtml(item.japanese, q)}</div>
+        <div style="font-size:18px; font-weight:700; color:var(--text); display:inline-flex; align-items:center; gap:6px;">
+          <span>${hlHtml(item.japanese, q)}</span>
+          <button class="action-icon-btn" style="color:var(--purple);" onclick="speakField('${item.id}', 'japanese', 'ja-JP', event)" title="הקרא ביפנית">
+            ${svgIcon('speaker')}
+          </button>
+        </div>
         ${item.hebPronun ? `<div style="font-size:14px; font-weight:600; color:var(--success); margin-top:4px;">${hlHtml(item.hebPronun, q)}</div>` : ''}
         ${item.romaji ? `<div style="font-size:12px; color:var(--warning); font-family:'Courier New',monospace; margin-top:2px;">${hlHtml(item.romaji, q)}</div>` : ''}
       </div>
@@ -1878,6 +1968,8 @@ function updateUI() {
   document.getElementById('stat-done').textContent        = totalCompleted;
   document.getElementById('stat-booking').textContent     = state.bookedIds.size + '/' + bookingCount;
   document.getElementById('stat-tips').textContent        = d.tips.length;
+
+  updateUndoBtn();
 
   if (contentDiv) {
     requestAnimationFrame(() => contentDiv.scrollTop = scrollPos);
@@ -2033,6 +2125,7 @@ function openAdd(type) {
 }
 
 function saveEdit() {
+  saveToHistory();
   const updated = readEditForm(state.editItem);
   const isNew   = state.editIsNew;
   const d = state.data;
@@ -2057,12 +2150,13 @@ function saveEdit() {
 
   state.editItem = null;
   document.getElementById('modal-edit').classList.add('hidden');
-  addToast(isNew ? 'פריט נוסף בהצלחה' : 'השינויים נשמרו', 'success');
+  addToast(isNew ? 'פריט נוסף בהצלחה' : 'השינויים נשמרו', 'success', undoLastAction);
   updateUI();
   persistState();
 }
 
 function deleteEditItem() {
+  saveToHistory();
   const id = state.editItem?.id;
   if (!id) return;
   for (const k of ['itinerary','options','tips','checklist','dictionary']) {
@@ -2073,7 +2167,7 @@ function deleteEditItem() {
   state.expandedIds.delete(id);
   state.editItem = null;
   document.getElementById('modal-edit').classList.add('hidden');
-  addToast('הפריט נמחק', 'neutral');
+  addToast('הפריט נמחק', 'neutral', undoLastAction);
   updateUI();
   persistState();
 }
@@ -2128,6 +2222,22 @@ document.addEventListener('DOMContentLoaded', () => {
     persistState();
   });
 
+  // Global Undo button
+  document.getElementById('btn-undo').addEventListener('click', () => {
+    undoLastAction();
+  });
+
+  // Global Ctrl+Z / Cmd+Z Support
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      // Ignore if user is actively typing in an input/textarea so we don't block native text undo
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        undoLastAction();
+      }
+    }
+  });
+
   // Modals generic click-outside-to-close handler
   window.addEventListener('click', e => {
     if (e.target.classList.contains('modal-overlay')) {
@@ -2158,7 +2268,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await processFiles(files);
 
       if (result.added > 0 || result.updated > 0) {
-          addToast(`נוספו ${result.added} / עודכנו ${result.updated} פריטים בהצלחה`, 'success');
+          addToast(`נוספו ${result.added} / עודכנו ${result.updated} פריטים בהצלחה`, 'success', undoLastAction);
       } else {
           addToast('לא נמצאו שינויים או פריטים חדשים להוספה.', 'neutral');
       }
@@ -2203,7 +2313,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Clear all
   document.getElementById('btn-clear').addEventListener('click', () => {
-    showConfirm('מחק הכל', 'האם אתה בטוח שברצונך למחוק את כל הנתונים? פעולה זו אינה הפיכה.', () => {
+    showConfirm('מחק הכל', 'האם אתה בטוח שברצונך למחוק את כל הנתונים?', () => {
+        saveToHistory();
         try { localStorage.clear(); } catch {}
         state.data = { itinerary:[], options:[], tips:[], checklist:[], dictionary:[] };
         state.completedIds = new Set();
@@ -2212,7 +2323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.activeTab    = 'itinerary';
         updateUI();
         setTab('itinerary');
-        addToast('כל הנתונים נמחקו', 'neutral');
+        addToast('כל הנתונים נמחקו', 'neutral', undoLastAction);
     }, true);
   });
 
