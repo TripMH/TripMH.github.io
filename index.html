@@ -820,7 +820,7 @@ function copyField(id, field, e) {
   });
 }
 
-// פתרון הקראה אוטומטי מהענן (לא דורש שום התקנה מהמשתמש!)
+// פתרון מקיף: שרת פתוח של גוגל + גיבוי אוטומטי למנוע המכשיר
 function speakField(id, field, lang, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   
@@ -829,26 +829,41 @@ function speakField(id, field, lang, e) {
   
   const textToSpeak = item[field];
 
-  // עוצר הקראה קודמת אם היא עדיין מתנגנת
+  // עצירת השמע הקודם במידה ועדיין מתנגן
   if (window.currentAudio) {
     window.currentAudio.pause();
     window.currentAudio.currentTime = 0;
   }
 
-  // הופך את קוד השפה (למשל 'ja-JP') לקוד קצר שגוגל תרגום מכיר ('ja')
-  const shortLang = lang.split('-')[0];
+  const shortLang = lang.split('-')[0]; // הופך 'ja-JP' ל-'ja'
   
-  // משיכת אודיו ישירות משרתי גוגל
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${shortLang}&client=tw-ob&q=${encodeURIComponent(textToSpeak)}`;
+  // שימוש ב-API הפתוח של Google Translate (client=gtx)
+  const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
   
   window.currentAudio = new Audio(url);
   
+  // ניסיון לנגן מהרשת
   window.currentAudio.play().then(() => {
     addToast('🔊 ' + textToSpeak, 'neutral');
   }).catch(err => {
-    console.error('Audio playback failed:', err);
-    // קריאת רשת עשויה להיחסם לפעמים אם גוגל מזהה עומס, זה הגיבוי:
-    addToast('שגיאה בשליפת השמע מהרשת.', 'error');
+    console.warn('Network TTS blocked, falling back to local engine:', err);
+    
+    // מנגנון גיבוי: אם הרשת נחסמה, מפעילים את המנוע המובנה של המכשיר
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = lang;
+      
+      // נסיון למצוא קול יפני ספציפי במכשיר
+      const voices = window.speechSynthesis.getVoices();
+      const targetVoice = voices.find(v => v.lang.includes('ja') || v.lang.includes('JP'));
+      if (targetVoice) utterance.voice = targetVoice;
+
+      window.speechSynthesis.speak(utterance);
+      addToast('🔊 ' + textToSpeak + ' (הקראה מקומית)', 'neutral');
+    } else {
+      addToast('שגיאה בהשמעת הקול.', 'error');
+    }
   });
 }
 
