@@ -224,14 +224,21 @@ html.light mark{background:rgba(217,119,6,.22)}
 .detail-row .dr-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:1px;flex-shrink:0}
 .detail-row .dr-value{flex:1}
 
+/* הגדרת סגנון לקופסת התחבורה הבולטת בתוך הכרטיסייה */
+.transit-box { background:var(--warning-glow); border:1px solid color-mix(in srgb,var(--warning) 30%,transparent); border-radius:var(--r-sm); padding:12px; margin-bottom:12px; }
+.transit-box-title { font-size:13px; font-weight:800; color:var(--warning); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.transit-box-title svg { width:16px; height:16px; flex-shrink:0; }
+.transit-box-row { font-size:12px; color:var(--text); line-height:1.6; margin-bottom:6px; word-break:break-word; }
+.transit-box-row:last-child { margin-bottom:0; }
+
 .nav-btns{display:flex;flex-direction:column;gap:6px}
 .link-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;
   border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg-muted);
   color:var(--text-muted);font-size:12px;font-weight:500;text-decoration:none;
   transition:background .15s;cursor:pointer;font-family:inherit}
 .link-btn:hover{background:color-mix(in srgb,var(--text-muted) 12%,transparent);color:var(--text)}
-.link-btn.primary{background:var(--accent-glow);color:var(--accent);border-color:var(--accent-border);font-weight:600}
-.link-btn.warning{background:var(--warning-glow);color:var(--warning);border-color:color-mix(in srgb,var(--warning) 28%,transparent);font-weight:600}
+.link-btn.primary{background:var(--accent);color:var(--bg);border:none;box-shadow:0 4px 12px rgba(34,211,238,.2);font-weight:700;}
+.link-btn.primary:hover{opacity:0.9; color:var(--bg);}
 .link-btn svg{width:14px;height:14px;flex-shrink:0}
 
 /* =========================================================
@@ -400,7 +407,7 @@ select.edit-input{appearance:none}
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
-        <button class="icon-btn danger" id="btn-clear" aria-label="מחק הכל" style="display:none">
+        <button class="icon-btn danger" id="btn-clear" aria-label="מחק הכל" style="display:none" title="מחק נתונים (נקה הכל)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
           </svg>
@@ -881,7 +888,7 @@ function escHtml(s) {
 function autoLink(text) {
   const urlRegex = /(https?:\/\/[^\s]+)/gi;
   return text.replace(urlRegex, function(url) {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline;" onclick="event.stopPropagation()">${url}</a>`;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:underline; word-break:break-word;" onclick="event.stopPropagation()">${url}</a>`;
   });
 }
 
@@ -1129,17 +1136,6 @@ function buildMapUrl(item, prevItem) {
   }
   
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest)}`;
-}
-
-function buildTransitUrl(item, prevItem) {
-  const dest = getLocStr(item);
-  if (!dest) return '';
-  
-  const orig = getLocStr(prevItem);
-  if (orig && orig !== dest) {
-    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(orig)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
-  }
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`;
 }
 
 function buildDailyUrl(items, mode='driving') {
@@ -1532,67 +1528,6 @@ function exportCSV() {
 
   downloadFilesSequentially(files);
   document.getElementById('modal-export').classList.add('hidden');
-  addToast(`הורדת ${files.length} קבצי נתונים החלה`, 'success');
-}
-
-function exportTxt() {
-  const files = [];
-  let fullClipboardText = `TripMH – נתוני טיול מלאים\n====================\n\n`;
-
-  function buildItiText(items, title) {
-      if (items.length === 0) return;
-      let text = `TripMH – ${title}\n\n`;
-      const dayMap = new Map();
-      items.forEach(i => {
-        const k = i.dayLabel||'ללא תאריך';
-        if (!dayMap.has(k)) dayMap.set(k,[]);
-        dayMap.get(k).push(i);
-      });
-      dayMap.forEach((arr, day) => {
-        text += `[ ${day} ]\n`;
-        arr.forEach(i => {
-            let ln = `  ${i.icon} ${i.placeName}`;
-            if (i.timeRange) ln += ` (${i.timeRange})`;
-            if (i.cost) ln += ` – ${i.cost}`;
-            if (i.checkIn) ln += ` | צ'ק-אין: ${i.checkIn}`;
-            if (i.checkOut) ln += ` | צ'ק-אאוט: ${i.checkOut}`;
-            text += ln + '\n';
-            if (i.booking) text += `      הזמנה: ${i.booking.replace(/\n/g, ' | ')}\n`;
-        });
-        text += '\n';
-      });
-      files.push({ content: text, filename: `TripMH_${title}.txt`, mime: 'text/plain;charset=utf-8' });
-      fullClipboardText += text + '\n====================\n\n';
-  }
-
-  buildItiText(state.data.itinerary, 'מסלול');
-  buildItiText(state.data.options, 'אופציות');
-
-  if (state.data.checklist.length > 0) {
-      let text = `TripMH – צ'ק ליסט\n\n`;
-      state.data.checklist.forEach(i => text += `[${state.completedIds.has(i.id)?'V':' '}] ${i.title}${i.description ? ' - '+i.description : ''}\n`);
-      files.push({ content: text, filename: 'TripMH_צק_ליסט.txt', mime: 'text/plain;charset=utf-8' });
-      fullClipboardText += text + '\n====================\n\n';
-  }
-  
-  if (state.data.tips.length > 0) {
-      let text = `TripMH – טיפים\n\n`;
-      state.data.tips.forEach(i => text += `💡 ${i.title}:\n${i.content}\n\n`);
-      files.push({ content: text, filename: 'TripMH_טיפים.txt', mime: 'text/plain;charset=utf-8' });
-      fullClipboardText += text + '\n====================\n\n';
-  }
-  
-  if (state.data.dictionary.length > 0) {
-      let text = `TripMH – מילון\n\n`;
-      state.data.dictionary.forEach(i => text += `📖 ${i.hebrew} - ${i.japanese} (${i.romaji})\n`);
-      files.push({ content: text, filename: 'TripMH_מילון.txt', mime: 'text/plain;charset=utf-8' });
-      fullClipboardText += text;
-  }
-
-  if (files.length === 0) { addToast('אין נתונים לייצוא', 'error'); return; }
-
-  downloadFilesSequentially(files);
-  document.getElementById('modal-export').classList.add('hidden');
   addToast(`הורדת ${files.length} קבצי טקסט החלה`, 'success');
 
   if (navigator.clipboard) {
@@ -1756,18 +1691,19 @@ function renderTripCard(item, q, prevItem) {
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
 
   const navBtns = [
-    mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" style="font-size:14px; padding:12px; justify-content:center;">${svgIcon('nav')} ניווט רגלי/רכב בגוגל מפות (למיקום זה)</a>` : '',
+    mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" style="font-size:14px; padding:12px; justify-content:center; background:var(--accent); color:var(--bg); box-shadow:0 4px 12px rgba(34,211,238,.3); border:none;">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
     item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'לאתר הרשמי')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
   const highlightTransit = (item.transport || item.travelTimePrev) ? `
-  <div style="background:var(--warning-glow); border:1px solid var(--warning); border-radius:var(--r-sm); padding:12px; margin-bottom:10px;">
-    <div style="font-size:13px; font-weight:700; color:var(--warning); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-      ${svgIcon('bus')} דרכי הגעה מומלצות מהיעד הקודם
+  <div class="transit-box">
+    <div class="transit-box-title">
+      <span style="display:flex; width:16px; height:16px; align-items:center; justify-content:center; flex-shrink:0;">${svgIcon('bus')}</span>
+      מידע והגעה מומלצת
     </div>
-    ${item.travelTimePrev ? `<div style="font-size:12px; color:var(--text); margin-bottom:4px;"><strong>⏳ זמן משוער:</strong> ${hlHtml(item.travelTimePrev, q)}</div>` : ''}
-    ${item.transport ? `<div style="font-size:12px; color:var(--text); line-height:1.5;"><strong>📍 מסלול:</strong> ${hlHtml(item.transport, q)}</div>` : ''}
+    ${item.travelTimePrev ? `<div class="transit-box-row"><strong>⏳ משך נסיעה מהיעד הקודם:</strong> ${hlHtml(item.travelTimePrev, q)}</div>` : ''}
+    ${item.transport ? `<div class="transit-box-row"><strong>📍 מסלול הגעה:</strong> ${hlHtml(item.transport, q)}</div>` : ''}
   </div>
   ` : '';
 
@@ -1996,7 +1932,7 @@ function updateUI() {
               <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.6; max-width:300px; margin-left:auto; margin-right:auto;">
                   כדי לראות את כל 100+ האטרקציות והחלופות על מפה אחת גדולה ונוחה, הורד את הקובץ ופתח ב-Google My Maps או Google Earth.
               </p>
-              <button class="link-btn primary" onclick="exportKML(state.data)" style="width:100%; justify-content:center; padding:12px; font-size:14px; font-weight:700;">
+              <button class="link-btn primary" onclick="exportKML(state.data)" style="width:100%; justify-content:center; padding:12px; font-size:14px; font-weight:700; background:var(--accent); color:var(--bg); border:none;">
                   ${svgIcon('download')} הורד מפת מסלול מלאה (KML)
               </button>
           </div>
