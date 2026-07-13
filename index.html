@@ -106,7 +106,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .tab-btn.active{color:var(--accent)}
 .tab-btn .tab-lbl{font-size:11px}
 .tab-btn .tab-count{font-size:9px;font-family:'Courier New',monospace;color:var(--text-dim);
-  background:var(--bg-muted);padding:1px 5px;border-radius:99px;margin-top:1px}
+  background:var(--bg-muted);padding:1px 5px;border-radius:99px;margin-top:1px;display:inline-block;}
 .tab-btn.active .tab-count{color:var(--accent);background:var(--accent-glow)}
 .tab-btn.active::after{content:'';position:absolute;bottom:0;left:8px;right:8px;
   height:2px;border-radius:2px;background:var(--accent)}
@@ -157,12 +157,10 @@ html.light mark{background:rgba(217,119,6,.22)}
   padding:2px 8px;border-radius:99px;background:var(--bg-muted);color:var(--text-muted)}
 .section-badge.all-done{background:var(--success-glow);color:var(--success)}
 
-.daily-route-btn, .transit-route-btn, .complete-day-btn {
+.complete-day-btn {
   display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
   text-decoration:none;padding:3px 8px;border-radius:99px;transition:opacity .2s;white-space:nowrap;border:none;cursor:pointer;font-family:inherit;
 }
-.daily-route-btn{color:var(--bg);background:var(--accent);}
-.transit-route-btn{color:var(--warning);background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 28%,transparent);}
 .complete-day-btn{color:var(--success);background:var(--success-glow);border:1px solid color-mix(in srgb,var(--success) 28%,transparent);}
 
 .progress-bar-wrap{height:2px;background:var(--border);overflow:hidden}
@@ -207,13 +205,12 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card.expanded .chevron{transform:rotate(180deg)}
 .card-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;
-  font-size:11px;font-weight:500;line-height:1.4}
+  font-size:11px;font-weight:500;line-height:1.4; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .badge svg{width:11px;height:11px;flex-shrink:0}
 .badge-time{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);font-family:'Courier New',monospace}
 .badge-area{background:var(--bg-muted);color:var(--text-muted);border:1px solid var(--border)}
 .badge-cost{background:var(--success-glow);color:var(--success);border:1px solid color-mix(in srgb,var(--success) 28%,transparent)}
 .badge-dur{background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent);font-family:'Courier New',monospace}
-.badge-trans{background:var(--warning-glow);color:var(--warning);border:1px solid color-mix(in srgb,var(--warning) 28%,transparent)}
 .badge-cat{background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent)}
 
 .card-details{display:none;padding:0 12px 12px;gap:10px;flex-direction:column}
@@ -468,6 +465,12 @@ select.edit-input{appearance:none}
         <span class="tab-lbl">מילון</span>
         <span class="tab-count" id="count-dictionary">0</span>
       </button>
+      <button class="tab-btn" data-tab="map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
+        </svg>
+        <span class="tab-lbl">מפה</span>
+      </button>
     </nav>
 
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
@@ -496,6 +499,7 @@ select.edit-input{appearance:none}
     <div id="panel-checklist" style="display:none"></div>
     <div id="panel-tips"      style="display:none"></div>
     <div id="panel-dictionary" style="display:none"></div>
+    <div id="panel-map"        style="display:none"></div>
   </main>
 </div>
 
@@ -1639,7 +1643,8 @@ function svgIcon(name) {
     ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
     ai:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
     copy:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
-    speaker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`
+    speaker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+    download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
   };
   return icons[name] || '';
 }
@@ -1745,22 +1750,26 @@ function renderTripCard(item, q, prevItem) {
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() || 'מפה',q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.travelTimePrev ? `<span class="badge" style="background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent)">⏳ ממיקום קודם: ${hlHtml(item.travelTimePrev,q)}</span>` : '',
-    item.transport ? `<span class="badge badge-trans">${svgIcon('bus')}${hlHtml(item.transport.length > 30 ? item.transport.slice(0,28)+'…' : item.transport,q)}</span>` : '',
-    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent)">🚨 ${hlHtml(item.risk,q)}</span>` : ''
+    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🚨 ${hlHtml(item.risk,q)}</span>` : ''
   ].filter(Boolean).join('');
 
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
-  const transitUrl = buildTransitUrl(item, prevItem);
-  const aiUrl = buildAiUrl(item);
 
   const navBtns = [
-    mapUrl     ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
-    transitUrl ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="link-btn warning">${svgIcon('transit')} תחבורה ציבורית</a>` : '',
-    aiUrl      ? `<a href="${aiUrl}" target="_blank" rel="noopener noreferrer" class="link-btn" style="background:var(--purple-glow);color:var(--purple);border-color:color-mix(in srgb,var(--purple) 28%,transparent);font-weight:600">${svgIcon('ai')} שאל AI על המקום</a>` : '',
-    item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'קישור לאתר')}</a>` : '',
+    mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" style="font-size:14px; padding:12px; justify-content:center;">${svgIcon('nav')} ניווט רגלי/רכב בגוגל מפות (למיקום זה)</a>` : '',
+    item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'לאתר הרשמי')}</a>` : '',
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
+
+  const highlightTransit = (item.transport || item.travelTimePrev) ? `
+  <div style="background:var(--warning-glow); border:1px solid var(--warning); border-radius:var(--r-sm); padding:12px; margin-bottom:10px;">
+    <div style="font-size:13px; font-weight:700; color:var(--warning); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+      ${svgIcon('bus')} דרכי הגעה מומלצות מהיעד הקודם
+    </div>
+    ${item.travelTimePrev ? `<div style="font-size:12px; color:var(--text); margin-bottom:4px;"><strong>⏳ זמן משוער:</strong> ${hlHtml(item.travelTimePrev, q)}</div>` : ''}
+    ${item.transport ? `<div style="font-size:12px; color:var(--text); line-height:1.5;"><strong>📍 מסלול:</strong> ${hlHtml(item.transport, q)}</div>` : ''}
+  </div>
+  ` : '';
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
@@ -1794,6 +1803,7 @@ function renderTripCard(item, q, prevItem) {
   </div>
   <div class="card-details">
     <div class="details-divider"></div>
+    ${highlightTransit}
     ${item.description ? `<div class="card-desc">${hlHtml(item.description,q)}</div>` : ''}
     ${notesRow}${prepareRow}${facilitiesRow}${addressRow}${ciRow}${coRow}${bookingRow}
     <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
@@ -1905,8 +1915,6 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     const done    = arr.filter(i => state.completedIds.has(i.id)).length;
     const allDone = done === arr.length && arr.length > 0;
     const pct     = arr.length ? (done/arr.length)*100 : 0;
-    const routeUrl   = buildDailyUrl(arr, 'driving');
-    const transitUrl = buildDailyUrl(arr, 'transit');
     
     const safeIds = arr.map(i => i.id).join(',');
     
@@ -1924,8 +1932,6 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
   <div class="section-header" style="border-right-color:${color}">
     <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
-      ${routeUrl && arr[0].type !== 'dictionary' ? `<a href="${routeUrl}" target="_blank" rel="noopener noreferrer" class="daily-route-btn">${svgIcon('map')} ניווט יומי</a>` : ''}
-      ${transitUrl && arr[0].type !== 'dictionary' ? `<a href="${transitUrl}" target="_blank" rel="noopener noreferrer" class="transit-route-btn">${svgIcon('transit')} תחבורה</a>` : ''}
       ${completeAllBtn}
     </div>
     <span class="section-badge${allDone?' all-done':''}">${arr[0].type !== 'dictionary' ? done+'/' : ''}${arr.length}</span>
@@ -1974,6 +1980,55 @@ function updateUI() {
   document.getElementById('panel-tips').innerHTML      = ft.length || !q ? renderPanel(ft,'category','טיפ','tip',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
   document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
 
+  // Render Map Panel
+  const hasAnyMapData = d.itinerary.length > 0 || d.options.length > 0;
+  let mapHtml = '';
+  if (!hasAnyMapData) {
+      mapHtml = renderEmptyState();
+  } else {
+      mapHtml = `
+      <div style="padding: 16px;">
+          <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r); padding:20px; text-align:center; margin-bottom:24px;">
+              <div style="width:56px;height:56px;border-radius:50%;background:var(--accent-glow);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                  ${svgIcon('map')}
+              </div>
+              <h2 style="font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px;">מפת המסלול המלאה</h2>
+              <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.6; max-width:300px; margin-left:auto; margin-right:auto;">
+                  כדי לראות את כל 100+ האטרקציות והחלופות על מפה אחת גדולה ונוחה, הורד את הקובץ ופתח ב-Google My Maps או Google Earth.
+              </p>
+              <button class="link-btn primary" onclick="exportKML(state.data)" style="width:100%; justify-content:center; padding:12px; font-size:14px; font-weight:700;">
+                  ${svgIcon('download')} הורד מפת מסלול מלאה (KML)
+              </button>
+          </div>
+
+          <h3 style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:12px; padding-right:4px;">ניווט יומי מרוכז (גוגל מפות)</h3>
+          <div style="display:flex; flex-direction:column; gap:8px; padding-bottom: 20px;">
+      `;
+
+      const daysMap = new Map();
+      [...d.itinerary, ...d.options].forEach(i => {
+          const k = i.dayLabel || 'ללא תאריך';
+          if(!daysMap.has(k)) daysMap.set(k, []);
+          daysMap.get(k).push(i);
+      });
+
+      daysMap.forEach((items, day) => {
+          const dailyUrl = buildDailyUrl(items, 'driving');
+          if(dailyUrl) {
+              mapHtml += `
+              <a href="${dailyUrl}" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-muted); border:1px solid var(--border); padding:14px 16px; border-radius:var(--r-sm); text-decoration:none; color:var(--text); transition:background .2s;">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                      <span style="color:var(--accent);">${svgIcon('pin')}</span>
+                      <span style="font-size:14px; font-weight:600;">${escHtml(day)}</span>
+                  </div>
+                  <span style="color:var(--text-muted);">${svgIcon('nav')}</span>
+              </a>`;
+          }
+      });
+      mapHtml += `</div></div>`;
+  }
+  document.getElementById('panel-map').innerHTML = mapHtml;
+
   document.getElementById('count-itinerary').textContent = d.itinerary.length;
   document.getElementById('count-options').textContent   = d.options.length;
   
@@ -2017,7 +2072,7 @@ function setTab(tab) {
     b.classList.toggle('active', active);
     b.setAttribute('aria-selected', active);
   });
-  ['itinerary','options','checklist','tips','dictionary'].forEach(t => {
+  ['itinerary','options','checklist','tips','dictionary','map'].forEach(t => {
     const p = document.getElementById('panel-'+t);
     if (p) p.style.display = t === tab ? 'block' : 'none';
   });
