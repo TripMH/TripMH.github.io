@@ -820,7 +820,7 @@ function copyField(id, field, e) {
   });
 }
 
-// התיקון המעמיק והיציב לפונקציית ההקראה
+// פתרון הקראה אוטומטי מהענן (לא דורש שום התקנה מהמשתמש!)
 function speakField(id, field, lang, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   
@@ -829,41 +829,27 @@ function speakField(id, field, lang, e) {
   
   const textToSpeak = item[field];
 
-  if (!('speechSynthesis' in window)) {
-    addToast('הדפדפן שלך לא תומך בהקראה (TTS)', 'error');
-    return;
+  // עוצר הקראה קודמת אם היא עדיין מתנגנת
+  if (window.currentAudio) {
+    window.currentAudio.pause();
+    window.currentAudio.currentTime = 0;
   }
 
-  // 1. איפוס וניקוי - עוצר כל הקראה קודמת שאולי נתקעה ברקע
-  window.speechSynthesis.cancel();
-
-  // 2. יצירת אובייקט ההקראה
-  const utterance = new SpeechSynthesisUtterance(textToSpeak);
-  utterance.lang = lang; // במקרה שלנו: 'ja-JP'
-  utterance.rate = 0.85; // האטה קלה מאוד כדי שהמילה היפנית תישמע ברור ולא תיבלע
-  utterance.pitch = 1.0;
-
-  // 3. ניסיון אקטיבי למשוך קול יפני מותקן (פותר באגים של ספארי וכרום)
-  const voices = window.speechSynthesis.getVoices();
-  const targetVoice = voices.find(v => v.lang.replace('_', '-').toLowerCase() === lang.toLowerCase() || v.lang.toLowerCase().includes('ja'));
-  if (targetVoice) {
-    utterance.voice = targetVoice;
-  }
-
-  // 4. שמירת האובייקט גלובלית - מונע את הבאג שבו כרום מוחק את הקול מהזיכרון לפני ההשמעה!
-  window.currentUtterance = utterance;
-
-  // 5. ניהול שגיאות
-  utterance.onerror = (event) => {
-    console.error('SpeechSynthesis Error:', event);
-    if (event.error !== 'interrupted') { // מתעלמים משגיאות של ביטול יזום שלנו
-      addToast('שגיאה בהקראה. ייתכן שחסרה חבילת שפה במכשיר.', 'error');
-    }
-  };
-
-  // הפעלת הדיבור + חיווי ויזואלי למשתמש
-  window.speechSynthesis.speak(utterance);
-  addToast('🔊 ' + textToSpeak, 'neutral');
+  // הופך את קוד השפה (למשל 'ja-JP') לקוד קצר שגוגל תרגום מכיר ('ja')
+  const shortLang = lang.split('-')[0];
+  
+  // משיכת אודיו ישירות משרתי גוגל
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${shortLang}&client=tw-ob&q=${encodeURIComponent(textToSpeak)}`;
+  
+  window.currentAudio = new Audio(url);
+  
+  window.currentAudio.play().then(() => {
+    addToast('🔊 ' + textToSpeak, 'neutral');
+  }).catch(err => {
+    console.error('Audio playback failed:', err);
+    // קריאת רשת עשויה להיחסם לפעמים אם גוגל מזהה עומס, זה הגיבוי:
+    addToast('שגיאה בשליפת השמע מהרשת.', 'error');
+  });
 }
 
 /* =========================================================
