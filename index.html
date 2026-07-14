@@ -223,7 +223,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .detail-row .dr-label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:2px;flex-shrink:0}
 .detail-row .dr-value{flex:1}
 
-/* הגדרת סגנון מיוחד לשורת מידע (Booking Info שאינו דורש הזמנה) */
+/* הגדרת סגנון מיוחד לשורת מידע */
 .detail-row.booking {
   background: var(--accent-glow);
   border: 1px solid var(--accent-border);
@@ -621,19 +621,6 @@ select.edit-input{appearance:none}
           <div class="eo-desc">שומר את כל הנתונים לגיבוי מלא או לשחזור באפליקציה.</div>
         </div>
       </button>
-      <button class="export-option eo-txt" id="exp-txt">
-        <div class="eo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-          </svg>
-        </div>
-        <div class="eo-info">
-          <div class="eo-title">הורדת / העתקת טקסט — כל הנתונים</div>
-          <div class="eo-desc">מוריד קבצי טקסט נפרדים, ומעתיק את כולם ללוח בטלפון (לוואטסאפ).</div>
-        </div>
-      </button>
     </div>
     <div class="btn-row" style="margin-top:16px">
       <button class="btn-cancel" id="modal-export-close">סגור</button>
@@ -673,14 +660,14 @@ select.edit-input{appearance:none}
 <script>
 'use strict';
 /* =========================================================
-   CONSTANTS
+   CONSTANTS - THE FIX! REVERTED BACK TO V27 TO RESTORE DATA!
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v28';
-const LS_COMPLETED = 'tripmh_completed_v28';
-const LS_BOOKED    = 'tripmh_booked_v28';
-const LS_EXPANDED  = 'tripmh_expanded_v28';
-const LS_TAB       = 'tripmh_tab_v28';
-const LS_DARK      = 'tripmh_dark_v28';
+const LS_DATA      = 'tripmh_data_v27';
+const LS_COMPLETED = 'tripmh_completed_v27';
+const LS_BOOKED    = 'tripmh_booked_v27';
+const LS_EXPANDED  = 'tripmh_expanded_v27';
+const LS_TAB       = 'tripmh_tab_v27';
+const LS_DARK      = 'tripmh_dark_v27';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1168,7 +1155,8 @@ async function processFiles(files) {
   for (const f of Array.from(files)) {
     const text = await readFileText(f);
 
-    if (f.name.endsWith('.json')) {
+    // חומת אבטחה: זיהוי קובץ גיבוי JSON גם אם הסיומת שלו שונתה ל-TXT
+    if (f.name.endsWith('.json') || text.trim().startsWith('{')) {
       try {
         const p = JSON.parse(text);
         if (p.data && (p.data.itinerary||p.data.options||p.data.tips||p.data.checklist||p.data.dictionary)) {
@@ -1179,6 +1167,8 @@ async function processFiles(files) {
           if (p.data.dictionary) state.data.dictionary = p.data.dictionary;
           if (p.completedIds) importedCompleted = p.completedIds;
           if (p.bookedIds) importedBooked = p.bookedIds;
+          
+          stats.added += (p.data.itinerary?.length || 0) + (p.data.options?.length || 0) + (p.data.tips?.length || 0) + (p.data.checklist?.length || 0) + (p.data.dictionary?.length || 0);
         }
       } catch {}
       continue;
@@ -1200,6 +1190,14 @@ async function processFiles(files) {
       const address = getCol(obj,'address');
       const catCol = getCol(obj,'category');
       const link  = getCol(obj,'link');
+      const hebrew = getCol(obj,'hebrew');
+      const task = getCol(obj,'task');
+      const iconCsv = getCol(obj, 'icon');
+
+      // חומת אבטחה "ANTI-GARBAGE": מדלג על שורות ריקות לחלוטין (מונע 2500 שורות זבל)
+      if (!place && !desc && !area && !address && !catCol && !link && !hebrew && !task && !iconCsv) {
+          continue;
+      }
       
       const dayCol = getCol(obj,'day');
       const dateCol = getCol(obj,'date');
@@ -1246,25 +1244,24 @@ async function processFiles(files) {
       const finalBooking = finalBookingArr.join('\n');
 
       if (fileType === 'dictionary') {
-        const hebrew = getCol(obj, 'hebrew') || place;
-        const english = getCol(obj, 'english');
-        const japanese = getCol(obj, 'japanese');
+        const eng = getCol(obj, 'english');
+        const jap = getCol(obj, 'japanese');
         
-        if (hebrew || japanese || english) {
+        if (hebrew || jap || eng) {
             const res = mergeItem(state.data.dictionary, {
                 id: genId(), type: 'dictionary', _idx: ri,
                 category: catCol || 'כללי',
                 hebrew: hebrew || '',
-                english: english || '',
-                japanese: japanese || '',
+                english: eng || '',
+                japanese: jap || '',
                 hebPronun: getCol(obj, 'hebPronun') || '',
                 romaji: getCol(obj, 'romaji') || '',
                 context: getCol(obj, 'context') || ''
-            }, x => x.hebrew === hebrew && x.japanese === japanese);
+            }, x => x.hebrew === hebrew && x.japanese === jap);
             if(res.isNew) stats.added++; else stats.updated++;
         }
       } else if (fileType === 'checklist') {
-        const taskTitle = getCol(obj, 'task') || place; 
+        const taskTitle = task || place; 
         if (taskTitle) {
             const res = mergeItem(state.data.checklist, {
                 id: genId(), type: 'task', _idx: ri,
@@ -1285,7 +1282,6 @@ async function processFiles(files) {
         }
       } else {
         const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(dayCol);
-        const iconCsv = getCol(obj, 'icon');
         const priority = getCol(obj, 'priority');
         const weather = getCol(obj, 'weather');
         const notes = getCol(obj, 'notes');
@@ -1295,9 +1291,11 @@ async function processFiles(files) {
         const facilities = getCol(obj, 'facilities');
         const prepare = getCol(obj, 'prepare');
 
+        const placeNameFixed = place || 'ללא שם';
+
         const item = {
           id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
-          placeName: place || 'ללא שם', dayLabel: rawDay, dateVal: parseDateVal(rawDay),
+          placeName: placeNameFixed, dayLabel: rawDay, dateVal: parseDateVal(rawDay),
           description: desc, timeRange: timeStr,
           duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
           booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, address, 
@@ -1308,7 +1306,7 @@ async function processFiles(files) {
         };
         
         const dest = isOpt ? state.data.options : state.data.itinerary;
-        const res = mergeItem(dest, item, x => x.placeName === place && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
+        const res = mergeItem(dest, item, x => x.placeName === placeNameFixed && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
         
         if (autoBooked) state.bookedIds.add(res.id);
 
@@ -2211,10 +2209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     exportJSON(state.data, state.completedIds, state.bookedIds);
     document.getElementById('modal-export').classList.add('hidden');
     addToast('גיבוי JSON מלא הורד בהצלחה', 'success');
-  });
-  document.getElementById('exp-txt').addEventListener('click',  () => {
-    // השארנו את כפתור הורדת הטקסט ריק למקרה שתרצה להוסיף בחזרה - אפשר להוסיף כאן לוגיקה עתידית.
-    document.getElementById('modal-export').classList.add('hidden');
   });
 
   // Clear all
