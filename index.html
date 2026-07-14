@@ -2,10 +2,10 @@
 <html lang="he" dir="rtl" class="dark">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0c0f14" id="theme-meta" />
 <title>TripMH – מתכנן טיול חכם</title>
-<meta name="description" content="אפליקציית ניהול מסלול טיול — CSV, JSON, KML, ייצוא מלא" />
+<meta name="description" content="אפליקציית ניהול מסלול טיול — CSV, JSON, ייצוא מלא" />
 <style>
 /* =========================================================
    RESET & BASE
@@ -31,7 +31,7 @@ html.light{
   --purple:#7c3aed;--purple-glow:rgba(124,58,237,.09);
 }
 html{font-family:'Segoe UI','Heebo',Arial,sans-serif;font-size:16px;line-height:1.5;
-  background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;scroll-behavior:smooth;}
 body{min-height:100dvh;overflow-x:hidden;direction:rtl;background:var(--bg);}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -64,21 +64,21 @@ html.light mark{background:rgba(217,119,6,.22)}
   background:var(--bg-muted);font-size:11px;font-family:'Courier New',monospace;color:var(--text-muted)}
 .pill-counter .dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
 
-.icon-btn{width:32px;height:32px;border-radius:var(--r-sm);border:none;background:transparent;
+.icon-btn{width:34px;height:34px;border-radius:var(--r-sm);border:none;background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   color:var(--text-muted);transition:color .15s,background .15s;position:relative}
 .icon-btn:hover{color:var(--text);background:var(--bg-muted)}
-.icon-btn svg{width:16px;height:16px}
+.icon-btn svg{width:18px;height:18px}
 .icon-btn.danger:hover{color:var(--danger);background:var(--danger-glow)}
 .icon-btn.warning{color:var(--warning);}
 .icon-btn.warning:hover{color:var(--warning);background:var(--warning-glow);}
 
-.upload-btn{width:32px;height:32px;border-radius:var(--r-sm);border:none;cursor:pointer;
+.upload-btn{width:34px;height:34px;border-radius:var(--r-sm);border:none;cursor:pointer;
   background:var(--accent);color:var(--bg);display:flex;align-items:center;justify-content:center;
   transition:opacity .15s,transform .1s;box-shadow:0 2px 8px rgba(34,211,238,.2)}
 .upload-btn:hover{opacity:.85}
 .upload-btn:active{transform:scale(.9)}
-.upload-btn svg{width:16px;height:16px}
+.upload-btn svg{width:18px;height:18px}
 
 .search-wrap{position:relative;padding:0 14px 10px}
 .search-icon{position:absolute;right:26px;top:50%;transform:translateY(-50%);
@@ -96,30 +96,30 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    TAB BAR
 ========================================================= */
-#tab-bar{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;}
+#tab-bar{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;padding:0 4px}
 #tab-bar::-webkit-scrollbar{display:none;}
-.tab-btn{flex:1;min-width:65px;display:flex;flex-direction:column;align-items:center;gap:2px;
-  padding:8px 4px 7px;border:none;background:none;cursor:pointer;
+.tab-btn{flex:1;min-width:65px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 4px 9px;border:none;background:none;cursor:pointer;
   font-size:11px;font-weight:500;color:var(--text-muted);position:relative;
   transition:color .15s;font-family:inherit}
-.tab-btn svg{width:16px;height:16px}
+.tab-btn svg{width:18px;height:18px}
 .tab-btn.active{color:var(--accent)}
 .tab-btn .tab-lbl{font-size:11px}
 .tab-btn .tab-count{font-size:9px;font-family:'Courier New',monospace;color:var(--text-dim);
   background:var(--bg-muted);padding:1px 5px;border-radius:99px;margin-top:1px;display:inline-block;}
 .tab-btn.active .tab-count{color:var(--accent);background:var(--accent-glow)}
 .tab-btn.active::after{content:'';position:absolute;bottom:0;left:8px;right:8px;
-  height:2px;border-radius:2px;background:var(--accent)}
+  height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
 
 /* =========================================================
    STATS BAR
 ========================================================= */
 .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-elevated)}
 .stat-item{flex:1;display:flex;flex-direction:column;align-items:center;
-  padding:6px 4px;gap:2px;border-left:1px solid var(--border)}
+  padding:8px 4px;gap:2px;border-left:1px solid var(--border)}
 .stat-item:last-child{border-left:none}
 .stat-num{font-size:14px;font-weight:700;color:var(--text);font-family:'Courier New',monospace}
-.stat-lbl{font-size:9px;color:var(--text-muted);text-align:center}
+.stat-lbl{font-size:10px;color:var(--text-muted);text-align:center}
 .stat-item.accent .stat-num{color:var(--accent)}
 .stat-item.success .stat-num{color:var(--success)}
 .stat-item.warning .stat-num{color:var(--warning)}
@@ -135,12 +135,12 @@ html.light mark{background:rgba(217,119,6,.22)}
   margin-right:2px; vertical-align:middle; flex-shrink:0;
 }
 .action-icon-btn:hover { color:var(--accent); background:var(--accent-glow); }
-.action-icon-btn svg { width:14px; height:14px; }
+.action-icon-btn svg { width:16px; height:16px; }
 
 /* =========================================================
    MAIN CONTENT
 ========================================================= */
-#tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:40px}
+#tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 
 /* =========================================================
    SECTION HEADERS
@@ -166,80 +166,93 @@ html.light mark{background:rgba(217,119,6,.22)}
 .progress-bar-wrap{height:2px;background:var(--border);overflow:hidden}
 .progress-bar-fill{height:100%;background:var(--accent);transition:width .5s ease}
 .progress-bar-fill.done{background:var(--success)}
-.cards-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.cards-list{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s}
-.card.done{opacity:.46;filter:saturate(.35)}
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s;box-shadow: 0 4px 20px rgba(0,0,0,0.15);}
+.card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
 
-.card-booking-bar{display:flex;flex-direction:column;gap:8px;padding:10px 12px; border-bottom:1px solid;}
+.card-booking-bar{display:flex;flex-direction:column;gap:8px;padding:12px; border-bottom:1px solid;}
 .card-booking-bar.unbooked {background:var(--danger-glow); border-color:rgba(248,113,113,.18);}
 .card-booking-bar.booked {background:var(--success-glow); border-color:rgba(74,222,128,.18);}
 .booking-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;width:100%;}
 .booking-info{display:flex;align-items:flex-start;gap:6px;font-size:12px;font-weight:600;line-height:1.4;color:var(--danger);}
 .booked .booking-info{color:var(--success);}
-.booking-info svg{width:12px;height:12px;flex-shrink:0;margin-top:2px;}
+.booking-info svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;}
 .booking-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
 
-.book-toggle-btn{background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px; padding:3px 8px; font-size:10px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; transition:opacity .2s; font-family:inherit;}
+.book-toggle-btn{background:var(--bg-elevated); border:1px solid var(--border); border-radius:4px; padding:4px 10px; font-size:11px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; transition:opacity .2s; font-family:inherit;}
 .book-toggle-btn:hover{opacity:.85;}
 .unbooked .book-toggle-btn{border-color:var(--danger); color:var(--danger);}
 .booked .book-toggle-btn{border-color:var(--success); color:var(--success);}
 
-.card-body{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 11px;cursor:pointer;user-select:none}
-.card-check{flex-shrink:0;margin-top:1px;width:24px;height:24px;border-radius:50%;
+.card-body{display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;user-select:none}
+.card-check{flex-shrink:0;margin-top:1px;width:26px;height:26px;border-radius:50%;
   border:2px solid var(--border);background:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:border-color .15s,background .15s,color .15s;color:transparent}
-.card-check svg{width:13px;height:13px}
+.card-check svg{width:14px;height:14px}
 .card-main{flex:1;min-width:0}
 .card-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .card-title-inner{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
-.card-icon{font-size:16px;flex-shrink:0;line-height:1}
-.card-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word}
-.chevron{width:15px;height:15px;flex-shrink:0;color:var(--text-dim);margin-top:2px;transition:transform .22s}
+.card-icon{font-size:18px;flex-shrink:0;line-height:1}
+.card-title{font-size:15px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word}
+.chevron{width:18px;height:18px;flex-shrink:0;color:var(--text-dim);margin-top:2px;transition:transform .22s}
 .card.expanded .chevron{transform:rotate(180deg)}
-.card-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;
+.card-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;
   font-size:11px;font-weight:500;line-height:1.4; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.badge svg{width:11px;height:11px;flex-shrink:0}
+.badge svg{width:12px;height:12px;flex-shrink:0}
 .badge-time{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);font-family:'Courier New',monospace}
 .badge-area{background:var(--bg-muted);color:var(--text-muted);border:1px solid var(--border)}
 .badge-cost{background:var(--success-glow);color:var(--success);border:1px solid color-mix(in srgb,var(--success) 28%,transparent)}
 .badge-dur{background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent);font-family:'Courier New',monospace}
 .badge-cat{background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent)}
 
-.card-details{display:none;padding:0 12px 12px;gap:10px;flex-direction:column}
+.card-details{display:none;padding:0 14px 14px;gap:10px;flex-direction:column}
 .card.expanded .card-details{display:flex}
-.details-divider{height:1px;background:var(--border);border-radius:1px;margin-bottom:2px}
-.card-desc{font-size:13px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+.details-divider{height:1px;background:var(--border);border-radius:1px;margin-bottom:4px}
+.card-desc{font-size:14px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
 
-.detail-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text-muted);line-height:1.55;word-break:break-word;}
-.detail-row svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
-.detail-row.booking svg{color:var(--danger)}
-.detail-row .dr-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:1px;flex-shrink:0}
+.detail-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-muted);line-height:1.55;word-break:break-word;}
+.detail-row svg{width:14px;height:14px;flex-shrink:0;margin-top:2px}
+.detail-row .dr-label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:2px;flex-shrink:0}
 .detail-row .dr-value{flex:1}
 
+/* הגדרת סגנון מיוחד לשורת מידע (Booking Info שאינו דורש הזמנה) */
+.detail-row.booking {
+  background: var(--accent-glow);
+  border: 1px solid var(--accent-border);
+  border-right: 3px solid var(--accent);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  margin-top: 8px;
+  align-items: flex-start;
+}
+.detail-row.booking svg { color: var(--accent); width: 16px; height: 16px; margin-top: 1px; }
+.detail-row.booking .dr-label { color: var(--accent); font-size: 12px; font-weight: 700; margin-top: 1px; }
+.detail-row.booking .dr-value { color: var(--text); font-weight: 600; font-size: 13px; }
+
 /* הגדרת סגנון לקופסת התחבורה הבולטת בתוך הכרטיסייה */
-.transit-box { background:var(--warning-glow); border:1px solid color-mix(in srgb,var(--warning) 30%,transparent); border-radius:var(--r-sm); padding:12px; margin-bottom:12px; }
-.transit-box-title { font-size:13px; font-weight:800; color:var(--warning); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
-.transit-box-title svg { width:16px; height:16px; flex-shrink:0; }
-.transit-box-row { font-size:12px; color:var(--text); line-height:1.6; margin-bottom:6px; word-break:break-word; }
+.transit-box { background:var(--warning-glow); border:1px solid color-mix(in srgb,var(--warning) 30%,transparent); border-radius:var(--r-sm); padding:14px; margin-bottom:12px; }
+.transit-box-title { font-size:14px; font-weight:800; color:var(--warning); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.transit-box-title svg { width:18px; height:18px; flex-shrink:0; }
+.transit-box-row { font-size:13px; color:var(--text); line-height:1.6; margin-bottom:8px; word-break:break-word; }
 .transit-box-row:last-child { margin-bottom:0; }
 
-.nav-btns{display:flex;flex-direction:column;gap:6px}
-.link-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;
+.nav-btns{display:flex;flex-direction:column;gap:8px}
+.link-btn{display:flex;align-items:center;gap:8px;width:100%;padding:12px 14px;
   border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg-muted);
-  color:var(--text-muted);font-size:12px;font-weight:500;text-decoration:none;
+  color:var(--text-muted);font-size:13px;font-weight:500;text-decoration:none;
   transition:background .15s;cursor:pointer;font-family:inherit}
 .link-btn:hover{background:color-mix(in srgb,var(--text-muted) 12%,transparent);color:var(--text)}
 .link-btn.primary{background:var(--accent);color:var(--bg);border:none;box-shadow:0 4px 12px rgba(34,211,238,.2);font-weight:700;}
 .link-btn.primary:hover{opacity:0.9; color:var(--bg);}
-.link-btn svg{width:14px;height:14px;flex-shrink:0}
+.link-btn svg{width:16px;height:16px;flex-shrink:0}
 
 /* =========================================================
    MODALS
@@ -249,57 +262,57 @@ html.light mark{background:rgba(217,119,6,.22)}
 @media(min-height:600px){.modal-overlay{align-items:center;padding:24px 16px}}
 .modal-overlay.hidden{opacity:0; pointer-events:none;}
 .modal-box{width:100%;max-width:448px;background:var(--bg-card);border:1px solid var(--border);
-  border-radius:var(--r-xl) var(--r-xl) 0 0;padding:20px 20px 32px;
+  border-radius:var(--r-xl) var(--r-xl) 0 0;padding:24px 20px 36px;
   max-height:92dvh;overflow-y:auto; transition:transform .2s ease;}
 .modal-overlay.hidden .modal-box {transform:translateY(100%);}
 @media(min-height:600px){
   .modal-box{border-radius:var(--r-xl);}
   .modal-overlay.hidden .modal-box {transform:translateY(24px) scale(0.95);}
 }
-.modal-drag-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:-4px auto 14px}
+.modal-drag-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:-8px auto 18px}
 @media(min-height:600px){.modal-drag-handle{display:none}}
-.modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;
+.modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px;
   display:flex;align-items:center;gap:8px}
-.modal-title svg{width:17px;height:17px;color:var(--accent)}
-.modal-subtitle{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:14px}
+.modal-title svg{width:18px;height:18px;color:var(--accent)}
+.modal-subtitle{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px}
 
-.btn-row{display:flex;gap:8px;margin-top:16px}
-.btn-row button{flex:1;padding:10px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn-row button{flex:1;padding:12px;border-radius:var(--r-sm);font-size:14px;font-weight:600;
   font-family:inherit;cursor:pointer;transition:opacity .15s;border:none}
 .btn-row button:hover{opacity:.85}
 .btn-primary{background:var(--accent);color:var(--bg)}
 .btn-cancel{background:var(--bg-muted);color:var(--text-muted);border:1px solid var(--border)!important}
 .btn-danger{background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent)!important}
 
-.edit-group{margin-bottom:11px}
-.edit-label{font-size:11px;color:var(--text-muted);margin-bottom:5px;display:block;
+.edit-group{margin-bottom:14px}
+.edit-label{font-size:12px;color:var(--text-muted);margin-bottom:6px;display:block;
   font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.edit-input{width:100%;padding:9px 11px;border-radius:var(--r-sm);border:1px solid var(--border);
-  background:var(--bg-muted);color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border .2s}
+.edit-input{width:100%;padding:12px 14px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--bg-muted);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border .2s}
 .edit-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-textarea.edit-input{resize:vertical;min-height:72px}
+textarea.edit-input{resize:vertical;min-height:80px}
 select.edit-input{appearance:none}
-.edit-row{display:flex;gap:10px}
+.edit-row{display:flex;gap:12px}
 .edit-row .edit-group{flex:1;margin-bottom:0}
 
 /* =========================================================
    STACKABLE TOASTS
 ========================================================= */
-#toast-container{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;gap:8px;z-index:9999;width:90%;max-width:320px;pointer-events:none;}
+#toast-container{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;gap:8px;z-index:9999;width:90%;max-width:340px;pointer-events:none;}
 .toast-msg{
   background:var(--bg-elevated); color:var(--text); padding:0; border-radius:var(--r);
-  border:1px solid var(--border); font-size:13px; font-weight:600;
+  border:1px solid var(--border); font-size:14px; font-weight:600;
   box-shadow:0 8px 24px rgba(0,0,0,.45); pointer-events:auto;
   animation:fadeUp .3s ease forwards; overflow:hidden; position:relative;
 }
 .toast-content {
-  display:flex; align-items:center; justify-content:space-between; gap:14px; padding:10px 14px; width:100%; position:relative; z-index:2;
+  display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 16px; width:100%; position:relative; z-index:2;
 }
 .toast-msg.success{border-color:color-mix(in srgb,var(--success) 30%,transparent);color:var(--success)}
 .toast-msg.error{border-color:color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)}
 .toast-msg .undo-btn{background:var(--accent-glow);color:var(--accent);border:1px solid var(--accent-border);
-  border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;border:none;font-family:inherit;}
+  border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;border:none;font-family:inherit;}
 
 .undo-progress {
   position:absolute; bottom:0; left:0; height:4px; background:currentColor; width:100%;
@@ -310,58 +323,57 @@ select.edit-input{appearance:none}
 /* =========================================================
    EMPTY STATE
 ========================================================= */
-.empty-state{display:flex;flex-direction:column;align-items:center;padding:48px 24px 32px;gap:16px;text-align:center}
-.empty-icon{width:56px;height:56px;border-radius:var(--r-lg);background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 22%,transparent);display:flex;align-items:center;justify-content:center}
-.empty-icon svg{width:24px;height:24px;color:var(--warning)}
-.empty-title{font-size:15px;font-weight:700;color:var(--text)}
-.empty-sub{font-size:13px;color:var(--text-muted);line-height:1.5;max-width:260px}
-.empty-actions{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;justify-content:center}
-.empty-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r-sm);
-  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:opacity .15s}
+.empty-state{display:flex;flex-direction:column;align-items:center;padding:64px 24px 32px;gap:16px;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:var(--r-lg);background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 22%,transparent);display:flex;align-items:center;justify-content:center}
+.empty-icon svg{width:28px;height:28px;color:var(--warning)}
+.empty-title{font-size:16px;font-weight:700;color:var(--text)}
+.empty-sub{font-size:14px;color:var(--text-muted);line-height:1.5;max-width:280px}
+.empty-actions{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.empty-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:var(--r-sm);
+  font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:opacity .15s}
 .empty-btn:hover{opacity:.85}
 .empty-btn.primary{background:var(--accent);color:var(--bg)}
 .empty-btn.secondary{background:var(--bg-muted);color:var(--text-muted);border:1px solid var(--border)}
-.empty-btn svg{width:15px;height:15px}
-.add-fab{display:flex;align-items:center;gap:6px;margin:10px 12px 0;padding:9px 14px;border-radius:var(--r-sm);border:1px dashed var(--border);
-  background:transparent;color:var(--text-muted);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;width:calc(100% - 24px)}
+.empty-btn svg{width:18px;height:18px}
+.add-fab{display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 14px 0;padding:14px;border-radius:var(--r-sm);border:2px dashed var(--border);
+  background:transparent;color:var(--text-muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;width:calc(100% - 28px)}
 .add-fab:hover{border-color:var(--accent);color:var(--accent)}
-.add-fab svg{width:14px;height:14px}
+.add-fab svg{width:18px;height:18px}
 
 /* =========================================================
    UPLOAD HINT GRID
 ========================================================= */
-.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.format-hint-item{padding:8px 10px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
-.format-hint-item strong{display:block;font-size:11px;color:var(--accent);margin-bottom:3px}
-.format-hint-item span{font-size:11px;color:var(--text-muted)}
+.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.format-hint-item{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
+.format-hint-item strong{display:block;font-size:12px;color:var(--accent);margin-bottom:4px}
+.format-hint-item span{font-size:12px;color:var(--text-muted)}
 
 /* =========================================================
    ANIMATIONS & LOADING
 ========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.loading-spinner{width:52px;height:52px;border-radius:var(--r-lg);background:var(--accent-glow);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
-.loading-spinner svg{width:22px;height:22px;color:var(--accent)}
-.loading-label{font-size:13px;color:var(--text-muted);font-weight:500}
+.loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.loading-spinner{width:64px;height:64px;border-radius:var(--r-lg);background:var(--accent-glow);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
+.loading-spinner svg{width:28px;height:28px;color:var(--accent)}
+.loading-label{font-size:14px;color:var(--text-muted);font-weight:600}
 
 /* =========================================================
    EXPORT MODAL
 ========================================================= */
-.export-row{display:flex;flex-direction:column;gap:8px}
-.export-option{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border);cursor:pointer;transition:border-color .15s;text-decoration:none}
+.export-row{display:flex;flex-direction:column;gap:10px}
+.export-option{display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border);cursor:pointer;transition:border-color .15s;text-decoration:none}
 .export-option:hover{border-color:var(--accent-border)}
-.export-option .eo-icon{width:32px;height:32px;border-radius:var(--r-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.export-option .eo-icon svg{width:16px;height:16px}
-.export-option .eo-info .eo-title{font-size:13px;font-weight:600;color:var(--text)}
-.export-option .eo-info .eo-desc{font-size:11px;color:var(--text-muted);margin-top:2px}
+.export-option .eo-icon{width:40px;height:40px;border-radius:var(--r-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.export-option .eo-icon svg{width:20px;height:20px}
+.export-option .eo-info .eo-title{font-size:14px;font-weight:600;color:var(--text)}
+.export-option .eo-info .eo-desc{font-size:12px;color:var(--text-muted);margin-top:4px}
 .eo-csv .eo-icon{background:var(--success-glow);color:var(--success)}
 .eo-json .eo-icon{background:var(--accent-glow);color:var(--accent)}
-.eo-kml .eo-icon{background:var(--warning-glow);color:var(--warning)}
 .eo-txt .eo-icon{background:var(--purple-glow);color:var(--purple)}
 
 /* Confirm Modal Specific */
-#modal-confirm .modal-box { max-width: 320px; margin: 0 auto; text-align: center; padding-bottom: 24px; }
+#modal-confirm .modal-box { max-width: 360px; margin: 0 auto; text-align: center; padding-bottom: 32px; }
 #modal-confirm .modal-title { justify-content: center; }
 </style>
 </head>
@@ -472,12 +484,6 @@ select.edit-input{appearance:none}
         <span class="tab-lbl">מילון</span>
         <span class="tab-count" id="count-dictionary">0</span>
       </button>
-      <button class="tab-btn" data-tab="map">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
-        </svg>
-        <span class="tab-lbl">מפה</span>
-      </button>
     </nav>
 
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
@@ -506,7 +512,6 @@ select.edit-input{appearance:none}
     <div id="panel-checklist" style="display:none"></div>
     <div id="panel-tips"      style="display:none"></div>
     <div id="panel-dictionary" style="display:none"></div>
-    <div id="panel-map"        style="display:none"></div>
   </main>
 </div>
 
@@ -536,7 +541,7 @@ select.edit-input{appearance:none}
   <div class="modal-box">
     <div class="modal-drag-handle"></div>
     <div class="modal-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--accent)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px;height:20px;color:var(--accent)">
         <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
         <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
       </svg>
@@ -566,14 +571,14 @@ select.edit-input{appearance:none}
     </div>
     <div class="btn-row">
       <button class="btn-primary" id="modal-pick-csv">העלה קובץ CSV</button>
-      <button class="btn-cancel" id="modal-pick-json" title="ייבוא גיבוי JSON" style="flex:0 0 auto;padding:10px 14px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
+      <button class="btn-cancel" id="modal-pick-json" title="ייבוא גיבוי JSON" style="flex:0 0 auto;padding:12px 16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
           <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
           <polyline points="14 2 14 8 20 8"/><path d="M9 13h6M9 17h4"/>
         </svg>
       </button>
-      <button class="btn-cancel" id="modal-upload-close" style="flex:0 0 auto;padding:10px 14px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px">
+      <button class="btn-cancel" id="modal-upload-close" style="flex:0 0 auto;padding:12px 16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
@@ -585,7 +590,7 @@ select.edit-input{appearance:none}
   <div class="modal-box">
     <div class="modal-drag-handle"></div>
     <div class="modal-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;color:var(--accent)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--accent)">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
@@ -616,18 +621,6 @@ select.edit-input{appearance:none}
           <div class="eo-desc">שומר את כל הנתונים לגיבוי מלא או לשחזור באפליקציה.</div>
         </div>
       </button>
-      <button class="export-option eo-kml" id="exp-kml">
-        <div class="eo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-            <line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
-          </svg>
-        </div>
-        <div class="eo-info">
-          <div class="eo-title">Google My Maps — KML</div>
-          <div class="eo-desc">ייצא את כל המיקומים במערכת למפה אינטראקטיבית.</div>
-        </div>
-      </button>
       <button class="export-option eo-txt" id="exp-txt">
         <div class="eo-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -642,7 +635,7 @@ select.edit-input{appearance:none}
         </div>
       </button>
     </div>
-    <div class="btn-row" style="margin-top:14px">
+    <div class="btn-row" style="margin-top:16px">
       <button class="btn-cancel" id="modal-export-close">סגור</button>
     </div>
   </div>
@@ -652,21 +645,21 @@ select.edit-input{appearance:none}
   <div class="modal-box" id="edit-modal-box">
     <div class="modal-drag-handle"></div>
     <div class="modal-title" id="edit-modal-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;color:var(--accent)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--accent)">
         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
       </svg>
       <span>עריכת פריט</span>
     </div>
     <div id="edit-form-body"></div>
-    <p style="font-size:11px;color:var(--text-dim);margin-top:8px">
+    <p style="font-size:12px;color:var(--text-dim);margin-top:10px">
       Ctrl+Enter לשמירה מהירה  •  Esc לביטול
     </p>
     <div class="btn-row" id="edit-btn-row">
       <button class="btn-primary" id="edit-save">שמור שינויים</button>
       <button class="btn-cancel"  id="edit-cancel">ביטול</button>
-      <button class="btn-danger"  id="edit-delete" style="flex:0 0 auto;padding:10px 12px;display:none" aria-label="מחק פריט">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
+      <button class="btn-danger"  id="edit-delete" style="flex:0 0 auto;padding:12px 14px;display:none" aria-label="מחק פריט">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
           <path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m4 5v6m4-6v6"/>
         </svg>
       </button>
@@ -682,12 +675,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v27';
-const LS_COMPLETED = 'tripmh_completed_v27';
-const LS_BOOKED    = 'tripmh_booked_v27';
-const LS_EXPANDED  = 'tripmh_expanded_v27';
-const LS_TAB       = 'tripmh_tab_v27';
-const LS_DARK      = 'tripmh_dark_v27';
+const LS_DATA      = 'tripmh_data_v28';
+const LS_COMPLETED = 'tripmh_completed_v28';
+const LS_BOOKED    = 'tripmh_booked_v28';
+const LS_EXPANDED  = 'tripmh_expanded_v28';
+const LS_TAB       = 'tripmh_tab_v28';
+const LS_DARK      = 'tripmh_dark_v28';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -831,7 +824,6 @@ function copyField(id, field, e) {
   });
 }
 
-// פתרון מקיף: שרת פתוח של גוגל + גיבוי אוטומטי למנוע המכשיר
 function speakField(id, field, lang, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   
@@ -840,32 +832,26 @@ function speakField(id, field, lang, e) {
   
   const textToSpeak = item[field];
 
-  // עצירת השמע הקודם במידה ועדיין מתנגן
   if (window.currentAudio) {
     window.currentAudio.pause();
     window.currentAudio.currentTime = 0;
   }
 
-  const shortLang = lang.split('-')[0]; // הופך 'ja-JP' ל-'ja'
-  
-  // שימוש ב-API הפתוח של Google Translate (client=gtx)
+  const shortLang = lang.split('-')[0];
   const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
   
   window.currentAudio = new Audio(url);
   
-  // ניסיון לנגן מהרשת
   window.currentAudio.play().then(() => {
     addToast('🔊 ' + textToSpeak, 'neutral');
   }).catch(err => {
     console.warn('Network TTS blocked, falling back to local engine:', err);
     
-    // מנגנון גיבוי: אם הרשת נחסמה, מפעילים את המנוע המובנה של המכשיר
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.lang = lang;
       
-      // נסיון למצוא קול יפני ספציפי במכשיר
       const voices = window.speechSynthesis.getVoices();
       const targetVoice = voices.find(v => v.lang.includes('ja') || v.lang.includes('JP'));
       if (targetVoice) utterance.voice = targetVoice;
@@ -1048,7 +1034,7 @@ function parseDateVal(d) {
 function detectIcon(text) {
   const t = (text||'').toLowerCase();
   if (/מסעד|אוכל|food|ramen|sushi|restaurant|cafe|קפה|פיצה|pizza|eatery|dining/.test(t)) return '🍜';
-  if (/מוזיאון|museum/.test(t))                                return '🏛️';
+  if (/מוזיאון|museum/.test(t))                               return '🏛️';
   if (/מקדש|shrine|temple|torii/.test(t))                      return '⛩️';
   if (/פארק|גן|park|garden|טבע|nature/.test(t))               return '🌿';
   if (/קניות|שוק|market|mall|shop|store/.test(t))             return '🛍️';
@@ -1058,7 +1044,7 @@ function detectIcon(text) {
   if (/אוטובוס|bus/.test(t))                                   return '🚌';
   if (/חוף|beach|ים|sea|ocean/.test(t))                       return '🏖️';
   if (/הר|mount|peak|ski/.test(t))                             return '🏔️';
-  if (/מבצר|castle|fortress|palace|ארמון/.test(t))            return '🏯';
+  if (/מבצר|castle|fortress|palace|ארמון/.test(t))             return '🏯';
   if (/גשר|bridge/.test(t))                                    return '🌉';
   if (/מפל|waterfall/.test(t))                                 return '💧';
   if (/גן חיות|zoo/.test(t))                                   return '🦁';
@@ -1096,9 +1082,6 @@ function needsBooking(bookText) {
   return false;
 }
 
-// =========================================================
-// REAL GOOGLE MAPS API LINKS
-// =========================================================
 function extractUrl(str) {
   const match = str.match(/(https?:\/\/[^\s\)]+)/i);
   return match ? match[0] : null;
@@ -1136,35 +1119,6 @@ function buildMapUrl(item, prevItem) {
   }
   
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dest)}`;
-}
-
-function buildDailyUrl(items, mode='driving') {
-  const locs = [];
-  items.filter(a => a.type === 'itinerary' || a.type === 'option').forEach(a => {
-    let q = getLocStr(a);
-    if (q) locs.push(q);
-  });
-  
-  const uniqueLocs = [...new Set(locs)];
-    
-  if (!uniqueLocs.length) return '';
-  if (uniqueLocs.length === 1) return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(uniqueLocs[0])}&travelmode=${mode}`;
-  
-  const origin = encodeURIComponent(uniqueLocs[0]);
-  const dest = encodeURIComponent(uniqueLocs[uniqueLocs.length-1]);
-  const wps = uniqueLocs.slice(1, 10).map(w => encodeURIComponent(w)).join('|');
-  
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=${mode}`;
-  if (wps && mode !== 'transit') url += `&waypoints=${wps}`; 
-  return url;
-}
-
-function buildAiUrl(item) {
-  const place = item.placeName || '';
-  const area = item.address || item.area ? (item.address || item.area).replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() : '';
-  if (!place && !area) return '';
-  const q = `תן לי מידע תיירותי, טיפים לביקור, וזמנים מומלצים עבור: ${place} ${area ? 'באזור ' + area : ''}`;
-  return `https://www.perplexity.ai/?q=${encodeURIComponent(q)}`;
 }
 
 function formatCost(s) {
@@ -1529,26 +1483,11 @@ function exportCSV() {
   downloadFilesSequentially(files);
   document.getElementById('modal-export').classList.add('hidden');
   addToast(`הורדת ${files.length} קבצי טקסט החלה`, 'success');
-
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(fullClipboardText);
-  }
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 8, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 9, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
-}
-
-function exportKML(data) {
-  const e = s => (s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
-  let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n<name>TripMH</name>\n`;
-  [...data.itinerary, ...data.options].filter(i => i.address || i.area || i.placeName).forEach(i => {
-      const desc = [i.description, i.timeRange ? `שעות: ${i.timeRange}` : '', i.duration  ? `משך: ${i.duration}` : '', i.cost ? `עלות: ${i.cost}` : '', i.transport ? `הגעה: ${i.transport}` : '', i.booking ? `הזמנה: ${i.booking}` : ''].filter(Boolean).join('\n');
-      kml += `<Placemark>\n<name>${e(i.placeName)}</name>\n<description>${e(desc)}</description>\n<address>${e(i.address||i.area||i.placeName)}</address>\n</Placemark>\n`;
-  });
-  kml += `</Document>\n</kml>`;
-  downloadBlob(kml, 'tripmh_map.kml', 'application/vnd.google-earth.kml+xml');
 }
 
 /* =========================================================
@@ -1567,7 +1506,6 @@ function svgIcon(name) {
     edit:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
     chev:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`,
     check:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`,
-    transit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg>`,
     money:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
     map:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
     checkAll:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l5 5L20 5"/><path d="M7 12l5 5 8-8" opacity=".4"/></svg>`,
@@ -1576,10 +1514,8 @@ function svgIcon(name) {
     plus:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
     upload:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>`,
     ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-    ai:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
     copy:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
     speaker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
-    download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
   };
   return icons[name] || '';
 }
@@ -1699,7 +1635,7 @@ function renderTripCard(item, q, prevItem) {
   const highlightTransit = (item.transport || item.travelTimePrev) ? `
   <div class="transit-box">
     <div class="transit-box-title">
-      <span style="display:flex; width:16px; height:16px; align-items:center; justify-content:center; flex-shrink:0;">${svgIcon('bus')}</span>
+      <span style="display:flex; width:18px; height:18px; align-items:center; justify-content:center; flex-shrink:0;">${svgIcon('bus')}</span>
       מידע והגעה מומלצת
     </div>
     ${item.travelTimePrev ? `<div class="transit-box-row"><strong>⏳ משך נסיעה מהיעד הקודם:</strong> ${hlHtml(item.travelTimePrev, q)}</div>` : ''}
@@ -1709,7 +1645,7 @@ function renderTripCard(item, q, prevItem) {
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
-  const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<span class="dr-label">מידע:</span><span class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</span></div>` : '';
+  const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<div><div class="dr-label">מידע:</div><div class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</div></div></div>` : '';
   
   const addressRow = item.address ? `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value" style="display:inline-flex;align-items:center;gap:6px;"><span>${hlHtml(item.address,q)}</span> <button class="action-icon-btn" onclick="copyField('${item.id}', 'address', event)" title="העתק כתובת">${svgIcon('copy')}</button></span></div>` : '';
   const notesRow = item.notes ? `<div class="detail-row">${svgIcon('warn')}<span class="dr-label">הערות וסגירה:</span><span class="dr-value" style="color:var(--warning); font-weight:600;">${hlHtml(item.notes,q)}</span></div>` : '';
@@ -1742,7 +1678,7 @@ function renderTripCard(item, q, prevItem) {
     ${highlightTransit}
     ${item.description ? `<div class="card-desc">${hlHtml(item.description,q)}</div>` : ''}
     ${notesRow}${prepareRow}${facilitiesRow}${addressRow}${ciRow}${coRow}${bookingRow}
-    <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
+    <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
   </div>
 </article>`;
 }
@@ -1778,7 +1714,7 @@ function renderTipCard(item, q) {
   <div class="card-details">
     <div class="details-divider"></div>
     ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
-    <div class="nav-btns" style="margin-top:8px">${navBtns}</div>
+    <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
   </div>
 </article>`;
 }
@@ -1787,13 +1723,13 @@ function renderChecklistCard(item, q) {
   const done = state.completedIds.has(item.id);
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
   return `
-  <article class="card ${done?'done':''}" data-id="${item.id}" style="padding:10px 12px; display:flex; gap:10px; align-items:center;">
+  <article class="card ${done?'done':''}" data-id="${item.id}" style="padding:14px; display:flex; gap:12px; align-items:center;">
     <button class="card-check" onclick="toggleComplete('${item.id}')" style="flex-shrink:0; ${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
     <div style="flex:1; cursor:pointer;" onclick="openEdit('${item.id}')">
-      <div style="font-size:14px; font-weight:600; color:var(--text); ${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title,q)}</div>
-      ${item.description ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${hlHtml(item.description,q)}</div>` : ''}
+      <div style="font-size:15px; font-weight:600; color:var(--text); ${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title,q)}</div>
+      ${item.description ? `<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${hlHtml(item.description,q)}</div>` : ''}
     </div>
     <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0;">${svgIcon('edit')}</button>
   </article>`;
@@ -1801,24 +1737,24 @@ function renderChecklistCard(item, q) {
 
 function renderDictionaryCard(item, q) {
   return `
-  <article class="card" data-id="${item.id}" style="padding:12px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
+  <article class="card" data-id="${item.id}" style="padding:16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <div style="flex:1; min-width:0;">
-        <div style="font-size:16px; font-weight:800; color:var(--accent); word-break:break-word;">${hlHtml(item.hebrew, q)}</div>
-        ${item.english ? `<div style="font-size:13px; font-weight:500; color:var(--text-muted); margin-bottom:6px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
+        <div style="font-size:18px; font-weight:800; color:var(--accent); word-break:break-word;">${hlHtml(item.hebrew, q)}</div>
+        ${item.english ? `<div style="font-size:14px; font-weight:500; color:var(--text-muted); margin-bottom:8px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
         
-        <div style="font-size:18px; font-weight:700; color:var(--text); display:inline-flex; align-items:center; gap:6px;">
+        <div style="font-size:20px; font-weight:700; color:var(--text); display:inline-flex; align-items:center; gap:8px;">
           <span>${hlHtml(item.japanese, q)}</span>
           <button class="action-icon-btn" style="color:var(--purple);" onclick="speakField('${item.id}', 'japanese', 'ja-JP', event)" title="הקרא ביפנית">
             ${svgIcon('speaker')}
           </button>
         </div>
-        ${item.hebPronun ? `<div style="font-size:14px; font-weight:600; color:var(--success); margin-top:4px;">${hlHtml(item.hebPronun, q)}</div>` : ''}
-        ${item.romaji ? `<div style="font-size:12px; color:var(--warning); font-family:'Courier New',monospace; margin-top:2px;">${hlHtml(item.romaji, q)}</div>` : ''}
+        ${item.hebPronun ? `<div style="font-size:15px; font-weight:600; color:var(--success); margin-top:6px;">${hlHtml(item.hebPronun, q)}</div>` : ''}
+        ${item.romaji ? `<div style="font-size:13px; color:var(--warning); font-family:'Courier New',monospace; margin-top:4px;">${hlHtml(item.romaji, q)}</div>` : ''}
       </div>
       <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; margin-right:8px;">${svgIcon('edit')}</button>
     </div>
-    ${item.context ? `<div style="font-size:11px; font-weight:600; color:var(--text-dim); margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
+    ${item.context ? `<div style="font-size:12px; font-weight:600; color:var(--text-dim); margin-top:12px; padding-top:10px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
   </article>`;
 }
 
@@ -1910,60 +1846,11 @@ function updateUI() {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
 
-  document.getElementById('panel-itinerary').innerHTML = fi.length || !q ? renderPanel(fi,'dayLabel','אטרקציה','itinerary',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
-  document.getElementById('panel-options').innerHTML   = fo.length || !q ? renderPanel(fo,'dayLabel','אופציה','option',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
-  document.getElementById('panel-checklist').innerHTML = fc.length || !q ? renderPanel(fc,'category','משימה','checklist',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
-  document.getElementById('panel-tips').innerHTML      = ft.length || !q ? renderPanel(ft,'category','טיפ','tip',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
-  document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px">אין תוצאות לחיפוש זה.</p>`;
-
-  // Render Map Panel
-  const hasAnyMapData = d.itinerary.length > 0 || d.options.length > 0;
-  let mapHtml = '';
-  if (!hasAnyMapData) {
-      mapHtml = renderEmptyState();
-  } else {
-      mapHtml = `
-      <div style="padding: 16px;">
-          <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r); padding:20px; text-align:center; margin-bottom:24px;">
-              <div style="width:56px;height:56px;border-radius:50%;background:var(--accent-glow);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                  ${svgIcon('map')}
-              </div>
-              <h2 style="font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px;">מפת המסלול המלאה</h2>
-              <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; line-height:1.6; max-width:300px; margin-left:auto; margin-right:auto;">
-                  כדי לראות את כל 100+ האטרקציות והחלופות על מפה אחת גדולה ונוחה, הורד את הקובץ ופתח ב-Google My Maps או Google Earth.
-              </p>
-              <button class="link-btn primary" onclick="exportKML(state.data)" style="width:100%; justify-content:center; padding:12px; font-size:14px; font-weight:700; background:var(--accent); color:var(--bg); border:none;">
-                  ${svgIcon('download')} הורד מפת מסלול מלאה (KML)
-              </button>
-          </div>
-
-          <h3 style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:12px; padding-right:4px;">ניווט יומי מרוכז (גוגל מפות)</h3>
-          <div style="display:flex; flex-direction:column; gap:8px; padding-bottom: 20px;">
-      `;
-
-      const daysMap = new Map();
-      [...d.itinerary, ...d.options].forEach(i => {
-          const k = i.dayLabel || 'ללא תאריך';
-          if(!daysMap.has(k)) daysMap.set(k, []);
-          daysMap.get(k).push(i);
-      });
-
-      daysMap.forEach((items, day) => {
-          const dailyUrl = buildDailyUrl(items, 'driving');
-          if(dailyUrl) {
-              mapHtml += `
-              <a href="${dailyUrl}" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-muted); border:1px solid var(--border); padding:14px 16px; border-radius:var(--r-sm); text-decoration:none; color:var(--text); transition:background .2s;">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                      <span style="color:var(--accent);">${svgIcon('pin')}</span>
-                      <span style="font-size:14px; font-weight:600;">${escHtml(day)}</span>
-                  </div>
-                  <span style="color:var(--text-muted);">${svgIcon('nav')}</span>
-              </a>`;
-          }
-      });
-      mapHtml += `</div></div>`;
-  }
-  document.getElementById('panel-map').innerHTML = mapHtml;
+  document.getElementById('panel-itinerary').innerHTML = fi.length || !q ? renderPanel(fi,'dayLabel','אטרקציה','itinerary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
+  document.getElementById('panel-options').innerHTML   = fo.length || !q ? renderPanel(fo,'dayLabel','אופציה','option',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
+  document.getElementById('panel-checklist').innerHTML = fc.length || !q ? renderPanel(fc,'category','משימה','checklist',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
+  document.getElementById('panel-tips').innerHTML      = ft.length || !q ? renderPanel(ft,'category','טיפ','tip',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
+  document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
 
   document.getElementById('count-itinerary').textContent = d.itinerary.length;
   document.getElementById('count-options').textContent   = d.options.length;
@@ -2008,7 +1895,7 @@ function setTab(tab) {
     b.classList.toggle('active', active);
     b.setAttribute('aria-selected', active);
   });
-  ['itinerary','options','checklist','tips','dictionary','map'].forEach(t => {
+  ['itinerary','options','checklist','tips','dictionary'].forEach(t => {
     const p = document.getElementById('panel-'+t);
     if (p) p.style.display = t === tab ? 'block' : 'none';
   });
@@ -2051,7 +1938,7 @@ function buildEditForm(item) {
   return `
 <div class="edit-row">
   <div class="edit-group" style="flex:2"><label class="edit-label">שם המקום / אטרקציה</label><input class="edit-input" id="ef-placeName" value="${escHtml(item.placeName)}" autocomplete="off" /></div>
-  <div class="edit-group" style="flex:0 0 52px"><label class="edit-label">סמל</label><input class="edit-input" id="ef-icon" value="${escHtml(item.icon||'📍')}" style="text-align:center;font-size:18px;padding:6px 4px" autocomplete="off" /></div>
+  <div class="edit-group" style="flex:0 0 52px"><label class="edit-label">סמל</label><input class="edit-input" id="ef-icon" value="${escHtml(item.icon||'📍')}" style="text-align:center;font-size:18px;padding:12px 6px" autocomplete="off" /></div>
   <div class="edit-group" style="flex:1"><label class="edit-label">עדיפות</label><input class="edit-input" id="ef-priority" value="${escHtml(item.priority)}" autocomplete="off" /></div>
 </div>
 <div class="edit-row">
@@ -2227,7 +2114,12 @@ document.addEventListener('DOMContentLoaded', () => {
     state.completedIds = new Set(lsGet(LS_COMPLETED, []));
     state.bookedIds    = new Set(lsGet(LS_BOOKED, []));
     state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
-    state.activeTab    = lsGet(LS_TAB, 'itinerary');
+    
+    if(lsGet(LS_TAB, 'itinerary') === 'map') {
+        state.activeTab = 'itinerary';
+    } else {
+        state.activeTab    = lsGet(LS_TAB, 'itinerary');
+    }
   }
 
   updateUI();
@@ -2252,7 +2144,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Global Ctrl+Z / Cmd+Z Support
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-      // Ignore if user is actively typing in an input/textarea so we don't block native text undo
       if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         e.preventDefault();
         undoLastAction();
@@ -2321,17 +2212,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-export').classList.add('hidden');
     addToast('גיבוי JSON מלא הורד בהצלחה', 'success');
   });
-  document.getElementById('exp-kml').addEventListener('click',  () => {
-    exportKML(state.data);
-    document.getElementById('modal-export').classList.add('hidden');
-    addToast('מפת KML הורדה בהצלחה', 'success');
-  });
   document.getElementById('exp-txt').addEventListener('click',  () => {
-    exportTxt();
+    // השארנו את כפתור הורדת הטקסט ריק למקרה שתרצה להוסיף בחזרה - אפשר להוסיף כאן לוגיקה עתידית.
+    document.getElementById('modal-export').classList.add('hidden');
   });
-
-  // Share
-  document.getElementById('btn-share').addEventListener('click', () => exportTxt());
 
   // Clear all
   document.getElementById('btn-clear').addEventListener('click', () => {
