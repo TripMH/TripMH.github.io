@@ -143,18 +143,20 @@ html.light mark{background:rgba(217,119,6,.22)}
 #tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 
 /* =========================================================
-   CALENDAR VIEW CSS
+   CALENDAR GRID CSS
 ========================================================= */
-.cal-agenda { padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 32px; }
-.cal-day { display: flex; flex-direction: column; gap: 16px; }
-.cal-header { display: flex; align-items: center; position: sticky; top: -14px; background: color-mix(in srgb,var(--bg) 94%,transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 10px 14px; z-index: 10; margin: 0 -14px; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
-.cal-header-date { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-glow); color: var(--accent); padding: 6px 14px; border-radius: 99px; font-weight: 700; font-size: 14px; border: 1px solid var(--accent-border); }
-.cal-events { display: flex; flex-direction: column; gap: 16px; padding-right: 20px; border-right: 2px dashed var(--border); margin-right: 8px; position: relative; }
-.cal-event { display: flex; gap: 14px; position: relative; align-items: flex-start; }
-.cal-event::before { content: ''; position: absolute; right: -27px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--accent); z-index: 2; box-shadow: 0 0 0 4px var(--bg); }
-.cal-event.done::before { background: var(--success); border-color: var(--success); }
-.cal-time { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: var(--text-dim); width: 42px; flex-shrink: 0; padding-top: 7px; text-align: left; direction: ltr; }
-
+.cal-month-block { padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 12px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; direction: rtl; }
+.cal-grid-header { font-size: 11px; font-weight: 600; color: var(--text-dim); text-align: center; padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.cal-grid-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px; min-height: 80px; display: flex; flex-direction: column; gap: 3px; position: relative; }
+.cal-grid-cell.empty { background: transparent; border-color: transparent; }
+.cal-grid-cell.today { border-color: var(--accent); background: var(--accent-glow); }
+.cal-cell-date { font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: right; line-height: 1; padding-bottom: 2px; }
+.cal-grid-cell.today .cal-cell-date { color: var(--accent); }
+.cal-item { font-size: 10px; padding: 4px; border-radius: 4px; background: var(--bg-muted); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: opacity .2s, border-color .2s; display: flex; align-items: center; gap: 4px; border: 1px solid transparent; }
+.cal-item:hover { opacity: 0.8; border-color: var(--border); }
+.cal-item.done { text-decoration: line-through; opacity: 0.4; filter: grayscale(1); }
+.cal-item-time { font-family: 'Courier New', monospace; font-size: 9px; color: var(--accent); flex-shrink: 0; font-weight: bold; }
 
 /* =========================================================
    SECTION HEADERS
@@ -185,7 +187,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s;box-shadow: 0 4px 20px rgba(0,0,0,0.15);}
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15);}
 .card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
@@ -459,6 +461,7 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
+    <!-- הלשוניות סודרו כך שלוח השנה יהיה הכי שמאלי (אחרון ברשימה ב-RTL) -->
     <nav id="tab-bar">
       <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -466,14 +469,6 @@ select.edit-input{appearance:none}
         </svg>
         <span class="tab-lbl">מסלול</span>
         <span class="tab-count" id="count-itinerary">0</span>
-      </button>
-      <button class="tab-btn" data-tab="calendar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        <span class="tab-lbl">לוח שנה</span>
-        <span class="tab-count" id="count-calendar">0</span>
       </button>
       <button class="tab-btn" data-tab="options">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -503,6 +498,14 @@ select.edit-input{appearance:none}
         <span class="tab-lbl">מילון</span>
         <span class="tab-count" id="count-dictionary">0</span>
       </button>
+      <button class="tab-btn" data-tab="calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span class="tab-lbl">לוח שנה</span>
+        <span class="tab-count" id="count-calendar">0</span>
+      </button>
     </nav>
 
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
@@ -527,11 +530,11 @@ select.edit-input{appearance:none}
 
   <main id="tab-content">
     <div id="panel-itinerary"></div>
-    <div id="panel-calendar"  style="display:none"></div>
     <div id="panel-options"   style="display:none"></div>
     <div id="panel-checklist" style="display:none"></div>
     <div id="panel-tips"      style="display:none"></div>
     <div id="panel-dictionary" style="display:none"></div>
+    <div id="panel-calendar"  style="display:none"></div>
   </main>
 </div>
 
@@ -682,12 +685,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v28';
-const LS_COMPLETED = 'tripmh_completed_v28';
-const LS_BOOKED    = 'tripmh_booked_v28';
-const LS_EXPANDED  = 'tripmh_expanded_v28';
-const LS_TAB       = 'tripmh_tab_v28';
-const LS_DARK      = 'tripmh_dark_v28';
+const LS_DATA      = 'tripmh_data_v29';
+const LS_COMPLETED = 'tripmh_completed_v29';
+const LS_BOOKED    = 'tripmh_booked_v29';
+const LS_EXPANDED  = 'tripmh_expanded_v29';
+const LS_TAB       = 'tripmh_tab_v29';
+const LS_DARK      = 'tripmh_dark_v29';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1621,6 +1624,25 @@ function toggleExpand(id) {
   persistState();
 }
 
+window.scrollToItem = function(id) {
+  const el = document.querySelector(`#panel-calendar .card[data-id="${id}"]`);
+  if(el) {
+    el.scrollIntoView({behavior: 'smooth', block: 'center'});
+    el.style.transition = 'all 0.3s';
+    const oldBg = el.style.backgroundColor;
+    el.style.backgroundColor = 'var(--accent-glow)';
+    el.style.borderColor = 'var(--accent)';
+    setTimeout(() => {
+      el.style.backgroundColor = oldBg;
+      el.style.borderColor = '';
+    }, 1500);
+    
+    if(!state.expandedIds.has(id)) {
+        toggleExpand(id);
+    }
+  }
+};
+
 /* =========================================================
    CARD RENDERERS
 ========================================================= */
@@ -1868,78 +1890,100 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
 }
 
 /* =========================================================
-   CALENDAR TAB RENDERER
+   CALENDAR TAB RENDERER (GRID)
 ========================================================= */
 function renderCalendarPanel(items, q) {
-  if (!items.length) return renderEmptyState() + '<p style="text-align:center; color:var(--text-muted); font-size:14px; margin-top:10px;">לא נמצאו פריטים במסלול או באופציות.</p>';
+  const validItems = items.filter(i => i.dateVal > 0);
+  if (!validItems.length) return renderEmptyState() + '<p style="text-align:center; color:var(--text-muted); font-size:14px; margin-top:10px;">אין פריטים עם תאריך להצגה בלוח השנה.</p>';
 
-  const groups = new Map();
-  items.forEach(i => {
-    let dateKey = i.dateVal;
-    let label = '';
-    if (dateKey > 0) {
-      const d = new Date(dateKey);
-      const dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
-      const dayName = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'][d.getDay()];
-      label = `${dateStr} - יום ${dayName}`;
-    } else {
-      label = i.dayLabel || 'ללא תאריך מוגדר';
-      dateKey = label; // Fallback string grouping
-    }
+  // Sort logically for chronological flow
+  validItems.sort((a, b) => a.dateVal - b.dateVal);
 
-    if (!groups.has(dateKey)) groups.set(dateKey, { label, dateVal: i.dateVal, items: [] });
-    groups.get(dateKey).items.push(i);
+  const monthGroups = new Map(); // "YYYY-MM" -> map of "DD" -> items
+  validItems.forEach(i => {
+     const d = new Date(i.dateVal);
+     const y = d.getFullYear();
+     const m = d.getMonth();
+     const day = d.getDate();
+     const monthKey = `${y}-${m}`;
+     
+     if (!monthGroups.has(monthKey)) {
+         monthGroups.set(monthKey, { year: y, month: m, days: new Map() });
+     }
+     const daysMap = monthGroups.get(monthKey).days;
+     if (!daysMap.has(day)) daysMap.set(day, []);
+     daysMap.get(day).push(i);
   });
 
-  const sortedKeys = Array.from(groups.values()).sort((a, b) => {
-    if (a.dateVal > 0 && b.dateVal > 0) return a.dateVal - b.dateVal;
-    if (a.dateVal > 0) return -1;
-    if (b.dateVal > 0) return 1;
-    return a.label.localeCompare(b.label);
+  const monthNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const dayNames = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+  
+  let html = '<div style="display:flex; flex-direction:column; gap:20px;">';
+
+  // Render Grid
+  monthGroups.forEach((monthData) => {
+     const y = monthData.year;
+     const m = monthData.month;
+     const daysMap = monthData.days;
+
+     html += `<div class="cal-month-block">`;
+     html += `<h3 style="margin-bottom:12px; font-size:18px; font-weight:800; color:var(--accent); display:flex; align-items:center; gap:8px;">${svgIcon('calendar')} ${monthNames[m]} ${y}</h3>`;
+     html += `<div class="cal-grid">`;
+     
+     // Headers (Sun - Sat)
+     dayNames.forEach(dn => {
+        html += `<div class="cal-grid-header">${dn}</div>`;
+     });
+
+     // Calculate start offset
+     const firstDay = new Date(y, m, 1).getDay(); // 0 = Sunday
+     for (let i = 0; i < firstDay; i++) {
+        html += `<div class="cal-grid-cell empty"></div>`;
+     }
+
+     const totalDays = new Date(y, m + 1, 0).getDate();
+     const today = new Date();
+     const isCurrentMonth = today.getFullYear() === y && today.getMonth() === m;
+
+     for (let day = 1; day <= totalDays; day++) {
+        const isToday = isCurrentMonth && today.getDate() === day;
+        const dayItems = daysMap.get(day) || [];
+        
+        // Sort items in this day by time
+        dayItems.sort((a,b) => {
+            const timeA = (a.timeRange || '').match(/(\d{1,2}:\d{2})/);
+            const timeB = (b.timeRange || '').match(/(\d{1,2}:\d{2})/);
+            if (timeA && timeB) return timeA[1].localeCompare(timeB[1]);
+            if (timeA) return -1;
+            if (timeB) return 1;
+            return a._idx - b._idx;
+        });
+
+        html += `<div class="cal-grid-cell ${isToday ? 'today' : ''}">`;
+        html += `<div class="cal-cell-date">${day}</div>`;
+        
+        dayItems.forEach(item => {
+           const done = state.completedIds.has(item.id);
+           const timeMatch = (item.timeRange || '').match(/(\d{1,2}:\d{2})/);
+           const timeStr = timeMatch ? `<span class="cal-item-time">${timeMatch[1]}</span>` : '';
+           
+           html += `<div class="cal-item ${done ? 'done' : ''}" onclick="window.scrollToItem('${item.id}')" title="${escHtml(item.placeName)}">
+                      ${timeStr}
+                      <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(item.icon||'📍')} ${hlHtml(item.placeName, q)}</span>
+                    </div>`;
+        });
+        
+        html += `</div>`;
+     }
+     html += `</div></div>`;
   });
 
-  let html = '<div class="cal-agenda">';
+  // Render Agenda below the grid
+  html += `<div style="border-top:2px dashed var(--border); padding-top:16px;">`;
+  html += `<h4 style="margin: 0 14px 10px; font-size:14px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; gap:6px;">${svgIcon('nav')} פירוט יומי (לחץ על הפריטים בלוח)</h4>`;
+  html += renderPanel(validItems, 'dayLabel', 'אטרקציה', 'itinerary', q);
+  html += `</div></div>`;
 
-  sortedKeys.forEach(group => {
-    html += `
-      <div class="cal-day">
-         <div class="cal-header">
-            <div class="cal-header-date">${svgIcon('calendar')} ${hlHtml(group.label, q)}</div>
-         </div>
-         <div class="cal-events">
-    `;
-    
-    // Sort items internally by time if possible
-    group.items.sort((a,b) => {
-        const timeA = (a.timeRange || '').match(/(\d{1,2}:\d{2})/);
-        const timeB = (b.timeRange || '').match(/(\d{1,2}:\d{2})/);
-        if (timeA && timeB) return timeA[1].localeCompare(timeB[1]);
-        if (timeA) return -1;
-        if (timeB) return 1;
-        return a._idx - b._idx;
-    });
-
-    group.items.forEach((item, index) => {
-      const prevItem = index > 0 ? group.items[index - 1] : null;
-      const timeMatch = (item.timeRange || '').match(/(\d{1,2}:\d{2})/);
-      const timeDisplay = timeMatch ? timeMatch[1] : '--:--';
-      const isDone = state.completedIds.has(item.id);
-
-      html += `
-        <div class="cal-event ${isDone ? 'done' : ''}">
-           <div class="cal-time">${hlHtml(timeDisplay, q)}</div>
-           <div class="cal-event-content" style="flex:1; min-width:0;">
-              ${renderTripCard(item, q, prevItem)}
-           </div>
-        </div>
-      `;
-    });
-    html += `
-         </div>
-      </div>
-    `;
-  });
-  html += '</div>';
   return html;
 }
 
@@ -1964,7 +2008,7 @@ function updateUI() {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
   
-  const fCal = [...fi, ...fo].sort((a,b) => a.dateVal - b.dateVal);
+  const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   document.getElementById('panel-itinerary').innerHTML = fi.length || !q ? renderPanel(fi,'dayLabel','אטרקציה','itinerary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
   document.getElementById('panel-calendar').innerHTML  = fCal.length || !q ? renderCalendarPanel(fCal, q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
@@ -1974,7 +2018,7 @@ function updateUI() {
   document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
 
   document.getElementById('count-itinerary').textContent = d.itinerary.length;
-  document.getElementById('count-calendar').textContent  = d.itinerary.length + d.options.length; // הכל משתקף בלוח השנה
+  document.getElementById('count-calendar').textContent  = fCal.length;
   document.getElementById('count-options').textContent   = d.options.length;
   
   const cc = document.getElementById('count-checklist'); if (cc) cc.textContent = d.checklist.length;
