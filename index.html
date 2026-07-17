@@ -80,7 +80,8 @@ html.light mark{background:rgba(217,119,6,.22)}
 }
 
 .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;gap:8px;}
-.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer;transition:opacity 0.2s;}
+.logo:hover{opacity:0.8;}
 .logo-icon{width:32px;height:32px;border-radius:var(--r-sm);background:var(--accent-glow);
   display:flex;align-items:center;justify-content:center;border:1px solid var(--accent-border);flex-shrink:0}
 .logo-icon svg{width:16px;height:16px;color:var(--accent)}
@@ -370,7 +371,6 @@ html.light mark{background:rgba(217,119,6,.22)}
 .modal-title svg{width:22px;height:22px;color:var(--accent)}
 .modal-subtitle{font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:24px; text-align:center;}
 
-/* עיצוב גריד למסך העלאה */
 .format-hint-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -495,7 +495,8 @@ select.edit-input{appearance:none}
 <div id="app">
   <header id="app-header">
     <div class="header-top">
-      <div class="logo">
+      <!-- לחיצה על הלוגו תאפס את הכל למצב ברירת מחדל -->
+      <div class="logo" id="app-logo" title="אפס מסננים וחזור למצב התחלתי">
         <div class="logo-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
@@ -803,12 +804,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v41';
-const LS_COMPLETED = 'tripmh_completed_v41';
-const LS_BOOKED    = 'tripmh_booked_v41';
-const LS_EXPANDED  = 'tripmh_expanded_v41';
-const LS_TAB       = 'tripmh_tab_v41';
-const LS_DARK      = 'tripmh_dark_v41';
+const LS_DATA      = 'tripmh_data_v42';
+const LS_COMPLETED = 'tripmh_completed_v42';
+const LS_BOOKED    = 'tripmh_booked_v42';
+const LS_EXPANDED  = 'tripmh_expanded_v42';
+const LS_TAB       = 'tripmh_tab_v42';
+const LS_DARK      = 'tripmh_dark_v42';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1000,7 +1001,6 @@ function speakField(id, field, lang, e) {
     window.currentAudio.currentTime = 0;
   }
 
-  // חיווי תמיכה במצב לא מקוון
   if (navigator.onLine) {
       const shortLang = lang.split('-')[0];
       const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
@@ -2597,6 +2597,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateUI();
   setTab(state.activeTab, true); 
+
+  // כפתור איפוס כללי על הלוגו של TripMH
+  document.getElementById('app-logo').addEventListener('click', () => {
+      // ניקוי חיפוש וסינונים
+      state.searchQuery = '';
+      document.getElementById('search-input').value = '';
+      document.getElementById('search-clear').classList.remove('visible');
+      document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+      
+      // סגירת כל הכרטיסיות הפתוחות
+      state.expandedIds.clear();
+      
+      // חזרה ללשונית המסלול ועדכון תצוגה
+      setTab('itinerary', true);
+      updateUI();
+      persistState();
+      
+      // גלילה חלקה למעלה
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      addToast('המערכת אופסה למצב ברירת מחדל', 'neutral');
+  });
 
   // Tab bar
   document.querySelectorAll('.tab-btn').forEach(b => {
