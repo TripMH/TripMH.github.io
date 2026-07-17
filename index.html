@@ -31,7 +31,7 @@ html.light{
   --purple:#7c3aed;--purple-glow:rgba(124,58,237,.09);
 }
 
-/* מאפשר גלילה טבעית (Pull to refresh עובד) אך חוסם גלילה אופקית (אין בריחות) */
+/* מאפשר גלילה טבעית ומושך לרענון במובייל, חוסם בריחה אופקית */
 html, body {
   font-family:'Segoe UI','Heebo',Arial,sans-serif;
   font-size:16px;
@@ -121,6 +121,12 @@ html.light mark{background:rgba(217,119,6,.22)}
 .search-clear.visible{display:flex}
 .search-clear svg{width:11px;height:11px}
 
+/* פילטרים מהירים */
+.quick-filters { display:flex; gap:8px; overflow-x:auto; padding: 0 14px 10px; flex-wrap: nowrap; -webkit-overflow-scrolling:touch; }
+.quick-filters::-webkit-scrollbar { display:none; }
+.qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s;}
+.qf-btn.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+
 /* =========================================================
    TAB BAR
 ========================================================= */
@@ -140,7 +146,7 @@ html.light mark{background:rgba(217,119,6,.22)}
   height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
 
 /* =========================================================
-   STATS BAR
+   STATS BAR (With Budget)
 ========================================================= */
 .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-elevated)}
 .stat-item{flex:1;display:flex;flex-direction:column;align-items:center;
@@ -154,7 +160,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .stat-item.purple .stat-num{color:var(--purple)}
 
 /* =========================================================
-   INLINE ACTION BUTTONS (COPY / TTS)
+   INLINE ACTION BUTTONS
 ========================================================= */
 .action-icon-btn {
   background:transparent; border:none; color:var(--text-dim); cursor:pointer;
@@ -174,7 +180,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 }
 
 /* =========================================================
-   CALENDAR GRID CSS - TIME DISTRIBUTION
+   CALENDAR GRID CSS - TIME DISTRIBUTION & DRAG DROP
 ========================================================= */
 .cal-month-block { padding: 14px 14px 0; display: flex; flex-direction: column; gap: 12px; }
 .cal-month-block h3 { margin-bottom:4px; font-size:18px; font-weight:800; color:var(--accent); display:flex; align-items:center; gap:8px; }
@@ -182,59 +188,32 @@ html.light mark{background:rgba(217,119,6,.22)}
 .cal-separator { border-top: 2px dashed var(--border); margin: 24px 14px 16px; opacity: 0.5; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; direction: rtl; }
 .cal-grid-header { font-size: 11px; font-weight: 600; color: var(--text-dim); text-align: center; padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-.cal-grid-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px; min-height: 120px; display: flex; flex-direction: column; position: relative; }
+
+/* תיקון ימים ריקים - המינימום הצטמצם מ-120 ל-45 פיקסלים בלבד! */
+.cal-grid-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px; min-height: 45px; display: flex; flex-direction: column; position: relative; transition: background-color 0.2s, border-color 0.2s; }
+.cal-grid-cell.has-events { min-height: 100px; } /* נפתח רק אם יש לו אטרקציות */
 .cal-grid-cell.empty { background: transparent; border-color: transparent; }
 .cal-grid-cell.today { border-color: var(--accent); background: var(--accent-glow); }
+.cal-grid-cell.drag-over { background: var(--accent-glow); border: 2px dashed var(--accent); }
+
 .cal-cell-date { font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: right; line-height: 1; padding-bottom: 4px; flex-shrink: 0; }
 .cal-grid-cell.today .cal-cell-date { color: var(--accent); }
 
 .cal-spacer { flex-shrink: 1; }
-.cal-item { font-size: 10px; padding: 4px; border-radius: 4px; background: var(--bg-muted); color: var(--text); cursor: pointer; transition: opacity .2s, border-color .2s; display: flex; align-items: center; gap: 4px; border: 1px solid transparent; flex-shrink: 0; position: relative; margin: 1px 0; z-index: 10; -webkit-tap-highlight-color: transparent;}
+.cal-item { font-size: 10px; padding: 4px; border-radius: 4px; background: var(--bg-muted); color: var(--text); cursor: grab; transition: opacity .2s, border-color .2s; display: flex; align-items: center; gap: 4px; border: 1px solid transparent; flex-shrink: 0; position: relative; margin: 1px 0; z-index: 10; -webkit-tap-highlight-color: transparent;}
+.cal-item:active { cursor: grabbing; }
 .cal-item:hover { opacity: 0.9; border-color: var(--border); z-index: 20; }
 .cal-item.done { text-decoration: line-through; opacity: 0.4; filter: grayscale(1); }
 .cal-item-time { font-family: 'Courier New', monospace; font-size: 9px; color: var(--accent); flex-shrink: 0; font-weight: bold; }
 .cal-item-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; display:flex; align-items:center; gap:2px; }
 
-/* =========================================================
-   GLOBAL TOOLTIP (פתרון מושלם לבועה שלא נחתכת במחשב)
-========================================================= */
-.global-tooltip {
-  position: fixed;
-  background: var(--bg-elevated);
-  color: var(--text);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: pre-wrap; /* מאפשר לטקסט ארוך להישבר אם צריך */
-  max-width: 300px;
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-  border: 1px solid var(--accent-border);
-  z-index: 99999; /* מופיע מעל הכל! */
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translate(-50%, -100%);
-  transition: opacity 0.15s ease-in-out;
-}
-.global-tooltip.visible {
-  opacity: 1;
-  visibility: visible;
-}
-.global-tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: var(--accent-border) transparent transparent transparent;
-}
+/* Tooltip חכם ומרחף (Global Tooltip שלא נחתך בחיים) */
+.global-tooltip { position: fixed; background: var(--bg-elevated); color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: pre-wrap; max-width: 300px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.5); border: 1px solid var(--accent-border); z-index: 99999; pointer-events: none; opacity: 0; visibility: hidden; transform: translate(-50%, -10px); transition: opacity 0.15s ease-in-out, transform 0.15s; }
+.global-tooltip.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.global-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: var(--accent-border) transparent transparent transparent; }
 
 /* =========================================================
-   MOBILE BOTTOM SHEET PREVIEW (תחליף חכם ללחיצה במובייל)
+   MOBILE BOTTOM SHEET PREVIEW (תחליף חכם ללחיצה ארוכה במובייל)
 ========================================================= */
 .mps-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .mps-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -253,7 +232,7 @@ html.light mark{background:rgba(217,119,6,.22)}
    AGENDA DAY GROUP - הדגשת כותרות עדינה וחכמה
 ========================================================= */
 .agenda-day-group { margin-bottom: 24px; }
-.section-header{position:sticky;top:105px;z-index:10;padding:8px 14px; /* offset top relative to header */
+.section-header{position:sticky;top:105px;z-index:10;padding:8px 14px;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   display:flex;align-items:center;justify-content:space-between;
   border-bottom: 1px solid var(--border);
@@ -278,7 +257,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 155px;} /* תוקן כדי לא להיות מוסתר תחת הכותרות העליונות */
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 155px;} 
 .card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
@@ -453,14 +432,6 @@ select.edit-input{appearance:none}
 .loading-label{font-size:14px;color:var(--text-muted);font-weight:600}
 
 /* =========================================================
-   FORMAT HINT GRID
-========================================================= */
-.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.format-hint-item{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
-.format-hint-item strong{display:block;font-size:12px;color:var(--accent);margin-bottom:4px}
-.format-hint-item span{font-size:12px;color:var(--text-muted)}
-
-/* =========================================================
    EXPORT MODAL
 ========================================================= */
 .export-row{display:flex;flex-direction:column;gap:10px}
@@ -547,6 +518,16 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
+    <!-- Quick Filters -->
+    <div class="quick-filters" id="quick-filters">
+       <button class="qf-btn" data-val="אוכל">🍜 אוכל ושתייה</button>
+       <button class="qf-btn" data-val="קניות">🛍️ קניות</button>
+       <button class="qf-btn" data-val="טבע">🌿 פארקים וטבע</button>
+       <button class="qf-btn" data-val="מקדש">⛩️ מקדשים</button>
+       <button class="qf-btn" data-val="מוזיאון">🏛️ מוזיאונים</button>
+       <button class="qf-btn" data-val="רכבת">🚆 תחבורה</button>
+    </div>
+
     <nav id="tab-bar">
       <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -590,17 +571,17 @@ select.edit-input{appearance:none}
         <span class="stat-num" id="stat-attractions">0</span>
         <span class="stat-lbl">אטרקציות</span>
       </div>
-      <div class="stat-item success">
-        <span class="stat-num" id="stat-done">0</span>
-        <span class="stat-lbl">הושלמו</span>
-      </div>
       <div class="stat-item warning" title="מעקב אחר אטרקציות ומקומות שדורשים הזמנה או שריון מראש">
         <span class="stat-num" id="stat-booking">0</span>
         <span class="stat-lbl">מעקב הזמנות</span>
       </div>
-      <div class="stat-item purple">
-        <span class="stat-num" id="stat-tips">0</span>
-        <span class="stat-lbl">טיפים</span>
+      <div class="stat-item success">
+        <span class="stat-num" id="stat-done">0</span>
+        <span class="stat-lbl">הושלמו</span>
+      </div>
+      <div class="stat-item purple" title="הערכת תקציב כולל (מבוסס על מסלול ואופציות)">
+        <span class="stat-num" id="stat-budget">0</span>
+        <span class="stat-lbl">תקציב (₪)</span>
       </div>
     </div>
   </header>
@@ -614,7 +595,7 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
-<!-- בועית ריחוף חכמה וגלובלית שלא נחתכת לעולם במסך המחשב -->
+<!-- Global Tooltip - בועה מרחפת שלא תיחתך במחשב לעולם -->
 <div id="global-tooltip" class="global-tooltip"></div>
 
 <!-- Mobile Bottom Sheet Preview -->
@@ -777,12 +758,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v35';
-const LS_COMPLETED = 'tripmh_completed_v35';
-const LS_BOOKED    = 'tripmh_booked_v35';
-const LS_EXPANDED  = 'tripmh_expanded_v35';
-const LS_TAB       = 'tripmh_tab_v35';
-const LS_DARK      = 'tripmh_dark_v35';
+const LS_DATA      = 'tripmh_data_v36';
+const LS_COMPLETED = 'tripmh_completed_v36';
+const LS_BOOKED    = 'tripmh_booked_v36';
+const LS_EXPANDED  = 'tripmh_expanded_v36';
+const LS_TAB       = 'tripmh_tab_v36';
+const LS_DARK      = 'tripmh_dark_v36';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -912,7 +893,7 @@ function showConfirm(title, text, onConfirm, isDanger=false) {
 }
 
 /* =========================================================
-   COPY & TTS HELPERS (Bulletproof Copy)
+   COPY & TTS HELPERS
 ========================================================= */
 function copyField(id, field, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -943,9 +924,7 @@ function copyField(id, field, e) {
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(textToCopy).then(() => {
       addToast('הועתק: ' + textToCopy, 'success');
-    }).catch(() => {
-      fallbackCopy(textToCopy);
-    });
+    }).catch(() => fallbackCopy(textToCopy));
   } else {
     fallbackCopy(textToCopy);
   }
@@ -968,25 +947,15 @@ function speakField(id, field, lang, e) {
   const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
   
   window.currentAudio = new Audio(url);
-  
   window.currentAudio.play().then(() => {
     addToast('🔊 ' + textToSpeak, 'neutral');
   }).catch(err => {
-    console.warn('Network TTS blocked, falling back to local engine:', err);
-    
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.lang = lang;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const targetVoice = voices.find(v => v.lang.includes('ja') || v.lang.includes('JP'));
-      if (targetVoice) utterance.voice = targetVoice;
-
       window.speechSynthesis.speak(utterance);
       addToast('🔊 ' + textToSpeak + ' (הקראה מקומית)', 'neutral');
-    } else {
-      addToast('שגיאה בהשמעת הקול.', 'error');
     }
   });
 }
@@ -1027,7 +996,6 @@ function getSmartLinkLabel(url, label) {
   if (u.includes('lawson') || u.includes('eplus') || u.includes('ticket') || u.includes('pia.jp') || u.includes('l-tike') || u.includes('viagogo')) return 'רכישת כרטיסים להופעה';
   if (u.includes('tabelog') || u.includes('tripadvisor') || u.includes('google.com/maps')) return 'ביקורות ומידע על המקום';
   if (u.includes('instagram.com') || u.includes('facebook.com') || u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
-  
   return 'האתר הרשמי';
 }
 
@@ -1073,9 +1041,6 @@ function parseCSV(raw) {
   return rows;
 }
 
-/* =========================================================
-   COLUMN ALIASES
-========================================================= */
 const ALIASES = {
   icon:      ['אייקון', 'icon', 'סמל'],
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -1658,6 +1623,50 @@ function svgIcon(name) {
 }
 
 /* =========================================================
+   DRAG & DROP EVENTS FOR CALENDAR
+========================================================= */
+window.onCalDragStart = function(e, id) {
+  e.dataTransfer.setData('text/plain', id);
+  e.dataTransfer.effectAllowed = 'move';
+};
+window.onCalDragOver = function(e) {
+  e.preventDefault(); 
+  e.dataTransfer.dropEffect = 'move';
+  const cell = e.target.closest('.cal-grid-cell');
+  if (cell) cell.classList.add('drag-over');
+};
+window.onCalDragLeave = function(e) {
+  const cell = e.target.closest('.cal-grid-cell');
+  if (cell) cell.classList.remove('drag-over');
+};
+window.onCalDrop = function(e, targetDateVal) {
+  e.preventDefault();
+  const cell = e.target.closest('.cal-grid-cell');
+  if (cell) cell.classList.remove('drag-over');
+  
+  const id = e.dataTransfer.getData('text/plain');
+  if (!id) return;
+  
+  saveToHistory();
+  const allItems = [...state.data.itinerary, ...state.data.options];
+  const item = allItems.find(x => x.id === id);
+  
+  if (item) {
+      const nd = new Date(targetDateVal);
+      const dd = String(nd.getDate()).padStart(2, '0');
+      const mm = String(nd.getMonth() + 1).padStart(2, '0');
+      const yyyy = nd.getFullYear();
+      
+      item.dayLabel = `${dd}/${mm}/${yyyy}`;
+      item.dateVal = targetDateVal;
+      
+      persistState();
+      updateUI();
+      addToast('האטרקציה הועברה לתאריך החדש בהצלחה', 'success', undoLastAction);
+  }
+};
+
+/* =========================================================
    UI ACTIONS
 ========================================================= */
 function toggleBooked(id) {
@@ -1720,13 +1729,12 @@ function toggleExpand(id) {
 window.handleCalClick = function(id, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   
-  // זיהוי האם המסך מגע (מובייל) או מחשב עם עכבר
   const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
   
   if (isTouch) {
-      openMobilePreview(id); // מובייל: פותח תפריט הצצה תחתון
+      openMobilePreview(id); 
   } else {
-      window.scrollToItem(id); // מחשב: גולל ישר לאטרקציה
+      window.scrollToItem(id); 
   }
 };
 
@@ -1735,18 +1743,16 @@ window.scrollToItem = function(id) {
   const item = allItems.find(x => x.id === id);
   if(!item) return;
 
-  // מעבר ללשונית הנכונה (מסלול / אופציות)
   if(item.type === 'option') {
       setTab('options', true);
   } else {
       setTab('itinerary', true);
   }
 
-  // מחכה רגע ל-DOM ואז גולל בצורה מדויקת
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${id}"]`);
     if(el) {
-      const headerOffset = 180; // גובה משוער של החלק העליון שנדבק (Header + Tabs)
+      const headerOffset = 180; 
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -1771,19 +1777,19 @@ window.scrollToItem = function(id) {
   }, 100);
 };
 
-/* פונקציות להצגת מסך ההצצה (Bottom Sheet) במובייל */
+/* פונקציות להצגת מסך ההצצה במובייל */
 window.openMobilePreview = function(id) {
   const allItems = [...state.data.itinerary, ...state.data.options];
   const item = allItems.find(x => x.id === id);
   if(!item) return;
 
-  document.getElementById('mps-icon').innerHTML = svgIcon('pin'); // או האייקון הספציפי
+  document.getElementById('mps-icon').innerHTML = svgIcon('pin');
   if(item.icon) document.getElementById('mps-icon').textContent = item.icon;
   
   const timeMatch = (item.timeRange || '').match(/(\d{1,2}:\d{2})/);
   const mpsTime = document.getElementById('mps-time');
   if (timeMatch) {
-      mpsTime.textContent = timeMatch[1] + ':' + timeMatch[2];
+      mpsTime.textContent = timeMatch[1]; 
       mpsTime.style.display = 'block';
   } else {
       mpsTime.style.display = 'none';
@@ -2018,21 +2024,38 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     const safeIds = arr.map(i => i.id).join(',');
     
     let completeAllBtn = '';
+    let mapBtn = '';
+    
     if (arr.length > 1 && arr[0].type !== 'dictionary') {
         if (!allDone) {
             completeAllBtn = `<button class="complete-day-btn js-complete-all" data-ids="${escHtml(safeIds)}" data-alldone="false" title="סמן את כולם כהושלם">${svgIcon('checkAll')} סמן הכל</button>`;
         } else {
             completeAllBtn = `<button class="complete-day-btn js-complete-all" data-ids="${escHtml(safeIds)}" data-alldone="true" title="בטל סימון לכולם" style="background:var(--bg-muted);color:var(--text-muted);border-color:var(--border);">${svgIcon('undo')} בטל הכל</button>`;
         }
+        
+        // יצירת כפתור מפה יומית (Route Map)
+        if (arr[0].type !== 'task' && arr[0].type !== 'tip') {
+            const places = arr.filter(x => x.placeName || x.address).map(x => getLocStr(x)).filter(Boolean);
+            if (places.length > 0) {
+                const origin = places[0];
+                const dest = places[places.length - 1];
+                let waypoints = '';
+                if (places.length > 2) {
+                   waypoints = '&waypoints=' + places.slice(1, -1).map(p => encodeURIComponent(p)).join('|');
+                }
+                const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}${waypoints}&travelmode=transit`;
+                mapBtn = `<a href="${dirUrl}" target="_blank" class="complete-day-btn" style="background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent); border-color:color-mix(in srgb, var(--accent) 30%, transparent); margin-right:auto; text-decoration:none;">🗺️ מפה יומית</a>`;
+            }
+        }
     }
 
-    // הדגשת כותרת יפהפייה - גראדיאנט עדין שלא פוגע בטקסט
     html += `
 <div class="agenda-day-group">
   <div class="section-header" style="border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 12%, var(--bg)), var(--bg));">
     <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
       ${completeAllBtn}
+      ${mapBtn}
     </div>
     <span class="section-badge${allDone?' all-done':''}">${arr[0].type !== 'dictionary' ? done+'/' : ''}${arr.length}</span>
   </div>
@@ -2108,6 +2131,8 @@ function renderCalendarPanel(items, q) {
      for (let day = 1; day <= totalDays; day++) {
         const isToday = isCurrentMonth && today.getDate() === day;
         const dayItems = daysMap.get(day) || [];
+        const hasEventsClass = dayItems.length > 0 ? 'has-events' : '';
+        const cellDateMs = new Date(y, m, day).getTime();
         
         // מיון פנימי לכל יום לפי שעות
         dayItems.sort((a,b) => {
@@ -2119,48 +2144,45 @@ function renderCalendarPanel(items, q) {
             return a._idx - b._idx;
         });
 
-        html += `<div class="cal-grid-cell ${isToday ? 'today' : ''}">`;
+        html += `<div class="cal-grid-cell ${isToday ? 'today' : ''} ${hasEventsClass}" data-date="${cellDateMs}" ondragover="onCalDragOver(event)" ondragleave="onCalDragLeave(event)" ondrop="onCalDrop(event, ${cellDateMs})">`;
         html += `<div class="cal-cell-date">${day}</div>`;
         
         // פריסה חכמה לפי זמנים (Flex Grow Distribution)
-        let lastHour = 7; // נניח ויזואלית שהיום מתחיל ב-7 בבוקר
+        let lastHour = 7; 
         
         dayItems.forEach(item => {
            const done = state.completedIds.has(item.id);
-           const timeMatch = (item.timeRange || '').match(/(\d{1,2}):(\d{2})/);
+           const timeMatch = (item.timeRange || '').match(/(\d{1,2}:\d{2})/);
            let hour = lastHour + 1; // ברירת מחדל אם אין שעה
            
            if (timeMatch) {
-               hour = parseInt(timeMatch[1], 10) + (parseInt(timeMatch[2], 10) / 60);
+               const hm = timeMatch[1].split(':');
+               hour = parseInt(hm[0], 10) + (parseInt(hm[1], 10) / 60);
            }
            
-           // שומר שהדברים תמיד יזרמו למטה ולא יעלו אחד על השני
            if (hour < lastHour) hour = lastHour + 0.2; 
            if (hour > 24) hour = 24;
 
-           // חישוב המרווח - אם יש פער שעות, מכניסים ספייסר גמיש חכם שדוחף למטה
            const gap = hour - lastHour;
            if (gap > 0) {
                html += `<div class="cal-spacer" style="flex-grow: ${gap};"></div>`;
            }
            lastHour = hour;
 
-           const timeStr = timeMatch ? `<span class="cal-item-time">${timeMatch[1]}:${timeMatch[2]}</span>` : '';
+           const timeStr = timeMatch ? `<span class="cal-item-time">${timeMatch[1]}</span>` : '';
            
-           // הכנת הטקסט המלא לטולטיפ העולמי
-           const timeForTooltip = timeMatch ? `[${timeMatch[1]}:${timeMatch[2]}] ` : '';
+           const timeForTooltip = timeMatch ? `[${timeMatch[1]}] ` : '';
            const tooltipText = escHtml(`${timeForTooltip}${item.placeName}`); 
-           const displayIcon = item.icon ? `<span style="font-size:12px; display:inline-block; max-width:16px; text-align:center;">${escHtml(item.icon)}</span>` : '';
+           const displayIcon = item.icon ? `<span style="font-size:12px; display:inline-block; max-width:18px; text-align:center;">${escHtml(item.icon)}</span>` : '';
            
-           html += `<div class="cal-item ${item.type === 'option' ? 'opt-event' : 'main-event'} ${done ? 'done' : ''}" onclick="handleCalClick('${item.id}', event)" data-tooltip="${tooltipText}">
+           html += `<div class="cal-item ${item.type === 'option' ? 'opt-event' : 'main-event'} ${done ? 'done' : ''}" draggable="true" ondragstart="onCalDragStart(event, '${item.id}')" onclick="handleCalClick('${item.id}', event)" data-tooltip="${tooltipText}">
                       ${timeStr}
-                      <span class="cal-item-text">${displayIcon} ${hlHtml(item.placeName, q)}</span>
+                      <span class="cal-item-text" style="display:flex; align-items:center; gap:2px;">${displayIcon} ${hlHtml(item.placeName, q)}</span>
                     </div>`;
         });
         
-        // ספייסר סופי שדוחף הכל למעלה אם אין אירועי לילה
         const finalGap = 24 - lastHour;
-        if (finalGap > 0) {
+        if (finalGap > 0 && dayItems.length > 0) {
             html += `<div class="cal-spacer" style="flex-grow: ${finalGap};"></div>`;
         }
 
@@ -2198,7 +2220,6 @@ function updateUI() {
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   let itineraryHtml = '';
-  // מרנדר לוח שנה בתוך לשונית מסלול אם אין חיפוש פעיל
   if (fCal.length && !q) {
       itineraryHtml += renderCalendarPanel(fCal, q);
   }
@@ -2220,6 +2241,14 @@ function updateUI() {
   const totalCompleted = state.completedIds.size;
   const totalItems = d.itinerary.length + d.options.length + d.tips.length + d.checklist.length;
   const bookingCount = [...d.itinerary, ...d.options].filter(i => i.requiresBooking).length;
+  
+  // חישוב תקציב כולל
+  let totalCost = 0;
+  [...d.itinerary, ...d.options].forEach(i => {
+     let match = (i.cost || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
+     if (match) totalCost += parseFloat(match[0]);
+  });
+  document.getElementById('stat-budget').textContent = totalCost.toLocaleString();
 
   const hasData = d.itinerary.length || d.options.length || d.tips.length || d.checklist.length || d.dictionary.length;
 
@@ -2234,10 +2263,9 @@ function updateUI() {
   document.getElementById('stat-attractions').textContent = d.itinerary.length + d.options.length;
   document.getElementById('stat-done').textContent        = totalCompleted;
   document.getElementById('stat-booking').textContent     = state.bookedIds.size + '/' + bookingCount;
-  document.getElementById('stat-tips').textContent        = d.tips.length;
 
   updateUndoBtn();
-  window.scrollTo(0, scrollPos); // שומר על מיקום הגלילה המקורי
+  window.scrollTo(0, scrollPos); 
 }
 
 /* =========================================================
@@ -2271,7 +2299,6 @@ function setTab(tab, forceScroll = false) {
   });
   persistState();
   
-  // אם מחליפים טאב ידנית ולא נשלחנו מתוך כפתור גלילה מותאם, נעלה למעלה
   if (!forceScroll) {
       window.scrollTo({ top: 0, behavior: 'auto' });
   }
@@ -2498,11 +2525,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateUI();
-  setTab(state.activeTab, true);
+  setTab(state.activeTab, true); // פותח את הלשונית האחרונה בלי לגלול
 
   // Tab bar
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.addEventListener('click', () => setTab(b.dataset.tab));
+  });
+  
+  // Quick Filters
+  document.querySelectorAll('.qf-btn').forEach(btn => {
+     btn.addEventListener('click', () => {
+        const isActive = btn.classList.contains('active');
+        document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+        if (!isActive) {
+           btn.classList.add('active');
+           state.searchQuery = btn.dataset.val;
+           document.getElementById('search-input').value = btn.dataset.val;
+           document.getElementById('search-clear').classList.add('visible');
+        } else {
+           state.searchQuery = '';
+           document.getElementById('search-input').value = '';
+           document.getElementById('search-clear').classList.remove('visible');
+        }
+        updateUI();
+     });
   });
 
   // Theme
@@ -2608,12 +2654,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('search-input').addEventListener('input', e => {
     state.searchQuery = e.target.value;
     document.getElementById('search-clear').classList.toggle('visible', !!e.target.value);
+    document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active')); // Reset filters
     updateUI();
   });
   document.getElementById('search-clear').addEventListener('click', () => {
     state.searchQuery = '';
     document.getElementById('search-input').value = '';
     document.getElementById('search-clear').classList.remove('visible');
+    document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active')); // Reset filters
     updateUI();
   });
 
@@ -2662,7 +2710,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const globalTooltip = document.getElementById('global-tooltip');
   
   document.addEventListener('mouseover', e => {
-      // אם זה מסך מגע (מובייל) לא נפעיל את הבועה המרחפת
       if (window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window)) return;
       
       const item = e.target.closest('.cal-item');
@@ -2675,7 +2722,6 @@ document.addEventListener('DOMContentLoaded', () => {
           globalTooltip.style.top = (rect.top - 8) + 'px';
           globalTooltip.classList.add('visible');
           
-          // בדיקת התנגשויות (כדי שלא ייחתך בצדדים במחשב)
           requestAnimationFrame(() => {
               const ttRect = globalTooltip.getBoundingClientRect();
               if (ttRect.left < 10) {
@@ -2694,11 +2740,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
   
-  // הסתרת בועה בעת גלילה
   window.addEventListener('scroll', () => {
       globalTooltip.classList.remove('visible');
   }, { passive: true });
 });
+
+/* =========================================================
+   PWA SERVICE WORKER (OFFLINE SUPPORT)
+========================================================= */
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        const CACHE_NAME = 'tripmh-v1';
+        self.addEventListener('install', e => { self.skipWaiting(); });
+        self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+        self.addEventListener('fetch', e => {
+            e.respondWith(
+                caches.match(e.request).then(res => {
+                    return res || fetch(e.request).catch(() => caches.match('/'));
+                })
+            );
+        });
+    `;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
 </script>
 </body>
 </html>
