@@ -31,7 +31,6 @@ html.light{
   --purple:#7c3aed;--purple-glow:rgba(124,58,237,.09);
 }
 
-/* מאפשר גלילה טבעית ומושך לרענון במובייל, חוסם בריחה אופקית */
 html, body {
   font-family:'Segoe UI','Heebo',Arial,sans-serif;
   font-size:16px;
@@ -146,14 +145,15 @@ html.light mark{background:rgba(217,119,6,.22)}
   height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
 
 /* =========================================================
-   STATS BAR (With Budget)
+   STATS BAR (CLICKABLE SMART FILTERS)
 ========================================================= */
 .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-elevated)}
 .stat-item{flex:1;display:flex;flex-direction:column;align-items:center;
-  padding:8px 4px;gap:2px;border-left:1px solid var(--border)}
+  padding:8px 4px;gap:2px;border-left:1px solid var(--border);cursor:pointer;transition:background 0.2s;}
+.stat-item:hover{background:color-mix(in srgb,var(--text-muted) 10%,transparent) !important;}
 .stat-item:last-child{border-left:none}
 .stat-num{font-size:14px;font-weight:700;color:var(--text);font-family:'Courier New',monospace}
-.stat-lbl{font-size:10px;color:var(--text-muted);text-align:center}
+.stat-lbl{font-size:10px;color:var(--text-muted);text-align:center;user-select:none;}
 .stat-item.accent .stat-num{color:var(--accent)}
 .stat-item.success .stat-num{color:var(--success)}
 .stat-item.warning .stat-num{color:var(--warning)}
@@ -180,12 +180,12 @@ html.light mark{background:rgba(217,119,6,.22)}
 }
 
 /* =========================================================
-   SCROLL TO TOP FAB (כפתור גלילה חכם ומרחף)
+   SCROLL TO TOP FAB (Hides on scroll down, shows on scroll up)
 ========================================================= */
 .fab-scroll-top {
   position: fixed;
   bottom: max(24px, env(safe-area-inset-bottom) + 24px);
-  left: 20px;
+  right: 20px; /* בצד ימין - נגישות אגודל */
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -213,7 +213,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .fab-scroll-top:active { transform: scale(0.9); }
 
 /* =========================================================
-   CALENDAR GRID CSS - TIME DISTRIBUTION & DRAG DROP
+   CALENDAR GRID CSS - TIME DISTRIBUTION & SMART HEIGHT
 ========================================================= */
 .cal-month-block { padding: 14px 14px 0; display: flex; flex-direction: column; gap: 12px; }
 .cal-month-block h3 { margin-bottom:4px; font-size:18px; font-weight:800; color:var(--accent); display:flex; align-items:center; gap:8px; }
@@ -222,14 +222,15 @@ html.light mark{background:rgba(217,119,6,.22)}
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; direction: rtl; }
 .cal-grid-header { font-size: 11px; font-weight: 600; color: var(--text-dim); text-align: center; padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
 
-/* תיקון ימים ריקים - המינימום הצטמצם מ-120 ל-45 פיקסלים בלבד! */
-.cal-grid-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px; min-height: 45px; display: flex; flex-direction: column; position: relative; transition: background-color 0.2s, border-color 0.2s; }
-.cal-grid-cell.has-events { min-height: 100px; } /* נפתח רק אם יש לו אטרקציות */
+/* גובה דינמי וחכם - משבצות ריקות קטנות מאוד! */
+.cal-grid-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px; min-height: 28px; display: flex; flex-direction: column; position: relative; transition: background-color 0.2s, border-color 0.2s; }
+.cal-grid-cell.has-events { min-height: 90px; } 
 .cal-grid-cell.empty { background: transparent; border-color: transparent; }
 .cal-grid-cell.today { border-color: var(--accent); background: var(--accent-glow); }
 .cal-grid-cell.drag-over { background: var(--accent-glow); border: 2px dashed var(--accent); }
 
-.cal-cell-date { font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: right; line-height: 1; padding-bottom: 4px; flex-shrink: 0; }
+.cal-cell-date { font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: right; line-height: 1; flex-shrink: 0; }
+.cal-grid-cell.has-events .cal-cell-date { padding-bottom: 4px; }
 .cal-grid-cell.today .cal-cell-date { color: var(--accent); }
 
 .cal-spacer { flex-shrink: 1; }
@@ -246,7 +247,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .global-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: var(--accent-border) transparent transparent transparent; }
 
 /* =========================================================
-   MOBILE BOTTOM SHEET PREVIEW (תחליף חכם ללחיצה ארוכה במובייל)
+   MOBILE BOTTOM SHEET PREVIEW
 ========================================================= */
 .mps-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .mps-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -262,7 +263,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .mps-btn:hover { opacity: 0.9; }
 
 /* =========================================================
-   AGENDA DAY GROUP - הדגשת כותרות עדינה וחכמה
+   AGENDA DAY GROUP
 ========================================================= */
 .agenda-day-group { margin-bottom: 24px; }
 .section-header{position:sticky;top:105px;z-index:10;padding:8px 14px;
@@ -553,6 +554,7 @@ select.edit-input{appearance:none}
 
     <!-- Quick Filters -->
     <div class="quick-filters" id="quick-filters">
+       <button class="qf-btn" data-val="__booking__">🚨 דורש שריון</button>
        <button class="qf-btn" data-val="אוכל">🍜 אוכל ושתייה</button>
        <button class="qf-btn" data-val="קניות">🛍️ קניות</button>
        <button class="qf-btn" data-val="טבע">🌿 פארקים וטבע</button>
@@ -600,19 +602,19 @@ select.edit-input{appearance:none}
     </nav>
 
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
-      <div class="stat-item accent">
+      <div class="stat-item accent" onclick="applySpecialFilter('__all__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--bg-muted)'" onmouseout="this.style.background='transparent'">
         <span class="stat-num" id="stat-attractions">0</span>
         <span class="stat-lbl">אטרקציות</span>
       </div>
-      <div class="stat-item warning" title="מעקב אחר אטרקציות ומקומות שדורשים הזמנה או שריון מראש">
+      <div class="stat-item warning" onclick="applySpecialFilter('__booking__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--warning-glow)'" onmouseout="this.style.background='transparent'" title="הצג רק אטרקציות שדורשות שריון">
         <span class="stat-num" id="stat-booking">0</span>
         <span class="stat-lbl">מעקב הזמנות</span>
       </div>
-      <div class="stat-item success">
+      <div class="stat-item success" onclick="applySpecialFilter('__done__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--success-glow)'" onmouseout="this.style.background='transparent'" title="הצג רק פריטים שהושלמו">
         <span class="stat-num" id="stat-done">0</span>
         <span class="stat-lbl">הושלמו</span>
       </div>
-      <div class="stat-item purple" title="הערכת תקציב כולל (מבוסס על מסלול ואופציות)">
+      <div class="stat-item purple" onclick="applySpecialFilter('__cost__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--purple-glow)'" onmouseout="this.style.background='transparent'" title="הצג אטרקציות שעולות כסף">
         <span class="stat-num" id="stat-budget">0</span>
         <span class="stat-lbl">תקציב (₪)</span>
       </div>
@@ -628,12 +630,12 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
-<!-- כפתור גלילה מהירה למעלה (FAB) שמופיע רק בגלילה מטה -->
+<!-- כפתור גלילה מהירה למעלה (FAB) -->
 <button id="fab-scroll-top" class="fab-scroll-top" aria-label="גלול למעלה">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
-<!-- Global Tooltip - בועה מרחפת שלא תיחתך במחשב לעולם -->
+<!-- Global Tooltip -->
 <div id="global-tooltip" class="global-tooltip"></div>
 
 <!-- Mobile Bottom Sheet Preview -->
@@ -673,49 +675,32 @@ select.edit-input{appearance:none}
 
 <div class="modal-overlay hidden" id="modal-upload">
   <div class="modal-box">
-    <div class="modal-drag-handle"></div>
-    <div class="modal-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px;height:20px;color:var(--accent)">
+    <div class="modal-title" style="justify-content:center;">
+      העלאת נתונים
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:22px;height:22px;color:var(--accent)">
         <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
         <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
       </svg>
-      העלאת נתונים
     </div>
-    <p class="modal-subtitle">
-      המערכת מזהה אוטומטית את סוג הקובץ. ניתן להעלות מסלול, אופציות, צ'ק ליסט, טיפים ומילון. 
-      <strong>כפילויות יעודכנו אוטומטית.</strong>
+    <p class="modal-subtitle" style="text-align:center;">
+      המערכת מזהה אוטומטית את סוג הקובץ. ניתן להעלות מסלול, אופציות, צ'ק ליסט, טיפים ומילון. כפילויות יעודכנו אוטומטית.
     </p>
-    <div class="format-hint-grid">
-      <div class="format-hint-item">
-        <strong>מסלול.csv</strong>
-        <span>אייקון, יום, תאריך, אטרקציה, מזג אוויר, מתקנים...</span>
-      </div>
-      <div class="format-hint-item">
-        <strong>צ'ק ליסט.csv</strong>
-        <span>משימה, קטגוריה, תיאור</span>
-      </div>
-      <div class="format-hint-item">
-        <strong>טיפים.csv</strong>
-        <span>כותרת, תוכן, קטגוריה, קישור</span>
-      </div>
-      <div class="format-hint-item">
-        <strong>מילון.csv</strong>
-        <span>עברית, שפה זרה, הגייה, הקשר</span>
-      </div>
+    
+    <div style="line-height:1.8; font-size:14px; margin-bottom:24px; color:var(--text-muted);">
+       <strong style="color:var(--text);">מסלול.csv</strong> אייקון, יום, תאריך, אטרקציה, מזג אוויר, מתקנים...<br>
+       <strong style="color:var(--text);">צ'ק ליסט.csv</strong> משימה, קטגוריה, תיאור<br>
+       <strong style="color:var(--text);">טיפים.csv</strong> כותרת, תוכן, קטגוריה, קישור<br>
+       <strong style="color:var(--text);">מילון.csv</strong> עברית, שפה זרה, הגייה, הקשר
     </div>
-    <div class="btn-row">
-      <button class="btn-primary" id="modal-pick-csv">העלה קובץ CSV</button>
-      <button class="btn-cancel" id="modal-pick-json" title="ייבוא גיבוי JSON" style="flex:0 0 auto;padding:12px 16px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
-          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-          <polyline points="14 2 14 8 20 8"/><path d="M9 13h6M9 17h4"/>
-        </svg>
-      </button>
-      <button class="btn-cancel" id="modal-upload-close" style="flex:0 0 auto;padding:12px 16px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
+
+    <div style="display:flex; gap:12px;">
+       <button class="btn-cancel" id="modal-upload-close" style="flex:0 0 50px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:var(--bg-elevated); border:none!important;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+       </button>
+       <button class="btn-cancel" id="modal-pick-json" style="flex:0 0 50px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:var(--bg-elevated); border:none!important;" title="ייבוא גיבוי JSON">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h6M9 17h4"/></svg>
+       </button>
+       <button class="btn-primary" id="modal-pick-csv" style="flex:1; border-radius:12px; font-size:16px;">העלה קובץ CSV</button>
     </div>
   </div>
 </div>
@@ -796,12 +781,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v38';
-const LS_COMPLETED = 'tripmh_completed_v38';
-const LS_BOOKED    = 'tripmh_booked_v38';
-const LS_EXPANDED  = 'tripmh_expanded_v38';
-const LS_TAB       = 'tripmh_tab_v38';
-const LS_DARK      = 'tripmh_dark_v38';
+const LS_DATA      = 'tripmh_data_v40';
+const LS_COMPLETED = 'tripmh_completed_v40';
+const LS_BOOKED    = 'tripmh_booked_v40';
+const LS_EXPANDED  = 'tripmh_expanded_v40';
+const LS_TAB       = 'tripmh_tab_v40';
+const LS_DARK      = 'tripmh_dark_v40';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1015,7 +1000,8 @@ function autoLink(text) {
 function hlHtml(raw, q) {
   let s = escHtml(raw);
   s = autoLink(s);
-  if (!q) return s;
+  if (!q && q !== '__booking__' && q !== '__done__' && q !== '__cost__' && q !== '__all__') return s;
+  if (!q || q.startsWith('__')) return s;
   const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![^<]*>)','gi');
   return s.replace(re,'<mark>$1</mark>');
 }
@@ -1656,7 +1642,6 @@ function svgIcon(name) {
     ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
     copy:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
     speaker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
-    arrowUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`
   };
   return icons[name] || '';
 }
@@ -1708,6 +1693,27 @@ window.onCalDrop = function(e, targetDateVal) {
 /* =========================================================
    UI ACTIONS
 ========================================================= */
+window.applySpecialFilter = function(filterTag) {
+    state.searchQuery = filterTag;
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-clear').classList.add('visible');
+    document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+    
+    if (filterTag === '__booking__') {
+        const bookingBtn = document.querySelector('.qf-btn[data-val="__booking__"]');
+        if(bookingBtn) bookingBtn.classList.add('active');
+    }
+
+    updateUI();
+    setTab('itinerary', true);
+    
+    // גלילה לשורת התוצאות
+    setTimeout(() => {
+        const contentOffset = document.getElementById('tab-content').getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: contentOffset, behavior: 'smooth' });
+    }, 50);
+};
+
 function toggleBooked(id) {
   const isBooked = state.bookedIds.has(id);
   if (isBooked) {
@@ -1764,17 +1770,10 @@ function toggleExpand(id) {
   persistState();
 }
 
-/* מערכת חכמה ללחיצה על אטרקציה בלוח השנה */
 window.handleCalClick = function(id, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
-  
   const isTouch = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
-  
-  if (isTouch) {
-      openMobilePreview(id); 
-  } else {
-      window.scrollToItem(id); 
-  }
+  if (isTouch) { openMobilePreview(id); } else { window.scrollToItem(id); }
 };
 
 window.scrollToItem = function(id) {
@@ -1782,11 +1781,8 @@ window.scrollToItem = function(id) {
   const item = allItems.find(x => x.id === id);
   if(!item) return;
 
-  if(item.type === 'option') {
-      setTab('options', true);
-  } else {
-      setTab('itinerary', true);
-  }
+  if(item.type === 'option') setTab('options', true);
+  else setTab('itinerary', true);
 
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${id}"]`);
@@ -1795,10 +1791,7 @@ window.scrollToItem = function(id) {
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
-      window.scrollTo({
-         top: offsetPosition,
-         behavior: "smooth"
-      });
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
       
       el.style.transition = 'all 0.3s';
       const oldBg = el.style.backgroundColor;
@@ -1809,14 +1802,14 @@ window.scrollToItem = function(id) {
         el.style.borderColor = '';
       }, 1500);
       
-      if(!state.expandedIds.has(id)) {
-          toggleExpand(id);
-      }
+      if(!state.expandedIds.has(id)) toggleExpand(id);
     }
   }, 100);
 };
 
-/* פונקציות להצגת מסך ההצצה במובייל */
+/* =========================================================
+   MOBILE BOTTOM SHEET PREVIEW
+========================================================= */
 window.openMobilePreview = function(id) {
   const allItems = [...state.data.itinerary, ...state.data.options];
   const item = allItems.find(x => x.id === id);
@@ -2072,7 +2065,6 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
             completeAllBtn = `<button class="complete-day-btn js-complete-all" data-ids="${escHtml(safeIds)}" data-alldone="true" title="בטל סימון לכולם" style="background:var(--bg-muted);color:var(--text-muted);border-color:var(--border);">${svgIcon('undo')} בטל הכל</button>`;
         }
         
-        // יצירת כפתור מפה יומית (Route Map)
         if (arr[0].type !== 'task' && arr[0].type !== 'tip') {
             const places = arr.filter(x => x.placeName || x.address).map(x => getLocStr(x)).filter(Boolean);
             if (places.length > 0) {
@@ -2116,15 +2108,15 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
 }
 
 /* =========================================================
-   CALENDAR TAB RENDERER (GRID) - SMART VERTICAL POSITIONING
+   CALENDAR TAB RENDERER (GRID)
 ========================================================= */
 function renderCalendarPanel(items, q) {
   const validItems = items.filter(i => i.dateVal > 0);
-  if (!validItems.length) return ''; // לא מרנדר לוח שנה ריק
+  if (!validItems.length) return ''; 
 
   validItems.sort((a, b) => a.dateVal - b.dateVal);
 
-  const monthGroups = new Map(); // "YYYY-MM" -> map of "DD" -> items
+  const monthGroups = new Map();
   validItems.forEach(i => {
      const d = new Date(i.dateVal);
      const y = d.getFullYear();
@@ -2158,7 +2150,7 @@ function renderCalendarPanel(items, q) {
         html += `<div class="cal-grid-header">${dn}</div>`;
      });
 
-     const firstDay = new Date(y, m, 1).getDay(); // 0 = Sunday
+     const firstDay = new Date(y, m, 1).getDay();
      for (let i = 0; i < firstDay; i++) {
         html += `<div class="cal-grid-cell empty"></div>`;
      }
@@ -2173,7 +2165,6 @@ function renderCalendarPanel(items, q) {
         const hasEventsClass = dayItems.length > 0 ? 'has-events' : '';
         const cellDateMs = new Date(y, m, day).getTime();
         
-        // מיון פנימי לכל יום לפי שעות
         dayItems.sort((a,b) => {
             const timeA = (a.timeRange || '').match(/(\d{1,2}:\d{2})/);
             const timeB = (b.timeRange || '').match(/(\d{1,2}:\d{2})/);
@@ -2186,13 +2177,12 @@ function renderCalendarPanel(items, q) {
         html += `<div class="cal-grid-cell ${isToday ? 'today' : ''} ${hasEventsClass}" data-date="${cellDateMs}" ondragover="onCalDragOver(event)" ondragleave="onCalDragLeave(event)" ondrop="onCalDrop(event, ${cellDateMs})">`;
         html += `<div class="cal-cell-date">${day}</div>`;
         
-        // פריסה חכמה לפי זמנים (Flex Grow Distribution)
         let lastHour = 7; 
         
         dayItems.forEach(item => {
            const done = state.completedIds.has(item.id);
            const timeMatch = (item.timeRange || '').match(/(\d{1,2}:\d{2})/);
-           let hour = lastHour + 1; // ברירת מחדל אם אין שעה
+           let hour = lastHour + 1;
            
            if (timeMatch) {
                const hm = timeMatch[1].split(':');
@@ -2243,9 +2233,20 @@ function updateUI() {
   const scrollPos = window.scrollY;
 
   const d = state.data;
-  const q = state.searchQuery.toLowerCase();
+  
+  const q = state.searchQuery === '__booking__' ? '__booking__' : 
+            state.searchQuery === '__done__' ? '__done__' : 
+            state.searchQuery === '__cost__' ? '__cost__' : 
+            state.searchQuery.toLowerCase();
 
   const filterFn = i => {
+    if (q === '__booking__') return i.requiresBooking === true;
+    if (q === '__done__') return state.completedIds.has(i.id);
+    if (q === '__cost__') {
+        const costVal = (i.cost || '').replace(/[^0-9.]/g, '');
+        return costVal !== '' && parseFloat(costVal) > 0;
+    }
+    if (q === '__all__') return true;
     if (!q) return true;
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
@@ -2259,14 +2260,15 @@ function updateUI() {
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   let itineraryHtml = '';
-  if (fCal.length && !q) {
+  // מרנדר לוח שנה בתוך לשונית מסלול רק אם אין חיפוש פעיל מיוחד
+  if (fCal.length && !q && q !== '__booking__' && q !== '__done__' && q !== '__cost__') {
       itineraryHtml += renderCalendarPanel(fCal, q);
   }
-  itineraryHtml += (fi.length || !q) ? renderPanel(fi,'dayLabel','אטרקציה','itinerary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
+  itineraryHtml += (fi.length || (!q && q!=='__booking__')) ? renderPanel(fi,'dayLabel','אטרקציה','itinerary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לסינון זה.</p>`;
 
   document.getElementById('panel-itinerary').innerHTML = itineraryHtml;
-  document.getElementById('panel-options').innerHTML   = fo.length || !q ? renderPanel(fo,'dayLabel','אופציה','option',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
-  document.getElementById('panel-checklist').innerHTML = fc.length || !q ? renderPanel(fc,'category','משימה','checklist',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
+  document.getElementById('panel-options').innerHTML   = fo.length || !q ? renderPanel(fo,'dayLabel','אופציה','option',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לסינון זה.</p>`;
+  document.getElementById('panel-checklist').innerHTML = fc.length || !q ? renderPanel(fc,'category','משימה','checklist',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לסינון זה.</p>`;
   document.getElementById('panel-tips').innerHTML      = ft.length || !q ? renderPanel(ft,'category','טיפ','tip',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
   document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
 
@@ -2281,7 +2283,6 @@ function updateUI() {
   const totalItems = d.itinerary.length + d.options.length + d.tips.length + d.checklist.length;
   const bookingCount = [...d.itinerary, ...d.options].filter(i => i.requiresBooking).length;
   
-  // חישוב תקציב כולל
   let totalCost = 0;
   [...d.itinerary, ...d.options].forEach(i => {
      let match = (i.cost || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
@@ -2304,17 +2305,16 @@ function updateUI() {
   document.getElementById('stat-booking').textContent     = state.bookedIds.size + '/' + bookingCount;
 
   updateUndoBtn();
-  window.scrollTo(0, scrollPos); // שומר על מיקום הגלילה המקורי
+  window.scrollTo(0, scrollPos); 
 }
 
 /* =========================================================
-   TAB SWITCHING (With Double Tap to Top)
+   TAB SWITCHING
 ========================================================= */
 let lastTabClickTime = 0;
 function setTab(tab, forceScroll = false) {
   const now = Date.now();
   
-  // לחיצה שנייה ברצף על הלשונית (בתוך 1 שנייה) גוללת ישר למעלה
   if (state.activeTab === tab && !forceScroll) {
       if (now - lastTabClickTime < 1000) {
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2578,15 +2578,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
         if (!isActive) {
            btn.classList.add('active');
-           state.searchQuery = btn.dataset.val;
-           document.getElementById('search-input').value = btn.dataset.val;
-           document.getElementById('search-clear').classList.add('visible');
+           window.applySpecialFilter(btn.dataset.val);
         } else {
-           state.searchQuery = '';
-           document.getElementById('search-input').value = '';
-           document.getElementById('search-clear').classList.remove('visible');
+           window.applySpecialFilter('__all__');
         }
-        updateUI();
      });
   });
 
@@ -2599,6 +2594,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // Global Undo button
   document.getElementById('btn-undo').addEventListener('click', () => {
     undoLastAction();
+  });
+
+  // Share Button - Fixed Native Share API
+  document.getElementById('btn-share').addEventListener('click', async () => {
+      const total = state.data.itinerary.length + state.data.options.length;
+      if (total === 0) {
+         addToast('אין עדיין אטרקציות במסלול לשתף', 'error'); return;
+      }
+      const textToShare = `הטיול שלי ליפן מוכן! ✈️ תכננתי ${total} אטרקציות ומקומות באמצעות TripMH.`;
+      
+      if (navigator.share) {
+          try {
+              await navigator.share({
+                  title: 'TripMH - המסלול שלי',
+                  text: textToShare
+              });
+          } catch (err) {
+              console.log('Share canceled', err);
+          }
+      } else {
+          navigator.clipboard.writeText(textToShare).then(() => {
+              addToast('טקסט השיתוף הועתק ללוח!', 'success');
+          });
+      }
   });
 
   // Global Ctrl+Z / Cmd+Z Support
@@ -2781,13 +2800,18 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Logic for FAB (Scroll to Top)
   const fabScrollTop = document.getElementById('fab-scroll-top');
+  let lastScrollYPos = window.scrollY;
+  
   window.addEventListener('scroll', () => {
-      if (window.scrollY > 400) {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > 300 && currentScrollY < lastScrollYPos) {
           fabScrollTop.classList.add('visible');
       } else {
           fabScrollTop.classList.remove('visible');
       }
-      // הסתרת בועה בעת גלילה
+      
+      lastScrollYPos = currentScrollY;
       globalTooltip.classList.remove('visible');
   }, { passive: true });
   
