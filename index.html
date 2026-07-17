@@ -122,7 +122,6 @@ html.light mark{background:rgba(217,119,6,.22)}
 .search-clear.visible{display:flex}
 .search-clear svg{width:11px;height:11px}
 
-/* עיצוב לתגית המספרים של הפילטרים המהירים */
 .quick-filters { display:flex; gap:8px; overflow-x:auto; padding: 0 14px 10px; flex-wrap: nowrap; -webkit-overflow-scrolling:touch; }
 .quick-filters::-webkit-scrollbar { display:none; }
 .qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px;}
@@ -823,12 +822,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v46';
-const LS_COMPLETED = 'tripmh_completed_v46';
-const LS_BOOKED    = 'tripmh_booked_v46';
-const LS_EXPANDED  = 'tripmh_expanded_v46';
-const LS_TAB       = 'tripmh_tab_v46';
-const LS_DARK      = 'tripmh_dark_v46';
+const LS_DATA      = 'tripmh_data_v48';
+const LS_COMPLETED = 'tripmh_completed_v48';
+const LS_BOOKED    = 'tripmh_booked_v48';
+const LS_EXPANDED  = 'tripmh_expanded_v48';
+const LS_TAB       = 'tripmh_tab_v48';
+const LS_DARK      = 'tripmh_dark_v48';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -2887,6 +2886,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const fabScrollTop = document.getElementById('fab-scroll-top');
   let lastScrollYPos = window.scrollY;
   
+  /* =========================================================
+     OFFLINE SUPPORT & EVENT WIRING
+  ========================================================= */
+  window.addEventListener('offline', () => {
+      addToast('📴 עברת למצב לא מקוון. הנתונים שמורים ואפשר להמשיך לעבוד!', 'warning');
+  });
+  window.addEventListener('online', () => {
+      addToast('📶 חיבור האינטרנט חזר', 'success');
+  });
+
+  if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+          // מצרף v=48 כדי לאלץ את הדפדפן להתעלם מהקאש הישן ולטעון את הקובץ החדש
+          navigator.serviceWorker.register('./sw.js?v=48')
+              .then(reg => console.log('SW Registered', reg.scope))
+              .catch(err => console.warn('SW Reg failed', err));
+      });
+  }
+  
   window.addEventListener('scroll', () => {
       const currentScrollY = window.scrollY;
       
@@ -2905,13 +2923,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
-
-/* =========================================================
-   PWA SERVICE WORKER REGISTRATION (OFFLINE SUPPORT)
-========================================================= */
-if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW reg failed', err));
-}
 </script>
 </body>
 </html>
