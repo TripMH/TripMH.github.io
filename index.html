@@ -180,6 +180,39 @@ html.light mark{background:rgba(217,119,6,.22)}
 }
 
 /* =========================================================
+   SCROLL TO TOP FAB (כפתור גלילה חכם ומרחף)
+========================================================= */
+.fab-scroll-top {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom) + 24px);
+  left: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg-card) 85%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px) scale(0.9);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.fab-scroll-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.fab-scroll-top svg { width: 22px; height: 22px; }
+.fab-scroll-top:active { transform: scale(0.9); }
+
+/* =========================================================
    CALENDAR GRID CSS - TIME DISTRIBUTION & DRAG DROP
 ========================================================= */
 .cal-month-block { padding: 14px 14px 0; display: flex; flex-direction: column; gap: 12px; }
@@ -595,6 +628,11 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
+<!-- כפתור גלילה מהירה למעלה (FAB) שמופיע רק בגלילה מטה -->
+<button id="fab-scroll-top" class="fab-scroll-top" aria-label="גלול למעלה">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <!-- Global Tooltip - בועה מרחפת שלא תיחתך במחשב לעולם -->
 <div id="global-tooltip" class="global-tooltip"></div>
 
@@ -758,12 +796,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v36';
-const LS_COMPLETED = 'tripmh_completed_v36';
-const LS_BOOKED    = 'tripmh_booked_v36';
-const LS_EXPANDED  = 'tripmh_expanded_v36';
-const LS_TAB       = 'tripmh_tab_v36';
-const LS_DARK      = 'tripmh_dark_v36';
+const LS_DATA      = 'tripmh_data_v38';
+const LS_COMPLETED = 'tripmh_completed_v38';
+const LS_BOOKED    = 'tripmh_booked_v38';
+const LS_EXPANDED  = 'tripmh_expanded_v38';
+const LS_TAB       = 'tripmh_tab_v38';
+const LS_DARK      = 'tripmh_dark_v38';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1618,6 +1656,7 @@ function svgIcon(name) {
     ok:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
     copy:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
     speaker: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+    arrowUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`
   };
   return icons[name] || '';
 }
@@ -1754,7 +1793,7 @@ window.scrollToItem = function(id) {
     if(el) {
       const headerOffset = 180; 
       const elementPosition = el.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
       window.scrollTo({
          top: offsetPosition,
@@ -2201,7 +2240,7 @@ function renderCalendarPanel(items, q) {
    FULL UI UPDATE
 ========================================================= */
 function updateUI() {
-  const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollPos = window.scrollY;
 
   const d = state.data;
   const q = state.searchQuery.toLowerCase();
@@ -2265,7 +2304,7 @@ function updateUI() {
   document.getElementById('stat-booking').textContent     = state.bookedIds.size + '/' + bookingCount;
 
   updateUndoBtn();
-  window.scrollTo(0, scrollPos); 
+  window.scrollTo(0, scrollPos); // שומר על מיקום הגלילה המקורי
 }
 
 /* =========================================================
@@ -2525,7 +2564,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateUI();
-  setTab(state.activeTab, true); // פותח את הלשונית האחרונה בלי לגלול
+  setTab(state.activeTab, true); 
 
   // Tab bar
   document.querySelectorAll('.tab-btn').forEach(b => {
@@ -2740,9 +2779,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
   
+  // Logic for FAB (Scroll to Top)
+  const fabScrollTop = document.getElementById('fab-scroll-top');
   window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+          fabScrollTop.classList.add('visible');
+      } else {
+          fabScrollTop.classList.remove('visible');
+      }
+      // הסתרת בועה בעת גלילה
       globalTooltip.classList.remove('visible');
   }, { passive: true });
+  
+  fabScrollTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
 });
 
 /* =========================================================
