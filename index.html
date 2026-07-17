@@ -122,10 +122,12 @@ html.light mark{background:rgba(217,119,6,.22)}
 .search-clear.visible{display:flex}
 .search-clear svg{width:11px;height:11px}
 
+/* עיצוב לתגית המספרים של הפילטרים המהירים */
 .quick-filters { display:flex; gap:8px; overflow-x:auto; padding: 0 14px 10px; flex-wrap: nowrap; -webkit-overflow-scrolling:touch; }
 .quick-filters::-webkit-scrollbar { display:none; }
-.qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s;}
+.qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px;}
 .qf-btn.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+.qf-badge { background:var(--accent); color:var(--bg); padding:1px 6px; border-radius:99px; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; line-height:1; }
 
 #tab-bar{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;padding:0 4px;flex-shrink:0;}
 #tab-bar::-webkit-scrollbar{display:none;}
@@ -584,13 +586,13 @@ select.edit-input{appearance:none}
     </div>
 
     <div class="quick-filters" id="quick-filters">
-       <button class="qf-btn" data-val="__booking__">🚨 דורש שריון</button>
-       <button class="qf-btn" data-val="אוכל">🍜 אוכל ושתייה</button>
-       <button class="qf-btn" data-val="קניות">🛍️ קניות</button>
-       <button class="qf-btn" data-val="טבע">🌿 פארקים וטבע</button>
-       <button class="qf-btn" data-val="מקדש">⛩️ מקדשים</button>
-       <button class="qf-btn" data-val="מוזיאון">🏛️ מוזיאונים</button>
-       <button class="qf-btn" data-val="רכבת">🚆 תחבורה</button>
+       <button class="qf-btn" data-val="__booking__" data-orig="🚨 דורש שריון">🚨 דורש שריון</button>
+       <button class="qf-btn" data-val="אוכל" data-orig="🍜 אוכל ושתייה">🍜 אוכל ושתייה</button>
+       <button class="qf-btn" data-val="קניות" data-orig="🛍️ קניות">🛍️ קניות</button>
+       <button class="qf-btn" data-val="טבע" data-orig="🌿 פארקים וטבע">🌿 פארקים וטבע</button>
+       <button class="qf-btn" data-val="מקדש" data-orig="⛩️ מקדשים">⛩️ מקדשים</button>
+       <button class="qf-btn" data-val="מוזיאון" data-orig="🏛️ מוזיאונים">🏛️ מוזיאונים</button>
+       <button class="qf-btn" data-val="רכבת" data-orig="🚆 תחבורה">🚆 תחבורה</button>
     </div>
 
     <nav id="tab-bar">
@@ -821,12 +823,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v45';
-const LS_COMPLETED = 'tripmh_completed_v45';
-const LS_BOOKED    = 'tripmh_booked_v45';
-const LS_EXPANDED  = 'tripmh_expanded_v45';
-const LS_TAB       = 'tripmh_tab_v45';
-const LS_DARK      = 'tripmh_dark_v45';
+const LS_DATA      = 'tripmh_data_v46';
+const LS_COMPLETED = 'tripmh_completed_v46';
+const LS_BOOKED    = 'tripmh_booked_v46';
+const LS_EXPANDED  = 'tripmh_expanded_v46';
+const LS_TAB       = 'tripmh_tab_v46';
+const LS_DARK      = 'tripmh_dark_v46';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1757,7 +1759,6 @@ window.applySpecialFilter = function(filterTag) {
     updateUI();
     setTab('itinerary', true);
     
-    // גלילה לשורת התוצאות (דילוג על לוח השנה)
     setTimeout(() => {
         const contentOffset = document.getElementById('tab-content').getBoundingClientRect().top + window.scrollY - 100;
         window.scrollTo({ top: contentOffset, behavior: 'smooth' });
@@ -1962,7 +1963,7 @@ function renderTripCard(item, q, prevItem) {
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
   const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<div><div class="dr-label">מידע:</div><div class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</div></div></div>` : '';
   
-  const addressRow = item.address ? `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value" style="display:inline-flex;align-items:center;gap:6px;"><span>${hlHtml(item.address,q)}</span> <button class="action-icon-btn" onclick="copyField('${item.id}', 'address', event)" title="העתק כתובת">${svgIcon('copy')}</button></span></div>` : '';
+  const addressRow = item.address ? `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value" style="display:inline-flex;align-items:center;gap:6px;"><span>${hlHtml(item.address,q)}</span> <button class="icon-btn" onclick="copyField('${item.id}', 'address', event)" title="העתק כתובת" style="width:26px;height:26px;color:var(--text-muted);">${svgIcon('copy')}</button></span></div>` : '';
   const notesRow = item.notes ? `<div class="detail-row">${svgIcon('warn')}<span class="dr-label">הערות וסגירה:</span><span class="dr-value" style="color:var(--warning); font-weight:600;">${hlHtml(item.notes,q)}</span></div>` : '';
   const facilitiesRow = item.facilities ? `<div class="detail-row">${svgIcon('pin')}<span class="dr-label">מתקנים:</span><span class="dr-value">${hlHtml(item.facilities,q)}</span></div>` : '';
   const prepareRow = item.prepare ? `<div class="detail-row">${svgIcon('check')}<span class="dr-label">להכין מראש:</span><span class="dr-value" style="color:var(--success); font-weight:600;">${hlHtml(item.prepare,q)}</span></div>` : '';
@@ -1979,7 +1980,7 @@ function renderTripCard(item, q, prevItem) {
         <div class="card-title-inner">
           <span class="card-icon" aria-hidden="true">${escHtml(item.icon||'📍')}</span>
           <h3 class="card-title">${hlHtml(item.placeName,q)}</h3>
-          <button class="action-icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום">
+          <button class="icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום" style="width:26px;height:26px;color:var(--text-muted); margin-right:4px;">
             ${svgIcon('copy')}
           </button>
         </div>
@@ -2059,7 +2060,7 @@ function renderDictionaryCard(item, q) {
         <div style="font-size:18px; font-weight:800; color:var(--accent); word-break:break-word;">${hlHtml(item.hebrew, q)}</div>
         ${item.english ? `<div style="font-size:14px; font-weight:500; color:var(--text-muted); margin-top:2px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
       </div>
-      <button class="action-icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; margin-right:8px;">${svgIcon('edit')}</button>
+      <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; margin-right:8px; width:28px; height:28px;">${svgIcon('edit')}</button>
     </div>
     
     <div style="background:var(--bg-elevated); padding:14px; border-radius:var(--r-sm); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:16px;">
@@ -2311,6 +2312,19 @@ function updateUI() {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
   
+  // חישוב סך כל הפריטים שהסתננו ומוצגים כרגע:
+  const totalVisibleItems = fi.length + fo.length + ft.length + fc.length + fd.length;
+  
+  // עדכון כפתורי הסינון המהיר כדי שיציגו את המספר במידה והם מסומנים
+  document.querySelectorAll('.qf-btn').forEach(btn => {
+      const origText = btn.getAttribute('data-orig');
+      if (btn.classList.contains('active')) {
+          btn.innerHTML = `${origText} <span class="qf-badge">${totalVisibleItems}</span>`;
+      } else {
+          btn.innerHTML = origText;
+      }
+  });
+
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   let itineraryHtml = '';
@@ -2622,21 +2636,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // כפתור איפוס כללי על הלוגו של TripMH
   document.getElementById('app-logo').addEventListener('click', () => {
-      // ניקוי חיפוש וסינונים
       state.searchQuery = '';
       document.getElementById('search-input').value = '';
       document.getElementById('search-clear').classList.remove('visible');
       document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
-      
-      // סגירת כל הכרטיסיות הפתוחות
       state.expandedIds.clear();
-      
-      // חזרה ללשונית המסלול ועדכון תצוגה
       setTab('itinerary', true);
       updateUI();
       persistState();
-      
-      // גלילה חלקה למעלה
       window.scrollTo({ top: 0, behavior: 'smooth' });
       addToast('המערכת אופסה למצב ברירת מחדל', 'neutral');
   });
@@ -2679,7 +2686,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const textToShare = `מתכנן טיול חכם ב-TripMH ✈️\nתכננתי מסלול של ${total} אטרקציות ומקומות! מוזמנים לנסות את האפליקציה:`;
-      const shareUrl = window.location.origin + window.location.pathname; // הכתובת הנקיה של האתר
+      const shareUrl = window.location.origin + window.location.pathname; 
       
       if (navigator.share) {
           try {
