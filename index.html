@@ -344,6 +344,28 @@ html.light mark{background:rgba(217,119,6,.22)}
 .link-btn.primary:hover{opacity:0.9; color:var(--bg);}
 .link-btn svg{width:16px;height:16px;flex-shrink:0}
 
+/* כפתור הקראה יפנית נוח במילון */
+.speaker-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--purple-glow);
+  color: var(--purple);
+  border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  flex-shrink: 0;
+}
+.speaker-btn:hover, .speaker-btn:active {
+  background: var(--purple);
+  color: var(--bg);
+  transform: scale(1.08);
+}
+.speaker-btn svg { width: 22px; height: 22px; }
+
 /* =========================================================
    MODALS
 ========================================================= */
@@ -495,7 +517,6 @@ select.edit-input{appearance:none}
 <div id="app">
   <header id="app-header">
     <div class="header-top">
-      <!-- לחיצה על הלוגו תאפס את הכל למצב ברירת מחדל -->
       <div class="logo" id="app-logo" title="אפס מסננים וחזור למצב התחלתי">
         <div class="logo-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -561,7 +582,6 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
-    <!-- Quick Filters -->
     <div class="quick-filters" id="quick-filters">
        <button class="qf-btn" data-val="__booking__">🚨 דורש שריון</button>
        <button class="qf-btn" data-val="אוכל">🍜 אוכל ושתייה</button>
@@ -639,15 +659,12 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
-<!-- כפתור גלילה מהירה למעלה (FAB) בצד ימין -->
 <button id="fab-scroll-top" class="fab-scroll-top" aria-label="גלול למעלה">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
-<!-- Global Tooltip -->
 <div id="global-tooltip" class="global-tooltip"></div>
 
-<!-- Mobile Bottom Sheet Preview -->
 <div class="mps-backdrop" id="mps-backdrop" onclick="closeMobilePreview()"></div>
 <div id="mobile-preview-sheet">
    <div class="mps-drag-handle"></div>
@@ -682,7 +699,6 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
-<!-- Upload Modal - עיצוב חזר למקור עם הכרטיסיות (Grid) -->
 <div class="modal-overlay hidden" id="modal-upload">
   <div class="modal-box">
     <div class="modal-title" style="justify-content:center;">
@@ -804,12 +820,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v42';
-const LS_COMPLETED = 'tripmh_completed_v42';
-const LS_BOOKED    = 'tripmh_booked_v42';
-const LS_EXPANDED  = 'tripmh_expanded_v42';
-const LS_TAB       = 'tripmh_tab_v42';
-const LS_DARK      = 'tripmh_dark_v42';
+const LS_DATA      = 'tripmh_data_v43';
+const LS_COMPLETED = 'tripmh_completed_v43';
+const LS_BOOKED    = 'tripmh_booked_v43';
+const LS_EXPANDED  = 'tripmh_expanded_v43';
+const LS_TAB       = 'tripmh_tab_v43';
+const LS_DARK      = 'tripmh_dark_v43';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -982,7 +998,7 @@ function fallbackTTS(textToSpeak, lang) {
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = lang;
     window.speechSynthesis.speak(utterance);
-    addToast('🔊 ' + textToSpeak + ' (מצב לא מקוון)', 'neutral');
+    addToast('🔊 ' + textToSpeak + ' (הקראה מקומית)', 'neutral');
   } else {
     addToast('אין חיבור לאינטרנט לשמיעת אודיו', 'error');
   }
@@ -1003,11 +1019,13 @@ function speakField(id, field, lang, e) {
 
   if (navigator.onLine) {
       const shortLang = lang.split('-')[0];
-      const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
+      // Updated to tw-ob to bypass normal blocks that cause fake offline reports
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
       window.currentAudio = new Audio(url);
       window.currentAudio.play().then(() => {
         addToast('🔊 ' + textToSpeak, 'neutral');
       }).catch(err => {
+        console.warn("Online Audio failed, falling back to native TTS", err);
         fallbackTTS(textToSpeak, lang);
       });
   } else {
@@ -2032,25 +2050,30 @@ function renderChecklistCard(item, q) {
   </article>`;
 }
 
+/* כרטיס המילון המעודכן עם כפתור שמע מובנה ויפה */
 function renderDictionaryCard(item, q) {
   return `
   <article class="card" data-id="${item.id}" style="padding:16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
       <div style="flex:1; min-width:0;">
         <div style="font-size:18px; font-weight:800; color:var(--accent); word-break:break-word;">${hlHtml(item.hebrew, q)}</div>
-        ${item.english ? `<div style="font-size:14px; font-weight:500; color:var(--text-muted); margin-bottom:8px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
-        
-        <div style="font-size:20px; font-weight:700; color:var(--text); display:inline-flex; align-items:center; gap:8px;">
-          <span>${hlHtml(item.japanese, q)}</span>
-          <button class="action-icon-btn" style="color:var(--purple);" onclick="speakField('${item.id}', 'japanese', 'ja-JP', event)" title="הקרא ביפנית">
-            ${svgIcon('speaker')}
-          </button>
-        </div>
+        ${item.english ? `<div style="font-size:14px; font-weight:500; color:var(--text-muted); margin-top:2px; word-break:break-word;">${hlHtml(item.english, q)}</div>` : ''}
+      </div>
+      <button class="action-icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; margin-right:8px;">${svgIcon('edit')}</button>
+    </div>
+    
+    <div style="background:var(--bg-elevated); padding:14px; border-radius:var(--r-sm); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:16px;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:22px; font-weight:700; color:var(--text); line-height:1.2; word-break:break-word;">${hlHtml(item.japanese, q)}</div>
         ${item.hebPronun ? `<div style="font-size:15px; font-weight:600; color:var(--success); margin-top:6px;">${hlHtml(item.hebPronun, q)}</div>` : ''}
         ${item.romaji ? `<div style="font-size:13px; color:var(--warning); font-family:'Courier New',monospace; margin-top:4px;">${hlHtml(item.romaji, q)}</div>` : ''}
       </div>
-      <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; margin-right:8px;">${svgIcon('edit')}</button>
+      <button class="speaker-btn" onclick="speakField('${item.id}', 'japanese', 'ja-JP', event)" title="הקרא ביפנית">
+        ${svgIcon('speaker')}
+      </button>
     </div>
+    
     ${item.context ? `<div style="font-size:12px; font-weight:600; color:var(--text-dim); margin-top:12px; padding-top:10px; border-top:1px dashed var(--border);">${hlHtml(item.context, q)}</div>` : ''}
   </article>`;
 }
