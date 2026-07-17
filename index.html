@@ -126,7 +126,8 @@ html.light mark{background:rgba(217,119,6,.22)}
 .quick-filters { display:flex; gap:8px; overflow-x:auto; padding: 0 14px 10px; flex-wrap: nowrap; -webkit-overflow-scrolling:touch; }
 .quick-filters::-webkit-scrollbar { display:none; }
 .qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px;}
-.qf-btn.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+/* מסגרת עדינה לסינונים המהירים */
+.qf-btn.active { background:var(--accent-glow); border-color:var(--accent); box-shadow:0 0 0 0.5px var(--accent); color:var(--accent); }
 .qf-badge { background:var(--bg-elevated); color:var(--text-muted); border:1px solid var(--border); padding:2px 6px; border-radius:99px; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; line-height:1; transition:all 0.2s; }
 .qf-btn.active .qf-badge { background:var(--accent); color:var(--bg); border-color:var(--accent); }
 
@@ -147,15 +148,28 @@ html.light mark{background:rgba(217,119,6,.22)}
 
 .stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-elevated)}
 .stat-item{flex:1;display:flex;flex-direction:column;align-items:center;
-  padding:8px 4px;gap:2px;border-left:1px solid var(--border);cursor:pointer;transition:background 0.2s;}
-.stat-item:hover{background:color-mix(in srgb,var(--text-muted) 10%,transparent) !important;}
+  padding:8px 4px;gap:2px;border-left:1px solid var(--border);cursor:pointer;transition:background 0.2s, box-shadow 0.2s; position:relative; background:transparent;}
 .stat-item:last-child{border-left:none}
 .stat-num{font-size:14px;font-weight:700;color:var(--text);font-family:'Courier New',monospace}
 .stat-lbl{font-size:10px;color:var(--text-muted);text-align:center;user-select:none;}
+
+/* צבעי טקסט לסטטיסטיקות */
 .stat-item.accent .stat-num{color:var(--accent)}
 .stat-item.success .stat-num{color:var(--success)}
 .stat-item.warning .stat-num{color:var(--warning)}
 .stat-item.purple .stat-num{color:var(--purple)}
+
+/* אפקטי מעבר (Hover) על הסטטיסטיקות */
+.stat-item.accent:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);}
+.stat-item.warning:hover{background:color-mix(in srgb,var(--warning) 8%,transparent);}
+.stat-item.success:hover{background:color-mix(in srgb,var(--success) 8%,transparent);}
+.stat-item.purple:hover{background:color-mix(in srgb,var(--purple) 8%,transparent);}
+
+/* מסגרת עדינה (Active) על שורת הסטטיסטיקות - ללא פגיעה בעיצוב או ברוחב */
+.stat-item.accent.active {box-shadow: inset 0 0 0 1.5px var(--accent); background: var(--accent-glow);}
+.stat-item.warning.active {box-shadow: inset 0 0 0 1.5px var(--warning); background: var(--warning-glow);}
+.stat-item.success.active {box-shadow: inset 0 0 0 1.5px var(--success); background: var(--success-glow);}
+.stat-item.purple.active {box-shadow: inset 0 0 0 1.5px var(--purple); background: var(--purple-glow);}
 
 /* =========================================================
    SCROLL TO TOP FAB
@@ -635,19 +649,19 @@ select.edit-input{appearance:none}
     </nav>
 
     <div class="stats-bar" id="stats-bar" style="display:none" title="נתונים כלליים למסלול">
-      <div class="stat-item accent" onclick="applySpecialFilter('__all__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--bg-muted)'" onmouseout="this.style.background='transparent'">
+      <div class="stat-item accent" data-val="__all__" onclick="applySpecialFilter('__all__')" title="הצג הכל">
         <span class="stat-num" id="stat-attractions">0</span>
         <span class="stat-lbl">אטרקציות</span>
       </div>
-      <div class="stat-item warning" onclick="applySpecialFilter('__booking__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--warning-glow)'" onmouseout="this.style.background='transparent'" title="הצג רק אטרקציות שדורשות שריון">
+      <div class="stat-item warning" data-val="__booking__" onclick="applySpecialFilter('__booking__')" title="הצג רק אטרקציות שדורשות שריון">
         <span class="stat-num" id="stat-booking">0</span>
         <span class="stat-lbl">מעקב הזמנות</span>
       </div>
-      <div class="stat-item success" onclick="applySpecialFilter('__done__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--success-glow)'" onmouseout="this.style.background='transparent'" title="הצג רק פריטים שהושלמו">
+      <div class="stat-item success" data-val="__done__" onclick="applySpecialFilter('__done__')" title="הצג רק פריטים שהושלמו">
         <span class="stat-num" id="stat-done">0</span>
         <span class="stat-lbl">הושלמו</span>
       </div>
-      <div class="stat-item purple" onclick="applySpecialFilter('__cost__')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='var(--purple-glow)'" onmouseout="this.style.background='transparent'" title="הצג אטרקציות שעולות כסף">
+      <div class="stat-item purple" data-val="__cost__" onclick="applySpecialFilter('__cost__')" title="הצג אטרקציות שעולות כסף">
         <span class="stat-num" id="stat-budget">0</span>
         <span class="stat-lbl">תקציב (₪)</span>
       </div>
@@ -824,12 +838,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v48';
-const LS_COMPLETED = 'tripmh_completed_v48';
-const LS_BOOKED    = 'tripmh_booked_v48';
-const LS_EXPANDED  = 'tripmh_expanded_v48';
-const LS_TAB       = 'tripmh_tab_v48';
-const LS_DARK      = 'tripmh_dark_v48';
+const LS_DATA      = 'tripmh_data_v49';
+const LS_COMPLETED = 'tripmh_completed_v49';
+const LS_BOOKED    = 'tripmh_booked_v49';
+const LS_EXPANDED  = 'tripmh_expanded_v49';
+const LS_TAB       = 'tripmh_tab_v49';
+const LS_DARK      = 'tripmh_dark_v49';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1197,7 +1211,7 @@ function parseDateVal(d) {
   const m1 = d.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
   if (m1) return new Date(`${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`).getTime();
   const m2 = d.match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
-  if (m2) return new Date(`${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')getTime();
+  if (m2) return new Date(`${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`).getTime();
   return 0;
 }
 function detectIcon(text) {
@@ -1749,15 +1763,22 @@ window.onCalDrop = function(e, targetDateVal) {
 window.applySpecialFilter = function(filterTag) {
     state.searchQuery = filterTag;
     document.getElementById('search-input').value = '';
-    document.getElementById('search-clear').classList.add('visible');
-    document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
     
-    if (filterTag === '__booking__') {
-        const bookingBtn = document.querySelector('.qf-btn[data-val="__booking__"]');
-        if(bookingBtn) bookingBtn.classList.add('active');
+    // איפוס סמני הפעילות של כל הפילטרים הקיימים
+    document.querySelectorAll('.qf-btn, .stat-item').forEach(b => b.classList.remove('active'));
+    
+    // סימון הפילטר המהיר הנבחר, או פילטר הסטטיסטיקות
+    const qfBtn = document.querySelector(`.qf-btn[data-val="${filterTag}"]`);
+    if(qfBtn) qfBtn.classList.add('active');
+    
+    const statBtn = document.querySelector(`.stat-item[data-val="${filterTag}"]`);
+    if(statBtn) statBtn.classList.add('active');
+
+    // הופעת כפתור האיפוס בשדה החיפוש רק אם סונן משהו ספציפי
+    if (filterTag === '__all__' || filterTag === '') {
+        document.getElementById('search-clear').classList.remove('visible');
     } else {
-        const otherBtn = document.querySelector(`.qf-btn[data-val="${filterTag}"]`);
-        if (otherBtn) otherBtn.classList.add('active');
+        document.getElementById('search-clear').classList.add('visible');
     }
 
     updateUI();
@@ -2640,6 +2661,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // הפעלה ראשונית של הממשק והחלת מצב פעיל ברירת מחדל ("אטרקציות" - כל הפריטים) אם אין חיפוש פעיל
+  if (!state.searchQuery || state.searchQuery === '__all__') {
+      state.searchQuery = '';
+      const allStatBtn = document.querySelector(`.stat-item[data-val="__all__"]`);
+      if (allStatBtn) allStatBtn.classList.add('active');
+  }
+
   updateUI();
   setTab(state.activeTab, true); 
 
@@ -2648,7 +2676,9 @@ document.addEventListener('DOMContentLoaded', () => {
       state.searchQuery = '';
       document.getElementById('search-input').value = '';
       document.getElementById('search-clear').classList.remove('visible');
-      document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.qf-btn, .stat-item').forEach(b => b.classList.remove('active'));
+      const allStatBtn = document.querySelector(`.stat-item[data-val="__all__"]`);
+      if (allStatBtn) allStatBtn.classList.add('active');
       state.expandedIds.clear();
       setTab('itinerary', true);
       updateUI();
@@ -2666,12 +2696,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.qf-btn').forEach(btn => {
      btn.addEventListener('click', () => {
         const isActive = btn.classList.contains('active');
-        document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
         if (!isActive) {
-           btn.classList.add('active');
            window.applySpecialFilter(btn.dataset.val);
         } else {
            window.applySpecialFilter('__all__');
+           const allStatBtn = document.querySelector(`.stat-item[data-val="__all__"]`);
+           if (allStatBtn) allStatBtn.classList.add('active');
         }
      });
   });
@@ -2806,14 +2836,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('search-input').addEventListener('input', e => {
     state.searchQuery = e.target.value;
     document.getElementById('search-clear').classList.toggle('visible', !!e.target.value);
-    document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active')); // Reset filters
+    document.querySelectorAll('.qf-btn, .stat-item').forEach(b => b.classList.remove('active')); // Reset filters
     updateUI();
   });
   document.getElementById('search-clear').addEventListener('click', () => {
     state.searchQuery = '';
     document.getElementById('search-input').value = '';
     document.getElementById('search-clear').classList.remove('visible');
-    document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active')); // Reset filters
+    document.querySelectorAll('.qf-btn, .stat-item').forEach(b => b.classList.remove('active')); // Reset filters
+    const allStatBtn = document.querySelector(`.stat-item[data-val="__all__"]`);
+    if (allStatBtn) allStatBtn.classList.add('active');
     updateUI();
   });
 
