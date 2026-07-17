@@ -154,6 +154,18 @@ html.light mark{background:rgba(217,119,6,.22)}
 .stat-item.purple .stat-num{color:var(--purple)}
 
 /* =========================================================
+   INLINE ACTION BUTTONS (COPY / TTS)
+========================================================= */
+.action-icon-btn {
+  background:transparent; border:none; color:var(--text-dim); cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:4px; border-radius:4px; transition:color .2s, background .2s;
+  margin-right:2px; vertical-align:middle; flex-shrink:0;
+}
+.action-icon-btn:hover { color:var(--accent); background:var(--accent-glow); }
+.action-icon-btn svg { width:16px; height:16px; }
+
+/* =========================================================
    MAIN CONTENT
 ========================================================= */
 #tab-content{
@@ -162,7 +174,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 }
 
 /* =========================================================
-   CALENDAR GRID CSS - TIME DISTRIBUTION & TOOLTIPS
+   CALENDAR GRID CSS - TIME DISTRIBUTION
 ========================================================= */
 .cal-month-block { padding: 14px 14px 0; display: flex; flex-direction: column; gap: 12px; }
 .cal-month-block h3 { margin-bottom:4px; font-size:18px; font-weight:800; color:var(--accent); display:flex; align-items:center; gap:8px; }
@@ -183,15 +195,46 @@ html.light mark{background:rgba(217,119,6,.22)}
 .cal-item-time { font-family: 'Courier New', monospace; font-size: 9px; color: var(--accent); flex-shrink: 0; font-weight: bold; }
 .cal-item-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; display:flex; align-items:center; gap:2px; }
 
-/* Tooltip לדסקטופ (מוסתר במובייל בגלל חוסר תמיכה ב-Hover) */
-.cal-tooltip { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: var(--bg-elevated); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid var(--border); z-index: 100; transition: opacity 0.2s; pointer-events: none; }
-.cal-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-width: 5px; border-style: solid; border-color: var(--border) transparent transparent transparent; }
-@media (hover: hover) and (pointer: fine) {
-  .cal-item:hover .cal-tooltip { visibility: visible; opacity: 1; }
+/* =========================================================
+   GLOBAL TOOLTIP (פתרון מושלם לבועה שלא נחתכת במחשב)
+========================================================= */
+.global-tooltip {
+  position: fixed;
+  background: var(--bg-elevated);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: pre-wrap; /* מאפשר לטקסט ארוך להישבר אם צריך */
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  border: 1px solid var(--accent-border);
+  z-index: 99999; /* מופיע מעל הכל! */
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%);
+  transition: opacity 0.15s ease-in-out;
+}
+.global-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+}
+.global-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--accent-border) transparent transparent transparent;
 }
 
 /* =========================================================
-   MOBILE BOTTOM SHEET PREVIEW (תחליף לחלון המרחף במובייל)
+   MOBILE BOTTOM SHEET PREVIEW (תחליף חכם ללחיצה במובייל)
 ========================================================= */
 .mps-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .mps-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -203,10 +246,11 @@ html.light mark{background:rgba(217,119,6,.22)}
 .mps-time-wrap { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: var(--accent); background: var(--accent-glow); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--accent-border); }
 .mps-title { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1.3; }
 .mps-desc { font-size: 14px; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.mps-btn { width: 100%; padding: 14px; font-size: 15px; border-radius: var(--r-sm); margin-top: 8px; background: var(--accent); color: var(--bg); font-weight: 700; border: none; font-family: inherit; cursor: pointer; }
+.mps-btn { width: 100%; padding: 14px; font-size: 15px; border-radius: var(--r-sm); margin-top: 8px; background: var(--accent); color: var(--bg); font-weight: 700; border: none; font-family: inherit; cursor: pointer; transition: opacity .2s;}
+.mps-btn:hover { opacity: 0.9; }
 
 /* =========================================================
-   AGENDA DAY GROUP - הדגשת כותרות עדינה
+   AGENDA DAY GROUP - הדגשת כותרות עדינה וחכמה
 ========================================================= */
 .agenda-day-group { margin-bottom: 24px; }
 .section-header{position:sticky;top:105px;z-index:10;padding:8px 14px; /* offset top relative to header */
@@ -234,7 +278,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15);}
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 155px;} /* תוקן כדי לא להיות מוסתר תחת הכותרות העליונות */
 .card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
@@ -316,18 +360,6 @@ html.light mark{background:rgba(217,119,6,.22)}
 .link-btn svg{width:16px;height:16px;flex-shrink:0}
 
 /* =========================================================
-   INLINE ACTION BUTTONS
-========================================================= */
-.action-icon-btn {
-  background:transparent; border:none; color:var(--text-dim); cursor:pointer;
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:4px; border-radius:4px; transition:color .2s, background .2s;
-  margin-right:2px; vertical-align:middle; flex-shrink:0;
-}
-.action-icon-btn:hover { color:var(--accent); background:var(--accent-glow); }
-.action-icon-btn svg { width:16px; height:16px; }
-
-/* =========================================================
    MODALS
 ========================================================= */
 .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);
@@ -394,7 +426,7 @@ select.edit-input{appearance:none}
 @keyframes shrinkBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
 /* =========================================================
-   EMPTY STATE
+   EMPTY STATE & LOADING
 ========================================================= */
 .empty-state{display:flex;flex-direction:column;align-items:center;padding:64px 24px 32px;gap:16px;text-align:center}
 .empty-icon{width:64px;height:64px;border-radius:var(--r-lg);background:var(--warning-glow);border:1px solid color-mix(in srgb,var(--warning) 22%,transparent);display:flex;align-items:center;justify-content:center}
@@ -413,23 +445,20 @@ select.edit-input{appearance:none}
 .add-fab:hover{border-color:var(--accent);color:var(--accent)}
 .add-fab svg{width:18px;height:18px}
 
-/* =========================================================
-   UPLOAD HINT GRID
-========================================================= */
-.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.format-hint-item{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
-.format-hint-item strong{display:block;font-size:12px;color:var(--accent);margin-bottom:4px}
-.format-hint-item span{font-size:12px;color:var(--text-muted)}
-
-/* =========================================================
-   ANIMATIONS & LOADING
-========================================================= */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .loading-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 .loading-spinner{width:64px;height:64px;border-radius:var(--r-lg);background:var(--accent-glow);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;animation:spin .8s linear infinite}
 .loading-spinner svg{width:28px;height:28px;color:var(--accent)}
 .loading-label{font-size:14px;color:var(--text-muted);font-weight:600}
+
+/* =========================================================
+   FORMAT HINT GRID
+========================================================= */
+.format-hint-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.format-hint-item{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg-muted);border:1px solid var(--border)}
+.format-hint-item strong{display:block;font-size:12px;color:var(--accent);margin-bottom:4px}
+.format-hint-item span{font-size:12px;color:var(--text-muted)}
 
 /* =========================================================
    EXPORT MODAL
@@ -444,8 +473,6 @@ select.edit-input{appearance:none}
 .eo-csv .eo-icon{background:var(--success-glow);color:var(--success)}
 .eo-json .eo-icon{background:var(--accent-glow);color:var(--accent)}
 .eo-txt .eo-icon{background:var(--purple-glow);color:var(--purple)}
-
-/* Confirm Modal Specific */
 #modal-confirm .modal-box { max-width: 360px; margin: 0 auto; text-align: center; padding-bottom: 32px; }
 #modal-confirm .modal-title { justify-content: center; }
 </style>
@@ -520,7 +547,6 @@ select.edit-input{appearance:none}
       </button>
     </div>
 
-    <!-- הלשוניות -->
     <nav id="tab-bar">
       <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -588,7 +614,10 @@ select.edit-input{appearance:none}
   </main>
 </div>
 
-<!-- Mobile Bottom Sheet Preview (הפתרון המקצועי להצגת מידע במובייל) -->
+<!-- בועית ריחוף חכמה וגלובלית שלא נחתכת לעולם במסך המחשב -->
+<div id="global-tooltip" class="global-tooltip"></div>
+
+<!-- Mobile Bottom Sheet Preview -->
 <div class="mps-backdrop" id="mps-backdrop" onclick="closeMobilePreview()"></div>
 <div id="mobile-preview-sheet">
    <div class="mps-drag-handle"></div>
@@ -748,12 +777,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v34';
-const LS_COMPLETED = 'tripmh_completed_v34';
-const LS_BOOKED    = 'tripmh_booked_v34';
-const LS_EXPANDED  = 'tripmh_expanded_v34';
-const LS_TAB       = 'tripmh_tab_v34';
-const LS_DARK      = 'tripmh_dark_v34';
+const LS_DATA      = 'tripmh_data_v35';
+const LS_COMPLETED = 'tripmh_completed_v35';
+const LS_BOOKED    = 'tripmh_booked_v35';
+const LS_EXPANDED  = 'tripmh_expanded_v35';
+const LS_TAB       = 'tripmh_tab_v35';
+const LS_DARK      = 'tripmh_dark_v35';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1754,7 +1783,7 @@ window.openMobilePreview = function(id) {
   const timeMatch = (item.timeRange || '').match(/(\d{1,2}:\d{2})/);
   const mpsTime = document.getElementById('mps-time');
   if (timeMatch) {
-      mpsTime.textContent = timeMatch[1];
+      mpsTime.textContent = timeMatch[1] + ':' + timeMatch[2];
       mpsTime.style.display = 'block';
   } else {
       mpsTime.style.display = 'none';
@@ -2000,7 +2029,7 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     // הדגשת כותרת יפהפייה - גראדיאנט עדין שלא פוגע בטקסט
     html += `
 <div class="agenda-day-group">
-  <div class="section-header" style="border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 10%, transparent), var(--bg));">
+  <div class="section-header" style="border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 12%, var(--bg)), var(--bg));">
     <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
       ${completeAllBtn}
@@ -2117,13 +2146,15 @@ function renderCalendarPanel(items, q) {
            lastHour = hour;
 
            const timeStr = timeMatch ? `<span class="cal-item-time">${timeMatch[1]}:${timeMatch[2]}</span>` : '';
-           const tooltipText = `${escHtml(item.placeName)}${timeMatch ? ' (' + timeMatch[1] + ':' + timeMatch[2] + ')' : ''}`;
-           const displayIcon = item.icon ? `<span style="font-size:12px; display:inline-block; max-width:18px; text-align:center;">${escHtml(item.icon)}</span>` : '';
            
-           html += `<div class="cal-item ${item.type === 'option' ? 'opt-event' : 'main-event'} ${done ? 'done' : ''}" onclick="handleCalClick('${item.id}', event)">
+           // הכנת הטקסט המלא לטולטיפ העולמי
+           const timeForTooltip = timeMatch ? `[${timeMatch[1]}:${timeMatch[2]}] ` : '';
+           const tooltipText = escHtml(`${timeForTooltip}${item.placeName}`); 
+           const displayIcon = item.icon ? `<span style="font-size:12px; display:inline-block; max-width:16px; text-align:center;">${escHtml(item.icon)}</span>` : '';
+           
+           html += `<div class="cal-item ${item.type === 'option' ? 'opt-event' : 'main-event'} ${done ? 'done' : ''}" onclick="handleCalClick('${item.id}', event)" data-tooltip="${tooltipText}">
                       ${timeStr}
-                      <span class="cal-item-text" style="display:flex; align-items:center; gap:2px;">${displayIcon} ${hlHtml(item.placeName, q)}</span>
-                      <div class="cal-tooltip">${tooltipText}</div>
+                      <span class="cal-item-text">${displayIcon} ${hlHtml(item.placeName, q)}</span>
                     </div>`;
         });
         
@@ -2467,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateUI();
-  setTab(state.activeTab, true); // פותח את הלשונית האחרונה בלי לגלול
+  setTab(state.activeTab, true);
 
   // Tab bar
   document.querySelectorAll('.tab-btn').forEach(b => {
@@ -2626,6 +2657,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const files = e.dataTransfer?.files;
     if (files?.length) handleFiles(files);
   });
+
+  // Setup Global Tooltip (Hover Logic for Desktop)
+  const globalTooltip = document.getElementById('global-tooltip');
+  
+  document.addEventListener('mouseover', e => {
+      // אם זה מסך מגע (מובייל) לא נפעיל את הבועה המרחפת
+      if (window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window)) return;
+      
+      const item = e.target.closest('.cal-item');
+      if (item) {
+          globalTooltip.textContent = item.getAttribute('data-tooltip');
+          const rect = item.getBoundingClientRect();
+          
+          let left = rect.left + rect.width / 2;
+          globalTooltip.style.left = left + 'px';
+          globalTooltip.style.top = (rect.top - 8) + 'px';
+          globalTooltip.classList.add('visible');
+          
+          // בדיקת התנגשויות (כדי שלא ייחתך בצדדים במחשב)
+          requestAnimationFrame(() => {
+              const ttRect = globalTooltip.getBoundingClientRect();
+              if (ttRect.left < 10) {
+                  globalTooltip.style.left = (ttRect.width / 2 + 10) + 'px';
+              } else if (ttRect.right > window.innerWidth - 10) {
+                  globalTooltip.style.left = (window.innerWidth - ttRect.width / 2 - 10) + 'px';
+              }
+          });
+      }
+  });
+
+  document.addEventListener('mouseout', e => {
+      const item = e.target.closest('.cal-item');
+      if (item) {
+          globalTooltip.classList.remove('visible');
+      }
+  });
+  
+  // הסתרת בועה בעת גלילה
+  window.addEventListener('scroll', () => {
+      globalTooltip.classList.remove('visible');
+  }, { passive: true });
 });
 </script>
 </body>
