@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0c0f14" id="theme-meta" />
 <title>TripMH – מתכנן טיול חכם</title>
 <meta name="description" content="אפליקציית ניהול מסלול טיול — עובדת גם אופליין!" />
+<link rel="manifest" href="manifest.json">
 <style>
 /* =========================================================
    RESET & BASE
@@ -820,12 +821,12 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v43';
-const LS_COMPLETED = 'tripmh_completed_v43';
-const LS_BOOKED    = 'tripmh_booked_v43';
-const LS_EXPANDED  = 'tripmh_expanded_v43';
-const LS_TAB       = 'tripmh_tab_v43';
-const LS_DARK      = 'tripmh_dark_v43';
+const LS_DATA      = 'tripmh_data_v45';
+const LS_COMPLETED = 'tripmh_completed_v45';
+const LS_BOOKED    = 'tripmh_booked_v45';
+const LS_EXPANDED  = 'tripmh_expanded_v45';
+const LS_TAB       = 'tripmh_tab_v45';
+const LS_DARK      = 'tripmh_dark_v45';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -1019,7 +1020,6 @@ function speakField(id, field, lang, e) {
 
   if (navigator.onLine) {
       const shortLang = lang.split('-')[0];
-      // Updated to tw-ob to bypass normal blocks that cause fake offline reports
       const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${shortLang}&q=${encodeURIComponent(textToSpeak)}`;
       window.currentAudio = new Audio(url);
       window.currentAudio.play().then(() => {
@@ -2050,7 +2050,6 @@ function renderChecklistCard(item, q) {
   </article>`;
 }
 
-/* כרטיס המילון המעודכן עם כפתור שמע מובנה ויפה */
 function renderDictionaryCard(item, q) {
   return `
   <article class="card" data-id="${item.id}" style="padding:16px; background:var(--bg-card); border-radius:var(--r); border:1px solid var(--border);">
@@ -2672,26 +2671,29 @@ document.addEventListener('DOMContentLoaded', () => {
     undoLastAction();
   });
 
-  // Share Button
+  // Share Button Fixed URL & Text
   document.getElementById('btn-share').addEventListener('click', async () => {
       const total = state.data.itinerary.length + state.data.options.length;
       if (total === 0) {
          addToast('אין עדיין אטרקציות במסלול לשתף', 'error'); return;
       }
-      const textToShare = `הטיול שלי מוכן! ✈️ תכננתי ${total} אטרקציות ומקומות באמצעות TripMH.`;
+      
+      const textToShare = `מתכנן טיול חכם ב-TripMH ✈️\nתכננתי מסלול של ${total} אטרקציות ומקומות! מוזמנים לנסות את האפליקציה:`;
+      const shareUrl = window.location.origin + window.location.pathname; // הכתובת הנקיה של האתר
       
       if (navigator.share) {
           try {
               await navigator.share({
-                  title: 'TripMH - המסלול שלי',
-                  text: textToShare
+                  title: 'TripMH - מתכנן הטיולים שלי',
+                  text: textToShare,
+                  url: shareUrl
               });
           } catch (err) {
               console.log('Share canceled', err);
           }
       } else {
-          navigator.clipboard.writeText(textToShare).then(() => {
-              addToast('טקסט השיתוף הועתק ללוח!', 'success');
+          navigator.clipboard.writeText(`${textToShare}\n${shareUrl}`).then(() => {
+              addToast('הקישור והטקסט הועתקו ללוח!', 'success');
           });
       }
   });
@@ -2898,25 +2900,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* =========================================================
-   PWA SERVICE WORKER (OFFLINE SUPPORT)
+   PWA SERVICE WORKER REGISTRATION (OFFLINE SUPPORT)
 ========================================================= */
 if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
-    const swCode = `
-        const CACHE_NAME = 'tripmh-offline-v3';
-        self.addEventListener('install', e => {
-            e.waitUntil(caches.open(CACHE_NAME).then(c => c.add(self.registration.scope)));
-            self.skipWaiting();
-        });
-        self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
-        self.addEventListener('fetch', e => {
-            e.respondWith(
-                fetch(e.request).catch(() => caches.match(e.request).then(res => res || caches.match(self.registration.scope)))
-            );
-        });
-    `;
-    const blob = new Blob([swCode], {type: 'application/javascript'});
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl, { scope: './' }).catch(()=>{});
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW reg failed', err));
 }
 </script>
 </body>
