@@ -122,11 +122,13 @@ html.light mark{background:rgba(217,119,6,.22)}
 .search-clear.visible{display:flex}
 .search-clear svg{width:11px;height:11px}
 
+/* עיצוב לתגית המספרים של הפילטרים המהירים */
 .quick-filters { display:flex; gap:8px; overflow-x:auto; padding: 0 14px 10px; flex-wrap: nowrap; -webkit-overflow-scrolling:touch; }
 .quick-filters::-webkit-scrollbar { display:none; }
 .qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px;}
 .qf-btn.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
-.qf-badge { background:var(--accent); color:var(--bg); padding:1px 6px; border-radius:99px; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; line-height:1; }
+.qf-badge { background:var(--bg-elevated); color:var(--text-muted); border:1px solid var(--border); padding:2px 6px; border-radius:99px; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; line-height:1; transition:all 0.2s; }
+.qf-btn.active .qf-badge { background:var(--accent); color:var(--bg); border-color:var(--accent); }
 
 #tab-bar{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;padding:0 4px;flex-shrink:0;}
 #tab-bar::-webkit-scrollbar{display:none;}
@@ -1195,7 +1197,7 @@ function parseDateVal(d) {
   const m1 = d.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/);
   if (m1) return new Date(`${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`).getTime();
   const m2 = d.match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
-  if (m2) return new Date(`${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`).getTime();
+  if (m2) return new Date(`${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')getTime();
   return 0;
 }
 function detectIcon(text) {
@@ -1753,6 +1755,9 @@ window.applySpecialFilter = function(filterTag) {
     if (filterTag === '__booking__') {
         const bookingBtn = document.querySelector('.qf-btn[data-val="__booking__"]');
         if(bookingBtn) bookingBtn.classList.add('active');
+    } else {
+        const otherBtn = document.querySelector(`.qf-btn[data-val="${filterTag}"]`);
+        if (otherBtn) otherBtn.classList.add('active');
     }
 
     updateUI();
@@ -2311,17 +2316,22 @@ function updateUI() {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
   
-  // חישוב סך כל הפריטים שהסתננו ומוצגים כרגע:
-  const totalVisibleItems = fi.length + fo.length + ft.length + fc.length + fd.length;
+  // חישוב והצגה של תגית המספרים לכל פילטר באופן קבוע
+  const allItemsForCount = [...d.itinerary, ...d.options, ...d.tips, ...d.checklist, ...d.dictionary];
   
-  // עדכון כפתורי הסינון המהיר כדי שיציגו את המספר במידה והם מסומנים
   document.querySelectorAll('.qf-btn').forEach(btn => {
+      const val = btn.dataset.val;
       const origText = btn.getAttribute('data-orig');
-      if (btn.classList.contains('active')) {
-          btn.innerHTML = `${origText} <span class="qf-badge">${totalVisibleItems}</span>`;
+      let count = 0;
+      
+      if (val === '__booking__') {
+          count = allItemsForCount.filter(i => i.requiresBooking === true).length;
       } else {
-          btn.innerHTML = origText;
+          count = allItemsForCount.filter(i => Object.values(i).some(v => String(v).toLowerCase().includes(val.toLowerCase()))).length;
       }
+      
+      // משתמשים במבנה זהה כדי שהמסגרת תישאר קבועה ויפה לכולם
+      btn.innerHTML = `${origText} <span class="qf-badge">${count}</span>`;
   });
 
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
@@ -2898,7 +2908,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-          // מצרף v=48 כדי לאלץ את הדפדפן להתעלם מהקאש הישן ולטעון את הקובץ החדש
           navigator.serviceWorker.register('./sw.js?v=48')
               .then(reg => console.log('SW Registered', reg.scope))
               .catch(err => console.warn('SW Reg failed', err));
