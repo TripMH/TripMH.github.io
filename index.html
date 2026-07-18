@@ -2416,6 +2416,12 @@ function setTab(tab, forceScroll = false) {
   if (state.activeTab === tab && !forceScroll) {
       if (now - lastTabClickTime < 1000) {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          // סגירת כל הכרטיסיות הפתוחות בלחיצה/נגיעה כפולה
+          if (state.expandedIds.size > 0) {
+              state.expandedIds.clear();
+              document.querySelectorAll('.card.expanded').forEach(card => card.classList.remove('expanded'));
+              persistState();
+          }
       }
       lastTabClickTime = now;
       return;
