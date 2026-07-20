@@ -839,13 +839,13 @@ select.edit-input{appearance:none}
 /* =========================================================
    CONSTANTS
 ========================================================= */
-const LS_DATA      = 'tripmh_data_v49';
-const LS_COMPLETED = 'tripmh_completed_v49';
-const LS_BOOKED    = 'tripmh_booked_v49';
-const LS_EXPANDED  = 'tripmh_expanded_v49';
-const LS_TAB       = 'tripmh_tab_v49';
-const LS_DARK      = 'tripmh_dark_v49';
-const LS_PREPAID   = 'tripmh_prepaid_v49'; // משתנה לשמירת הוצאות קבועות מראש
+const LS_DATA      = 'tripmh_data_v50';
+const LS_COMPLETED = 'tripmh_completed_v50';
+const LS_BOOKED    = 'tripmh_booked_v50';
+const LS_EXPANDED  = 'tripmh_expanded_v50';
+const LS_TAB       = 'tripmh_tab_v50';
+const LS_DARK      = 'tripmh_dark_v50';
+const LS_PREPAID   = 'tripmh_prepaid_v50'; 
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -868,7 +868,7 @@ let state = {
   searchQuery: '',
   editItem: null,
   editIsNew: false,
-  prepaidExpenses: 0, // הוצאות קבועות מראש לחישוב תקציב בלבד
+  prepaidExpenses: 0, 
 };
 
 /* =========================================================
@@ -1273,8 +1273,9 @@ function needsBooking(bookText) {
 
   b = b.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim();
   if (b.length < 2) return false;
+  
+  // עקיפה חד משמעית להוצאות נטו או מה שלא דורש שריון
   if (/^(לא|אין|חינם|free|none|false|no)$/i.test(b)) return false;
-
   if (/(אין צורך|לא צריך|במקום|בקופה|בקופות|ללא הזמנה|כניסה חופשית|סיור חופשי|פתוח לקהל|פתוח לציבור|לא ניתן להזמין|תשלום ישיר|הצמדת כרטיס|כרטיס פיזי|בשערי|בשערים|בתחנה|תשלום נוח|free entry|walk.?in|no booking|ללא תשלום)/i.test(b)) {
     if (/(חובה להזמין|מומלץ להזמין|must book)/i.test(b)) return true;
     return false;
@@ -2133,8 +2134,6 @@ function renderTipCard(item, q) {
   let linksHtml = '';
   if (urls.length === 1) {
       linksHtml = `<a href="${urls[0]}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>`;
-  } else if (urls.length > 1) {
-      linksHtml = urls.map((u, idx) => `<a href="${u}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} קישור ${idx + 1}</a>`).join('');
   }
 
   const navBtns = [
@@ -2605,7 +2604,7 @@ function buildEditForm(item) {
 <div class="edit-group"><label class="edit-label">כותרת הטיפ</label><input class="edit-input" id="ef-title" value="${escHtml(item.title)}" autocomplete="off" /></div>
 <div class="edit-group"><label class="edit-label">קטגוריה</label><input class="edit-input" id="ef-category" value="${escHtml(item.category)}" autocomplete="off" /></div>
 <div class="edit-group"><label class="edit-label">תוכן</label><textarea class="edit-input" id="ef-content" rows="4">${escHtml(item.content)}</textarea></div>
-<div class="edit-row"><div class="edit-group" style="flex:2"><label class="edit-label">קישורים (ניתן להוסיף כמה)</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" /></div><div class="edit-group" style="flex:1"><label class="edit-label">שם הקישור</label><input class="edit-input" id="ef-linkLabel" value="${escHtml(item.linkLabel)}" /></div></div>`;
+<div class="edit-row"><div class="edit-group" style="flex:2"><label class="edit-label">קישור אחד עיקרי (אופציונלי)</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" /></div><div class="edit-group" style="flex:1"><label class="edit-label">שם הקישור</label><input class="edit-input" id="ef-linkLabel" value="${escHtml(item.linkLabel)}" /></div></div>`;
   }
   return `
 <div class="edit-row">
@@ -2786,7 +2785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.completedIds = new Set(lsGet(LS_COMPLETED, []));
     state.bookedIds    = new Set(lsGet(LS_BOOKED, []));
     state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
-    state.prepaidExpenses = lsGet(LS_PREPAID, 0); // שחזור הוצאות קבועות
+    state.prepaidExpenses = lsGet(LS_PREPAID, 0); 
     
     if(lsGet(LS_TAB, 'itinerary') === 'map' || lsGet(LS_TAB, 'itinerary') === 'calendar') {
         state.activeTab = 'itinerary';
