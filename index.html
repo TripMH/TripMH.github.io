@@ -126,7 +126,6 @@ html.light mark{background:rgba(217,119,6,.22)}
 .quick-filters { display:flex; gap:8px; overflow-x:auto; padding: 0 14px 10px; flex-wrap: nowrap; -webkit-overflow-scrolling:touch; }
 .quick-filters::-webkit-scrollbar { display:none; }
 .qf-btn { background:var(--bg-muted); border:1px solid var(--border); border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px;}
-/* מסגרת עדינה לסינונים המהירים */
 .qf-btn.active { background:var(--accent-glow); border-color:var(--accent); box-shadow:0 0 0 0.5px var(--accent); color:var(--accent); }
 .qf-badge { background:var(--bg-elevated); color:var(--text-muted); border:1px solid var(--border); padding:2px 6px; border-radius:99px; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; line-height:1; transition:all 0.2s; }
 .qf-btn.active .qf-badge { background:var(--accent); color:var(--bg); border-color:var(--accent); }
@@ -153,19 +152,16 @@ html.light mark{background:rgba(217,119,6,.22)}
 .stat-num{font-size:14px;font-weight:700;color:var(--text);font-family:'Courier New',monospace}
 .stat-lbl{font-size:10px;color:var(--text-muted);text-align:center;user-select:none;}
 
-/* צבעי טקסט לסטטיסטיקות */
 .stat-item.accent .stat-num{color:var(--accent)}
 .stat-item.success .stat-num{color:var(--success)}
 .stat-item.warning .stat-num{color:var(--warning)}
 .stat-item.purple .stat-num{color:var(--purple)}
 
-/* אפקטי מעבר (Hover) על הסטטיסטיקות */
 .stat-item.accent:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);}
 .stat-item.warning:hover{background:color-mix(in srgb,var(--warning) 8%,transparent);}
 .stat-item.success:hover{background:color-mix(in srgb,var(--success) 8%,transparent);}
 .stat-item.purple:hover{background:color-mix(in srgb,var(--purple) 8%,transparent);}
 
-/* מסגרת עדינה (Active) על שורת הסטטיסטיקות - ללא פגיעה בעיצוב או ברוחב */
 .stat-item.accent.active {box-shadow: inset 0 0 0 1.5px var(--accent); background: var(--accent-glow);}
 .stat-item.warning.active {box-shadow: inset 0 0 0 1.5px var(--warning); background: var(--warning-glow);}
 .stat-item.success.active {box-shadow: inset 0 0 0 1.5px var(--success); background: var(--success-glow);}
@@ -663,7 +659,12 @@ select.edit-input{appearance:none}
       </div>
       <div class="stat-item purple" data-val="__cost__" onclick="applySpecialFilter('__cost__')" title="הצג אטרקציות שעולות כסף">
         <span class="stat-num" id="stat-budget">0</span>
-        <span class="stat-lbl">תקציב (₪)</span>
+        <span class="stat-lbl" style="display:flex;align-items:center;gap:4px">
+            תקציב (₪)
+            <button onclick="event.stopPropagation(); window.editPrepaidExpenses()" style="background:none;border:none;cursor:pointer;color:inherit;padding:2px;display:flex;align-items:center;opacity:0.7" title="הוסף הוצאות קבועות מראש (טיסות/מלונות)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+        </span>
       </div>
     </div>
   </header>
@@ -844,6 +845,7 @@ const LS_BOOKED    = 'tripmh_booked_v49';
 const LS_EXPANDED  = 'tripmh_expanded_v49';
 const LS_TAB       = 'tripmh_tab_v49';
 const LS_DARK      = 'tripmh_dark_v49';
+const LS_PREPAID   = 'tripmh_prepaid_v49'; // משתנה לשמירת הוצאות קבועות מראש
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -866,6 +868,7 @@ let state = {
   searchQuery: '',
   editItem: null,
   editIsNew: false,
+  prepaidExpenses: 0, // הוצאות קבועות מראש לחישוב תקציב בלבד
 };
 
 /* =========================================================
@@ -883,6 +886,7 @@ function persistState() {
   lsSet(LS_BOOKED,    [...state.bookedIds]);
   lsSet(LS_EXPANDED,  [...state.expandedIds]);
   lsSet(LS_TAB,       state.activeTab);
+  lsSet(LS_PREPAID,   state.prepaidExpenses);
   localStorage.setItem(LS_DARK, String(state.isDark));
 }
 
@@ -896,7 +900,8 @@ function saveToHistory() {
     data: JSON.parse(JSON.stringify(state.data)),
     completedIds: new Set(state.completedIds),
     bookedIds: new Set(state.bookedIds),
-    expandedIds: new Set(state.expandedIds)
+    expandedIds: new Set(state.expandedIds),
+    prepaidExpenses: state.prepaidExpenses
   });
   if (historyStack.length > MAX_HISTORY) historyStack.shift();
   updateUndoBtn();
@@ -912,6 +917,7 @@ function undoLastAction() {
   state.completedIds = new Set(prev.completedIds);
   state.bookedIds = new Set(prev.bookedIds);
   state.expandedIds = new Set(prev.expandedIds);
+  if (prev.prepaidExpenses !== undefined) state.prepaidExpenses = prev.prepaidExpenses;
   
   updateUI();
   persistState();
@@ -958,7 +964,7 @@ function addToast(msg, type = 'neutral', undoCallback = null) {
 }
 
 /* =========================================================
-   MODALS (Confirm)
+   MODALS (Confirm & Prompts)
 ========================================================= */
 function showConfirm(title, text, onConfirm, isDanger=false) {
   const m = document.getElementById('modal-confirm');
@@ -971,6 +977,26 @@ function showConfirm(title, text, onConfirm, isDanger=false) {
   document.getElementById('mc-btn-cancel').onclick = () => m.classList.add('hidden');
   m.classList.remove('hidden');
 }
+
+window.editPrepaidExpenses = function() {
+  const current = state.prepaidExpenses || 0;
+  const val = prompt('הזן סכום של הוצאות קבועות ששולמו מראש (טיסות, מלונות וכדומה) בשקלים.\nסכום זה יתווסף אוטומטית לסך התקציב הכללי ולא ישפיע על מסלול הטיול:', current);
+  if (val !== null) {
+      const num = parseFloat(val.replace(/[^\d.-]/g, ''));
+      if (!isNaN(num)) {
+          saveToHistory();
+          state.prepaidExpenses = num;
+          persistState();
+          updateUI();
+          addToast('הוצאות קבועות עודכנו בהצלחה', 'success', undoLastAction);
+      } else if (val.trim() === '') {
+          saveToHistory();
+          state.prepaidExpenses = 0;
+          persistState();
+          updateUI();
+      }
+  }
+};
 
 /* =========================================================
    COPY & TTS HELPERS (WITH OFFLINE SUPPORT)
@@ -1346,7 +1372,7 @@ function mergeItem(arr, newItem, matchFn) {
 async function processFiles(files) {
   saveToHistory();
   const stats = { added: 0, updated: 0 };
-  let importedCompleted, importedBooked;
+  let importedCompleted, importedBooked, importedPrepaid;
 
   for (const f of Array.from(files)) {
     const text = await readFileText(f);
@@ -1362,6 +1388,7 @@ async function processFiles(files) {
           if (p.data.dictionary) state.data.dictionary = p.data.dictionary;
           if (p.completedIds) importedCompleted = p.completedIds;
           if (p.bookedIds) importedBooked = p.bookedIds;
+          if (p.prepaidExpenses !== undefined) importedPrepaid = p.prepaidExpenses;
           
           stats.added += (p.data.itinerary?.length || 0) + (p.data.options?.length || 0) + (p.data.tips?.length || 0) + (p.data.checklist?.length || 0) + (p.data.dictionary?.length || 0);
         }
@@ -1514,12 +1541,13 @@ async function processFiles(files) {
   
   if (importedCompleted) state.completedIds = new Set(importedCompleted);
   if (importedBooked) state.bookedIds = new Set(importedBooked);
+  if (importedPrepaid !== undefined) state.prepaidExpenses = importedPrepaid;
 
   return stats;
 }
 
 /* =========================================================
-   CALENDAR REMINDERS
+   CALENDAR REMINDERS & ICS BATCH EXPORT
 ========================================================= */
 function setCalendarReminder(id) {
   const arr = [...state.data.itinerary, ...state.data.options];
@@ -1603,6 +1631,77 @@ function setCalendarReminder(id) {
   addToast('מעביר ליצירת תזכורת מדויקת ב-Google Calendar...', 'success');
 }
 
+window.downloadICS = function() {
+  const items = [...state.data.itinerary, ...state.data.options]
+      .filter(i => i.requiresBooking && !state.bookedIds.has(i.id) && i.dateVal > 0);
+
+  if (items.length === 0) {
+      addToast('אין אטרקציות שדורשות שריון טרם טופלו (או חסר תאריך רשמי)', 'warning');
+      return;
+  }
+
+  let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TripMH//Smart Planner//HE\r\nCALSCALE:GREGORIAN\r\n";
+
+  items.forEach(item => {
+      const targetDate = new Date(item.dateVal);
+      let daysToSub = 14;
+      const txt = (item.booking || '').toLowerCase();
+      
+      let hour = 10;
+      let min = 0;
+      const timeMatch = txt.match(/([0-2]?\d):([0-5]\d)/);
+      if (timeMatch) { hour = parseInt(timeMatch[1], 10); min = parseInt(timeMatch[2], 10); }
+
+      const m1 = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
+      const m2 = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
+      const m3 = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
+      
+      if (m1) daysToSub = parseInt(m1[1], 10) * 30;
+      else if (m2) daysToSub = parseInt(m2[1], 10) * 7;
+      else if (m3) daysToSub = parseInt(m3[1], 10);
+      else if (txt.includes('חודשיים')) daysToSub = 60;
+      else if (txt.includes('חודש')) daysToSub = 30;
+      else if (txt.includes('שבועיים')) daysToSub = 14;
+      else if (txt.includes('שבוע')) daysToSub = 7;
+
+      targetDate.setDate(targetDate.getDate() - daysToSub);
+      targetDate.setHours(hour, min, 0, 0);
+      
+      if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
+          if (targetDate.getHours() < 6) targetDate.setDate(targetDate.getDate() - 1); 
+          targetDate.setHours(20, 0, 0, 0); 
+      }
+      
+      const now = new Date();
+      if (targetDate < now) {
+          targetDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
+          if (hour >= 22 || hour < 6) targetDate.setHours(20, 0, 0, 0);
+          else targetDate.setHours(hour, min, 0, 0);
+      }
+      
+      const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000));
+      const pad = n => String(n).padStart(2, '0');
+      const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+
+      ics += "BEGIN:VEVENT\r\n";
+      ics += `UID:${item.id}@tripmh\r\n`;
+      ics += `DTSTAMP:${fmtLocal(new Date())}Z\r\n`;
+      ics += `DTSTART:${fmtLocal(targetDate)}\r\n`;
+      ics += `DTEND:${fmtLocal(endDate)}\r\n`;
+      ics += `SUMMARY:🚨 שריון: ${item.placeName.replace(/,/g, '\\,')}\r\n`;
+      let desc = `תזכורת אוטומטית ממערכת TripMH!\\nהגיע הזמן לשריין עבור:\\n📌 ${item.placeName}\\n`;
+      if (item.booking) desc += `\\n📝 פירוט ההזמנה:\\n${item.booking.replace(/\n/g, '\\n')}`;
+      if (item.link) desc += `\\n\\n🔗 קישור ישיר להזמנה:\\n${item.link}`;
+      ics += `DESCRIPTION:${desc}\r\n`;
+      if (item.address || item.area) ics += `LOCATION:${(item.address || item.area).replace(/,/g, '\\,')}\r\n`;
+      ics += "END:VEVENT\r\n";
+  });
+
+  ics += "END:VCALENDAR\r\n";
+  downloadBlob(ics, 'TripMH_Bookings.ics', 'text/calendar;charset=utf-8');
+  addToast('קובץ היומן ירד! פתח אותו במכשיר כדי להוסיף הכל בבת אחת.', 'success');
+};
+
 /* =========================================================
    EXPORT: SEPARATE FILES CASCADED
 ========================================================= */
@@ -1678,7 +1777,7 @@ function exportCSV() {
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 9, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds] };
+  const payload = { version: 9, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds], prepaidExpenses: state.prepaidExpenses };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
@@ -2030,8 +2129,16 @@ function renderTipCard(item, q) {
   const checkStyle = done ? 'border-color:var(--success);background:var(--success-glow);color:var(--success);' : 'color:transparent;';
   const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
 
+  const urls = (item.link || '').match(/(https?:\/\/[^\s,]+)/gi) || [];
+  let linksHtml = '';
+  if (urls.length === 1) {
+      linksHtml = `<a href="${urls[0]}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>`;
+  } else if (urls.length > 1) {
+      linksHtml = urls.map((u, idx) => `<a href="${u}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} קישור ${idx + 1}</a>`).join('');
+  }
+
   const navBtns = [
-    item.link ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>` : '',
+    linksHtml,
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
   ].filter(Boolean).join('');
 
@@ -2358,6 +2465,26 @@ function updateUI() {
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   let itineraryHtml = '';
+  
+  // באנר חכם להוספת יומן כאשר מסונן "דורש שריון"
+  if (q === '__booking__') {
+      const pendingBookings = [...fi, ...fo].filter(i => i.requiresBooking && !state.bookedIds.has(i.id) && i.dateVal > 0);
+      if (pendingBookings.length > 0) {
+          itineraryHtml += `
+          <div class="transit-box" style="margin: 14px; display:flex; flex-direction:column; gap:10px; background:var(--accent-glow); border-color:var(--accent-border);">
+             <div class="transit-box-title" style="color:var(--accent); font-size:16px;">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                 הוספה מרוכזת ליומן
+             </div>
+             <div style="font-size:13px; color:var(--text); line-height:1.5;">יש לך <strong>${pendingBookings.length}</strong> פריטים שדורשים שריון, טרם טופלו ויש להם תאריך מוגדר במסלול.</div>
+             <button class="btn-primary" onclick="downloadICS()" style="padding:12px; border-radius:8px; border:none; font-family:inherit; font-weight:bold; cursor:pointer; font-size:14px; box-shadow:0 4px 12px rgba(34,211,238,.3);">
+                הורד קובץ יומן (ICS) לכל השריונים
+             </button>
+          </div>
+          `;
+      }
+  }
+
   // מרנדר לוח שנה בתוך לשונית מסלול רק אם אין חיפוש פעיל מיוחד
   if (fCal.length && !q && q !== '__booking__' && q !== '__done__' && q !== '__cost__') {
       itineraryHtml += renderCalendarPanel(fCal, q);
@@ -2381,7 +2508,7 @@ function updateUI() {
   const totalItems = d.itinerary.length + d.options.length + d.tips.length + d.checklist.length;
   const bookingCount = [...d.itinerary, ...d.options].filter(i => i.requiresBooking).length;
   
-  let totalCost = 0;
+  let totalCost = Number(state.prepaidExpenses) || 0;
   [...d.itinerary, ...d.options].forEach(i => {
      let match = (i.cost || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
      if (match) totalCost += parseFloat(match[0]);
@@ -2478,7 +2605,7 @@ function buildEditForm(item) {
 <div class="edit-group"><label class="edit-label">כותרת הטיפ</label><input class="edit-input" id="ef-title" value="${escHtml(item.title)}" autocomplete="off" /></div>
 <div class="edit-group"><label class="edit-label">קטגוריה</label><input class="edit-input" id="ef-category" value="${escHtml(item.category)}" autocomplete="off" /></div>
 <div class="edit-group"><label class="edit-label">תוכן</label><textarea class="edit-input" id="ef-content" rows="4">${escHtml(item.content)}</textarea></div>
-<div class="edit-row"><div class="edit-group"><label class="edit-label">קישור</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" type="url" /></div><div class="edit-group" style="flex:0 0 140px"><label class="edit-label">שם הקישור</label><input class="edit-input" id="ef-linkLabel" value="${escHtml(item.linkLabel)}" /></div></div>`;
+<div class="edit-row"><div class="edit-group" style="flex:2"><label class="edit-label">קישורים (ניתן להוסיף כמה)</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" /></div><div class="edit-group" style="flex:1"><label class="edit-label">שם הקישור</label><input class="edit-input" id="ef-linkLabel" value="${escHtml(item.linkLabel)}" /></div></div>`;
   }
   return `
 <div class="edit-row">
@@ -2659,6 +2786,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.completedIds = new Set(lsGet(LS_COMPLETED, []));
     state.bookedIds    = new Set(lsGet(LS_BOOKED, []));
     state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
+    state.prepaidExpenses = lsGet(LS_PREPAID, 0); // שחזור הוצאות קבועות
     
     if(lsGet(LS_TAB, 'itinerary') === 'map' || lsGet(LS_TAB, 'itinerary') === 'calendar') {
         state.activeTab = 'itinerary';
@@ -2832,6 +2960,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.bookedIds    = new Set();
         state.expandedIds  = new Set();
         state.activeTab    = 'itinerary';
+        state.prepaidExpenses = 0;
         updateUI();
         setTab('itinerary', true);
         addToast('כל הנתונים נמחקו', 'neutral', undoLastAction);
