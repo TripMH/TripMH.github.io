@@ -526,16 +526,43 @@ select.edit-input{appearance:none}
 #modal-confirm .modal-title { justify-content: center; }
 
 /* =========================================================
-   BUDGET BREAKDOWN MODAL CSS
+   BUDGET BREAKDOWN MODAL CSS & TOGGLES
 ========================================================= */
 .budget-group-title { font-size: 15px; font-weight: 800; color: var(--purple); margin: 16px 0 8px; display: flex; align-items: center; gap: 6px; }
-.budget-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-muted); border: 1px solid var(--border); border-radius: var(--r-sm); margin-bottom: 6px; transition: border-color 0.2s, background 0.2s;}
+.budget-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-muted); border: 1px solid var(--border); border-radius: var(--r-sm); margin-bottom: 6px; transition: border-color 0.2s, background 0.2s, opacity 0.3s, filter 0.3s;}
 .budget-row:hover { border-color: var(--purple); background: var(--purple-glow); }
+.budget-row.excluded { opacity: 0.45; filter: grayscale(1); border-color: transparent; }
+.budget-row.excluded:hover { opacity: 0.8; }
+.budget-row.excluded .budget-row-cost { text-decoration: line-through; color: var(--text-muted) !important; }
 .budget-row-name { font-size: 14px; font-weight: 600; color: var(--text); display:flex; align-items:center; gap:8px;}
 .budget-row-name .b-icon { font-size: 18px; flex-shrink: 0;}
-.budget-row-cost { font-size: 15px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--text); }
+.budget-row-cost { font-size: 15px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--text); transition: color 0.3s;}
 .budget-row-cost.paid { color: var(--success); }
-.budget-total { display: flex; justify-content: space-between; padding: 16px; background: var(--purple-glow); border: 1px solid var(--purple); border-radius: var(--r-sm); margin-top: 16px; font-size: 18px; font-weight: 800; color: var(--purple); }
+.budget-total { display: flex; justify-content: space-between; padding: 16px; background: var(--purple-glow); border: 1px solid var(--purple); border-radius: var(--r-sm); margin-top: 16px; font-size: 18px; font-weight: 800; color: var(--purple); transition: all 0.3s; }
+
+/* Custom Toggle Switch for Budget Items */
+.b-toggle-wrapper {
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 4px; border-radius: 4px;
+    margin-left: 8px;
+}
+.b-toggle-wrapper:hover { background: rgba(255,255,255,0.08); }
+html.light .b-toggle-wrapper:hover { background: rgba(0,0,0,0.05); }
+.b-toggle {
+    position: relative; display: inline-block; width: 34px; height: 20px; pointer-events: none;
+}
+.b-toggle input { opacity: 0; width: 0; height: 0; }
+.b-slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--bg-card); border: 1px solid var(--border);
+    transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 20px;
+}
+.b-slider:before {
+    position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px;
+    background-color: var(--text-muted); transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 50%;
+}
+input:checked + .b-slider { background-color: var(--purple); border-color: var(--purple); }
+input:checked + .b-slider:before { transform: translateX(14px); background-color: #fff; }
 </style>
 </head>
 <body>
@@ -877,6 +904,7 @@ const LS_EXPANDED  = 'tripmh_expanded_v50';
 const LS_TAB       = 'tripmh_tab_v50';
 const LS_DARK      = 'tripmh_dark_v50';
 const LS_PREPAID   = 'tripmh_prepaid_v50'; 
+const LS_BUDGET    = 'tripmh_budget_v50';
 
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
@@ -894,6 +922,7 @@ let state = {
   completedIds: new Set(),
   bookedIds: new Set(),
   expandedIds: new Set(),
+  budgetToggles: {},
   activeTab: 'itinerary',
   isDark: true,
   searchQuery: '',
@@ -916,6 +945,7 @@ function persistState() {
   lsSet(LS_COMPLETED, [...state.completedIds]);
   lsSet(LS_BOOKED,    [...state.bookedIds]);
   lsSet(LS_EXPANDED,  [...state.expandedIds]);
+  lsSet(LS_BUDGET,    state.budgetToggles);
   lsSet(LS_TAB,       state.activeTab);
   lsSet(LS_PREPAID,   state.prepaidExpenses);
   localStorage.setItem(LS_DARK, String(state.isDark));
@@ -932,6 +962,7 @@ function saveToHistory() {
     completedIds: new Set(state.completedIds),
     bookedIds: new Set(state.bookedIds),
     expandedIds: new Set(state.expandedIds),
+    budgetToggles: { ...state.budgetToggles },
     prepaidExpenses: state.prepaidExpenses
   });
   if (historyStack.length > MAX_HISTORY) historyStack.shift();
@@ -948,12 +979,17 @@ function undoLastAction() {
   state.completedIds = new Set(prev.completedIds);
   state.bookedIds = new Set(prev.bookedIds);
   state.expandedIds = new Set(prev.expandedIds);
+  state.budgetToggles = prev.budgetToggles ? { ...prev.budgetToggles } : {};
   if (prev.prepaidExpenses !== undefined) state.prepaidExpenses = prev.prepaidExpenses;
   
   updateUI();
   persistState();
   updateUndoBtn();
   addToast('פעולה אחרונה בוטלה בהצלחה', 'neutral');
+  
+  if (!document.getElementById('modal-budget').classList.contains('hidden')) {
+      window.showBudgetBreakdown();
+  }
 }
 
 /* =========================================================
@@ -1036,6 +1072,24 @@ window.editPrepaidExpenses = function() {
   }
 };
 
+window.toggleBudget = function(id) {
+    const allItems = [...state.data.itinerary, ...state.data.options];
+    const item = allItems.find(x => x.id === id);
+    if (!item) return;
+
+    saveToHistory();
+
+    const currentState = state.budgetToggles[id] !== undefined ? state.budgetToggles[id] : (item.type === 'itinerary');
+    state.budgetToggles[id] = !currentState;
+
+    persistState();
+    updateUI();
+    
+    if (!document.getElementById('modal-budget').classList.contains('hidden')) {
+        window.showBudgetBreakdown();
+    }
+};
+
 /* =========================================================
    BUDGET BREAKDOWN MODAL LOGIC
 ========================================================= */
@@ -1052,7 +1106,7 @@ window.showBudgetBreakdown = function() {
         html += `<div class="budget-group-title">✈️ הוצאות קבועות מראש (טיסות, מלונות)</div>`;
         html += `
         <div class="budget-row">
-            <div class="budget-row-name">הוצאות כלליות ששולמו מראש</div>
+            <div class="budget-row-name" style="padding-right: 48px;">הוצאות כלליות ששולמו מראש</div>
             <div class="budget-row-cost paid">₪${prepaid.toLocaleString()}</div>
         </div>`;
     }
@@ -1080,22 +1134,33 @@ window.showBudgetBreakdown = function() {
         if (items.length === 0) return '';
         let res = `<div class="budget-group-title">${icon} ${title}</div>`;
         items.forEach(i => {
-            total += i.numCost;
+            const isActive = state.budgetToggles[i.id] !== undefined ? state.budgetToggles[i.id] : (i.type === 'itinerary');
+            
+            if (isActive) {
+                total += i.numCost;
+            }
+            
             let isPaid = state.bookedIds.has(i.id);
-            if (isPaid) totalPaid += i.numCost;
+            if (isPaid && isActive) totalPaid += i.numCost;
             
             let paidBadge = isPaid ? `<span style="font-size:10px; background:var(--success-glow); color:var(--success); padding:2px 6px; border-radius:4px; margin-right:6px; border:1px solid color-mix(in srgb,var(--success) 30%,transparent)">שולם / הוזמן</span>` : '';
             
             res += `
-            <div class="budget-row" onclick="document.getElementById('modal-budget').classList.add('hidden'); window.scrollToItem('${i.id}')" title="לחץ כדי לקפוץ לפריט במסלול">
-                <div class="budget-row-name">
+            <div class="budget-row ${isActive ? '' : 'excluded'}" onclick="document.getElementById('modal-budget').classList.add('hidden'); window.scrollToItem('${i.id}')" title="לחץ כדי לקפוץ לפריט במסלול">
+                <div class="budget-row-name" style="align-items:center;">
+                    <div class="b-toggle-wrapper" title="הוסף/הסר מחישוב התקציב" onclick="event.stopPropagation(); window.toggleBudget('${i.id}')">
+                        <label class="b-toggle">
+                            <input type="checkbox" ${isActive ? 'checked' : ''} tabindex="-1">
+                            <span class="b-slider"></span>
+                        </label>
+                    </div>
                     <span class="b-icon">${i.icon || '📍'}</span>
                     <div style="display:flex; flex-direction:column; gap:2px;">
                         <span>${escHtml(i.placeName)} ${paidBadge}</span>
                         <span style="font-size:11px; color:var(--text-muted)">${escHtml(i.dayLabel)}</span>
                     </div>
                 </div>
-                <div class="budget-row-cost ${isPaid ? 'paid' : ''}">₪${i.numCost.toLocaleString()}</div>
+                <div class="budget-row-cost ${isPaid && isActive ? 'paid' : ''}">₪${i.numCost.toLocaleString()}</div>
             </div>`;
         });
         return res;
@@ -1104,11 +1169,11 @@ window.showBudgetBreakdown = function() {
     html += renderItems(itineraryCosts, 'הוצאות באטרקציות ומקומות (מסלול)', '📍');
     html += renderItems(optionsCosts, 'אופציות ותוספות', '➕');
 
-    if (total === 0) {
+    if (total === 0 && prepaid === 0) {
         html = `<div class="empty-state" style="padding: 24px 0;">
                   <div class="empty-icon">💰</div>
-                  <div class="empty-title">אין הוצאות מוגדרות</div>
-                  <div class="empty-sub">לא הוזנו עלויות לאטרקציות או הוצאות מראש.</div>
+                  <div class="empty-title">אין הוצאות מוגדרות או פעילות</div>
+                  <div class="empty-sub">לא הוזנו עלויות, או שכל הפריטים הוסרו מהחישוב.</div>
                 </div>`;
     }
 
@@ -1512,7 +1577,7 @@ function mergeItem(arr, newItem, matchFn) {
 async function processFiles(files) {
   saveToHistory();
   const stats = { added: 0, updated: 0 };
-  let importedCompleted, importedBooked, importedPrepaid;
+  let importedCompleted, importedBooked, importedPrepaid, importedToggles;
 
   for (const f of Array.from(files)) {
     const text = await readFileText(f);
@@ -1529,6 +1594,7 @@ async function processFiles(files) {
           if (p.completedIds) importedCompleted = p.completedIds;
           if (p.bookedIds) importedBooked = p.bookedIds;
           if (p.prepaidExpenses !== undefined) importedPrepaid = p.prepaidExpenses;
+          if (p.budgetToggles) importedToggles = p.budgetToggles;
           
           stats.added += (p.data.itinerary?.length || 0) + (p.data.options?.length || 0) + (p.data.tips?.length || 0) + (p.data.checklist?.length || 0) + (p.data.dictionary?.length || 0);
         }
@@ -1682,6 +1748,7 @@ async function processFiles(files) {
   if (importedCompleted) state.completedIds = new Set(importedCompleted);
   if (importedBooked) state.bookedIds = new Set(importedBooked);
   if (importedPrepaid !== undefined) state.prepaidExpenses = importedPrepaid;
+  if (importedToggles) state.budgetToggles = importedToggles;
 
   return stats;
 }
@@ -1917,7 +1984,7 @@ function exportCSV() {
 }
 
 function exportJSON(data, completedIds, bookedIds) {
-  const payload = { version: 9, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds], prepaidExpenses: state.prepaidExpenses };
+  const payload = { version: 9, exportedAt: new Date().toISOString(), data, completedIds: [...completedIds], bookedIds: [...bookedIds], prepaidExpenses: state.prepaidExpenses, budgetToggles: state.budgetToggles };
   downloadBlob(JSON.stringify(payload, null, 2), 'tripmh_backup.json', 'application/json');
 }
 
@@ -2648,8 +2715,11 @@ function updateUI() {
   
   let totalCost = Number(state.prepaidExpenses) || 0;
   [...d.itinerary, ...d.options].forEach(i => {
-     let match = (i.cost || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
-     if (match) totalCost += parseFloat(match[0]);
+     const isActive = state.budgetToggles[i.id] !== undefined ? state.budgetToggles[i.id] : (i.type === 'itinerary');
+     if (isActive) {
+         let match = (i.cost || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
+         if (match) totalCost += parseFloat(match[0]);
+     }
   });
   document.getElementById('stat-budget').textContent = totalCost.toLocaleString();
 
@@ -2886,6 +2956,12 @@ function deleteEditItem() {
   state.completedIds.delete(id);
   state.bookedIds.delete(id);
   state.expandedIds.delete(id);
+  
+  // נקה גם מטבלת התקציב במידה ונשמר ידנית
+  if (state.budgetToggles[id] !== undefined) {
+      delete state.budgetToggles[id];
+  }
+
   state.editItem = null;
   document.getElementById('modal-edit').classList.add('hidden');
   addToast('הפריט נמחק', 'neutral', undoLastAction);
@@ -2927,6 +3003,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.completedIds = new Set(lsGet(LS_COMPLETED, []));
     state.bookedIds    = new Set(lsGet(LS_BOOKED, []));
     state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
+    state.budgetToggles = lsGet(LS_BUDGET, {});
     state.prepaidExpenses = lsGet(LS_PREPAID, 0); 
     
     if(lsGet(LS_TAB, 'itinerary') === 'map' || lsGet(LS_TAB, 'itinerary') === 'calendar') {
@@ -3100,6 +3177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.completedIds = new Set();
         state.bookedIds    = new Set();
         state.expandedIds  = new Set();
+        state.budgetToggles = {};
         state.activeTab    = 'itinerary';
         state.prepaidExpenses = 0;
         updateUI();
