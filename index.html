@@ -524,6 +524,18 @@ select.edit-input{appearance:none}
 .eo-txt .eo-icon{background:var(--purple-glow);color:var(--purple)}
 #modal-confirm .modal-box { max-width: 360px; margin: 0 auto; text-align: center; padding-bottom: 32px; }
 #modal-confirm .modal-title { justify-content: center; }
+
+/* =========================================================
+   BUDGET BREAKDOWN MODAL CSS
+========================================================= */
+.budget-group-title { font-size: 15px; font-weight: 800; color: var(--purple); margin: 16px 0 8px; display: flex; align-items: center; gap: 6px; }
+.budget-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-muted); border: 1px solid var(--border); border-radius: var(--r-sm); margin-bottom: 6px; transition: border-color 0.2s, background 0.2s;}
+.budget-row:hover { border-color: var(--purple); background: var(--purple-glow); }
+.budget-row-name { font-size: 14px; font-weight: 600; color: var(--text); display:flex; align-items:center; gap:8px;}
+.budget-row-name .b-icon { font-size: 18px; flex-shrink: 0;}
+.budget-row-cost { font-size: 15px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--text); }
+.budget-row-cost.paid { color: var(--success); }
+.budget-total { display: flex; justify-content: space-between; padding: 16px; background: var(--purple-glow); border: 1px solid var(--purple); border-radius: var(--r-sm); margin-top: 16px; font-size: 18px; font-weight: 800; color: var(--purple); }
 </style>
 </head>
 <body>
@@ -657,11 +669,11 @@ select.edit-input{appearance:none}
         <span class="stat-num" id="stat-done">0</span>
         <span class="stat-lbl">הושלמו</span>
       </div>
-      <div class="stat-item purple" data-val="__cost__" onclick="applySpecialFilter('__cost__')" title="הצג אטרקציות שעולות כסף">
+      <div class="stat-item purple" onclick="window.showBudgetBreakdown()" title="הצג פירוט תקציב מלא">
         <span class="stat-num" id="stat-budget">0</span>
         <span class="stat-lbl" style="display:flex;align-items:center;gap:4px">
             תקציב (₪)
-            <button onclick="event.stopPropagation(); window.editPrepaidExpenses()" style="background:none;border:none;cursor:pointer;color:inherit;padding:2px;display:flex;align-items:center;opacity:0.7" title="הוסף הוצאות קבועות מראש (טיסות/מלונות)">
+            <button onclick="event.stopPropagation(); window.editPrepaidExpenses()" style="background:none;border:none;cursor:pointer;color:inherit;padding:2px;display:flex;align-items:center;opacity:0.7" title="הוסף/ערוך הוצאות קבועות מראש (טיסות/מלונות)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
         </span>
@@ -831,6 +843,25 @@ select.edit-input{appearance:none}
   </div>
 </div>
 
+<!-- מודל פירוט תקציב חדש -->
+<div class="modal-overlay hidden" id="modal-budget">
+  <div class="modal-box">
+    <div class="modal-drag-handle"></div>
+    <div class="modal-title" style="color:var(--purple)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;">
+        <circle cx="12" cy="12" r="10"/><path d="M9.5 9a3 3 0 0 1 5 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>פירוט תקציב והוצאות</span>
+    </div>
+    <div id="budget-breakdown-body" style="max-height: 60vh; overflow-y: auto; margin-bottom: 16px; padding-left: 4px;"></div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="document.getElementById('modal-budget').classList.add('hidden')" style="background:var(--purple); box-shadow:0 4px 12px rgba(192,132,252,.3);">סגור</button>
+      <button class="btn-cancel" onclick="window.editPrepaidExpenses()">ערוך הוצאות מראש</button>
+    </div>
+    <button class="btn-cancel" onclick="document.getElementById('modal-budget').classList.add('hidden'); applySpecialFilter('__cost__');" style="width:100%; margin-top:8px; border:none!important; background:var(--bg-elevated);">סנן אטרקציות בתשלום במסלול</button>
+  </div>
+</div>
+
 <input type="file" id="file-csv"  accept=".csv,text/csv" multiple style="display:none" />
 <input type="file" id="file-json" accept=".json,application/json" style="display:none" />
 
@@ -989,14 +1020,122 @@ window.editPrepaidExpenses = function() {
           persistState();
           updateUI();
           addToast('הוצאות קבועות עודכנו בהצלחה', 'success', undoLastAction);
+          // אם מודל התקציב פתוח, רענן אותו
+          if (!document.getElementById('modal-budget').classList.contains('hidden')) {
+              window.showBudgetBreakdown();
+          }
       } else if (val.trim() === '') {
           saveToHistory();
           state.prepaidExpenses = 0;
           persistState();
           updateUI();
+          if (!document.getElementById('modal-budget').classList.contains('hidden')) {
+              window.showBudgetBreakdown();
+          }
       }
   }
 };
+
+/* =========================================================
+   BUDGET BREAKDOWN MODAL LOGIC
+========================================================= */
+window.showBudgetBreakdown = function() {
+    let html = '';
+    let total = 0;
+    let totalPaid = 0;
+    
+    // 1. Prepaid (Flights, Hotels, etc.)
+    let prepaid = Number(state.prepaidExpenses) || 0;
+    if (prepaid > 0) {
+        total += prepaid;
+        totalPaid += prepaid; // מניחים שהוצאות מראש כבר שולמו
+        html += `<div class="budget-group-title">✈️ הוצאות קבועות מראש (טיסות, מלונות)</div>`;
+        html += `
+        <div class="budget-row">
+            <div class="budget-row-name">הוצאות כלליות ששולמו מראש</div>
+            <div class="budget-row-cost paid">₪${prepaid.toLocaleString()}</div>
+        </div>`;
+    }
+
+    // 2. Extract costs from items
+    let itineraryCosts = [];
+    let optionsCosts = [];
+    
+    const extractCost = (item) => {
+        let match = (item.cost || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
+        return match ? parseFloat(match[0]) : 0;
+    };
+
+    state.data.itinerary.forEach(i => {
+        let c = extractCost(i);
+        if (c > 0) itineraryCosts.push({ ...i, numCost: c });
+    });
+    
+    state.data.options.forEach(i => {
+        let c = extractCost(i);
+        if (c > 0) optionsCosts.push({ ...i, numCost: c });
+    });
+
+    const renderItems = (items, title, icon) => {
+        if (items.length === 0) return '';
+        let res = `<div class="budget-group-title">${icon} ${title}</div>`;
+        items.forEach(i => {
+            total += i.numCost;
+            let isPaid = state.bookedIds.has(i.id);
+            if (isPaid) totalPaid += i.numCost;
+            
+            let paidBadge = isPaid ? `<span style="font-size:10px; background:var(--success-glow); color:var(--success); padding:2px 6px; border-radius:4px; margin-right:6px; border:1px solid color-mix(in srgb,var(--success) 30%,transparent)">שולם / הוזמן</span>` : '';
+            
+            res += `
+            <div class="budget-row" onclick="document.getElementById('modal-budget').classList.add('hidden'); window.scrollToItem('${i.id}')" title="לחץ כדי לקפוץ לפריט במסלול">
+                <div class="budget-row-name">
+                    <span class="b-icon">${i.icon || '📍'}</span>
+                    <div style="display:flex; flex-direction:column; gap:2px;">
+                        <span>${escHtml(i.placeName)} ${paidBadge}</span>
+                        <span style="font-size:11px; color:var(--text-muted)">${escHtml(i.dayLabel)}</span>
+                    </div>
+                </div>
+                <div class="budget-row-cost ${isPaid ? 'paid' : ''}">₪${i.numCost.toLocaleString()}</div>
+            </div>`;
+        });
+        return res;
+    };
+
+    html += renderItems(itineraryCosts, 'הוצאות באטרקציות ומקומות (מסלול)', '📍');
+    html += renderItems(optionsCosts, 'אופציות ותוספות', '➕');
+
+    if (total === 0) {
+        html = `<div class="empty-state" style="padding: 24px 0;">
+                  <div class="empty-icon">💰</div>
+                  <div class="empty-title">אין הוצאות מוגדרות</div>
+                  <div class="empty-sub">לא הוזנו עלויות לאטרקציות או הוצאות מראש.</div>
+                </div>`;
+    }
+
+    html += `
+    <div class="budget-total">
+        <div>סה"כ תקציב משוער:</div>
+        <div>₪${total.toLocaleString()}</div>
+    </div>
+    `;
+    
+    if (totalPaid > 0 && totalPaid < total) {
+        html += `
+        <div style="display:flex; justify-content:space-between; padding: 12px 16px; background:var(--success-glow); border-radius:var(--r-sm); margin-top:8px; color:var(--success); font-weight:700; font-size:14px; border:1px solid color-mix(in srgb,var(--success) 30%,transparent);">
+            <div>מתוכם כבר שולם/הוזמן:</div>
+            <div>₪${totalPaid.toLocaleString()}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding: 12px 16px; background:var(--warning-glow); border-radius:var(--r-sm); margin-top:8px; color:var(--warning); font-weight:700; font-size:14px; border:1px solid color-mix(in srgb,var(--warning) 30%,transparent);">
+            <div>נותר לתשלום:</div>
+            <div>₪${(total - totalPaid).toLocaleString()}</div>
+        </div>
+        `;
+    }
+
+    document.getElementById('budget-breakdown-body').innerHTML = html;
+    document.getElementById('modal-budget').classList.remove('hidden');
+};
+
 
 /* =========================================================
    COPY & TTS HELPERS (WITH OFFLINE SUPPORT)
@@ -2733,6 +2872,8 @@ function saveEdit() {
   addToast(isNew ? 'פריט נוסף בהצלחה' : 'השינויים נשמרו', 'success', undoLastAction);
   updateUI();
   persistState();
+  // אם מודל התקציב פתוח, רענן גם אותו
+  if (!document.getElementById('modal-budget').classList.contains('hidden')) window.showBudgetBreakdown();
 }
 
 function deleteEditItem() {
@@ -2750,6 +2891,7 @@ function deleteEditItem() {
   addToast('הפריט נמחק', 'neutral', undoLastAction);
   updateUI();
   persistState();
+  if (!document.getElementById('modal-budget').classList.contains('hidden')) window.showBudgetBreakdown();
 }
 
 /* =========================================================
