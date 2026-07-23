@@ -2636,7 +2636,7 @@ function updateUI() {
             state.searchQuery === '__cost__' ? '__cost__' : 
             state.searchQuery.toLowerCase();
 
-  const filterFn = i => {
+ const filterFn = i => {
     if (q === '__booking__') return i.requiresBooking === true;
     if (q === '__done__') return state.completedIds.has(i.id);
     if (q === '__cost__') {
@@ -2645,6 +2645,14 @@ function updateUI() {
     }
     if (q === '__all__') return true;
     if (!q) return true;
+    
+    // רשימת הסינונים המהירים המוגדרים מראש - יסוננו רק לפי עמודת "קטגוריות לסינון"
+    const predefinedCategories = ["לינה", "אוכל", "אטרקציה", "קניות", "תצפית", "מרחצאות", "טבע", "מוזיאון", "היסטוריה", "תחבורה", "לוגיסטיקה"];
+    if (predefinedCategories.includes(q)) {
+        return (i.filterCategory || '').toLowerCase().includes(q);
+    }
+    
+    // אם המשתמש סתם הקליד מילה בתיבת החיפוש החופשי - חפש בכל השדות
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2657,7 +2665,7 @@ function updateUI() {
   // חישוב והצגה של תגית המספרים לכל פילטר באופן קבוע
   const allItemsForCount = [...d.itinerary, ...d.options, ...d.tips, ...d.checklist, ...d.dictionary];
   
-  document.querySelectorAll('.qf-btn').forEach(btn => {
+document.querySelectorAll('.qf-btn').forEach(btn => {
       const val = btn.dataset.val;
       const origText = btn.getAttribute('data-orig');
       let count = 0;
@@ -2665,10 +2673,10 @@ function updateUI() {
       if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
       } else {
-          count = allItemsForCount.filter(i => Object.values(i).some(v => String(v).toLowerCase().includes(val.toLowerCase()))).length;
+          // ספירה מדויקת אך ורק מתוך שדה הקטגוריה, כדי שהמספר יתאים למה שיוצג בסינון
+          count = allItemsForCount.filter(i => (i.filterCategory || '').toLowerCase().includes(val.toLowerCase())).length;
       }
       
-      // משתמשים במבנה זהה כדי שהמסגרת תישאר קבועה ויפה לכולם
       btn.innerHTML = `${origText} <span class="qf-badge">${count}</span>`;
   });
 
