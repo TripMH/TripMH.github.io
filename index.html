@@ -3049,9 +3049,45 @@ document.addEventListener('DOMContentLoaded', () => {
     b.addEventListener('click', () => setTab(b.dataset.tab));
   });
   
-  // Quick Filters
+  // Quick Filters Drag to Scroll
+  const qfSlider = document.getElementById('quick-filters');
+  let isQfDown = false;
+  let qfStartX;
+  let qfScrollLeft;
+  let isQfDragging = false;
+
+  qfSlider.addEventListener('mousedown', (e) => {
+      isQfDown = true;
+      isQfDragging = false;
+      qfStartX = e.pageX - qfSlider.offsetLeft;
+      qfScrollLeft = qfSlider.scrollLeft;
+      qfSlider.style.cursor = 'grabbing';
+  });
+  qfSlider.addEventListener('mouseleave', () => {
+      isQfDown = false;
+      qfSlider.style.cursor = '';
+  });
+  qfSlider.addEventListener('mouseup', () => {
+      isQfDown = false;
+      qfSlider.style.cursor = '';
+  });
+  qfSlider.addEventListener('mousemove', (e) => {
+      if (!isQfDown) return;
+      e.preventDefault();
+      const x = e.pageX - qfSlider.offsetLeft;
+      const walk = (x - qfStartX) * 2; // מהירות הגרירה
+      if (Math.abs(walk) > 5) isQfDragging = true;
+      qfSlider.scrollLeft = qfScrollLeft - walk;
+  });
+
+  // Quick Filters Click (עם הגנה נגד קליק בזמן גרירה)
   document.querySelectorAll('.qf-btn').forEach(btn => {
-     btn.addEventListener('click', () => {
+     btn.addEventListener('click', (e) => {
+        if (isQfDragging) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
         const isActive = btn.classList.contains('active');
         if (!isActive) {
            window.applySpecialFilter(btn.dataset.val);
