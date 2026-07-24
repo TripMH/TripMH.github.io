@@ -635,7 +635,7 @@ input:checked + .b-slider:before { transform: translateX(14px); background-color
       </button>
     </div>
 
-  <div class="quick-filters" id="quick-filters">
+<div class="quick-filters" id="quick-filters">
        <button class="qf-btn" data-val="__booking__" data-orig="🚨 דורש שריון">🚨 דורש שריון</button>
        <button class="qf-btn" data-val="__qf__לינה" data-orig="🛏️ לינה">🛏️ לינה</button>
        <button class="qf-btn" data-val="__qf__אוכל" data-orig="🍜 אוכל ושתייה">🍜 אוכל ושתייה</button>
@@ -646,8 +646,7 @@ input:checked + .b-slider:before { transform: translateX(14px); background-color
        <button class="qf-btn" data-val="__qf__טבע" data-orig="🌿 פארקים וטבע">🌿 פארקים וטבע</button>
        <button class="qf-btn" data-val="__qf__מוזיאון" data-orig="🏛️ מוזיאונים">🏛️ מוזיאונים</button>
        <button class="qf-btn" data-val="__qf__היסטוריה" data-orig="⛩️ היסטוריה ותרבות">⛩️ היסטוריה ותרבות</button>
-       <button class="qf-btn" data-val="__qf__תחבורה" data-orig="🚆 תחבורה">🚆 תחבורה</button>
-       <button class="qf-btn" data-val="__qf__לוגיסטיקה" data-orig="🧳 לוגיסטיקה">🧳 לוגיסטיקה</button>
+       <button class="qf-btn" data-val="__qf__תחבורה" data-orig="🚆 תחבורה ולוגיסטיקה">🚆 תחבורה ולוגיסטיקה</button>
     </div>
 
     <nav id="tab-bar">
@@ -2645,18 +2644,29 @@ const filterFn = i => {
     }
     if (q === '__all__') return true;
     if (!q) return true;
-    
-    // מנוע חיפוש חדש וקפדני לסינונים המהירים (מבוסס על הקידומת __qf__)
+
+    // מנוע חיפוש גמיש לסינונים המהירים
     if (q.startsWith('__qf__')) {
-        const filterVal = q.replace('__qf__', '');
-        // שימוש בביטוי רגולרי שלוכד באופן הרמטי אך ורק את השורה שמתחילה ב-"לסינון:" ולא שום טקסט מעבר לה
-        const filterLineMatch = (i.description || '').match(/(?:^|\n)\s*לסינון:\s*([^\n\r]*)/i);
-        const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(filterVal) : false;
-        const inCategory = (i.category || '').toLowerCase().includes(filterVal);
-        return inFilterLine || inCategory;
+        const filterVal = q.replace('__qf__', '').trim();
+        let searchTerms = [filterVal];
+
+        // איחוד כלל סוגי התחבורה והלוגיסטיקה תחת קטגוריה אחת
+        if (filterVal === 'תחבורה') {
+            searchTerms = ['תחבורה', 'לוגיסטיקה', 'טיסה', 'טיסות', 'רכבת', 'רכבות', 'אוטובוס', 'אוטובוסים', 'שינקנסן', 'מונית', 'רכב'];
+        }
+
+        // הביטוי הרגולרי קורא הכל מאחרי המילה "לסינון:" ומתעלם מאימוג'ים שמופיעים לפניה
+        const filterLineMatch = (i.description || '').match(/לסינון:\s*([^\n\r]*)/i);
+        const filterLineText = filterLineMatch ? filterLineMatch[1].toLowerCase() : '';
+        const categoryText = (i.category || '').toLowerCase();
+
+        return searchTerms.some(term => {
+            const t = term.toLowerCase();
+            return filterLineText.includes(t) || categoryText.includes(t);
+        });
     }
-    
-    // אם המשתמש סתם הקליד מילה בתיבת החיפוש החופשי - חפש בכל השדות הרגילים
+
+    // חיפוש חופשי רגיל
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2665,31 +2675,39 @@ const filterFn = i => {
   const ft = d.tips.filter(filterFn);
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
-  
-  // חישוב והצגה של תגית המספרים לכל פילטר באופן קבוע - מותאם למנוע המדויק החדש
+
+  // ספירת התגים מעודכנת לאותו מנוע חיפוש בדיוק
   const allItemsForCount = [...d.itinerary, ...d.options, ...d.tips, ...d.checklist, ...d.dictionary];
-  
+
 document.querySelectorAll('.qf-btn').forEach(btn => {
       const val = btn.dataset.val;
       const origText = btn.getAttribute('data-orig');
       let count = 0;
-      
+
      if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
       } else if (val.startsWith('__qf__')) {
-          const filterVal = val.replace('__qf__', '').toLowerCase();
-          // ספירה מדויקת לחלוטין מתוך שורת הסינון בלבד
+          const filterVal = val.replace('__qf__', '').toLowerCase().trim();
+          let searchTerms = [filterVal];
+
+          if (filterVal === 'תחבורה') {
+              searchTerms = ['תחבורה', 'לוגיסטיקה', 'טיסה', 'טיסות', 'רכבת', 'רכבות', 'אוטובוס', 'אוטובוסים', 'שינקנסן', 'מונית', 'רכב'];
+          }
+
           count = allItemsForCount.filter(i => {
-              const filterLineMatch = (i.description || '').match(/(?:^|\n)\s*לסינון:\s*([^\n\r]*)/i);
-              const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(filterVal) : false;
-              const inCategory = (i.category || '').toLowerCase().includes(filterVal);
-              return inFilterLine || inCategory;
+              const filterLineMatch = (i.description || '').match(/לסינון:\s*([^\n\r]*)/i);
+              const filterLineText = filterLineMatch ? filterLineMatch[1].toLowerCase() : '';
+              const categoryText = (i.category || '').toLowerCase();
+
+              return searchTerms.some(term => {
+                  const t = term.toLowerCase();
+                  return filterLineText.includes(t) || categoryText.includes(t);
+              });
           }).length;
       }
-      
+
       btn.innerHTML = `${origText} <span class="qf-badge">${count}</span>`;
   });
-
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   let itineraryHtml = '';
