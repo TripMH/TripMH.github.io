@@ -2646,11 +2646,14 @@ function updateUI() {
     if (q === '__all__') return true;
     if (!q) return true;
     
-    // רשימת הסינונים המהירים המוגדרים מראש - יסוננו רק לפי עמודת "קטגוריות לסינון"
-    const predefinedCategories = ["לינה", "אוכל", "אטרקציה", "קניות", "תצפית", "מרחצאות", "טבע", "מוזיאון", "היסטוריה", "תחבורה", "לוגיסטיקה"];
-    if (predefinedCategories.includes(q)) {
-        return (i.filterCategory || '').toLowerCase().includes(q);
-    }
+    // הסינונים המהירים יחפשו אך ורק בשורת "לסינון:" בתוך התיאור, או בעמודת הקטגוריה
+        const predefinedCategories = ["לינה", "אוכל", "אטרקציה", "קניות", "תצפית", "מרחצאות", "טבע", "מוזיאון", "היסטוריה", "תחבורה", "לוגיסטיקה"];
+        if (predefinedCategories.includes(q)) {
+            const filterLineMatch = (i.description || '').match(/לסינון:\s*(.*)/i);
+            const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(q) : false;
+            const inCategory = (i.category || '').toLowerCase().includes(q);
+            return inFilterLine || inCategory;
+        }
     
     // אם המשתמש סתם הקליד מילה בתיבת החיפוש החופשי - חפש בכל השדות
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
@@ -2670,11 +2673,16 @@ document.querySelectorAll('.qf-btn').forEach(btn => {
       const origText = btn.getAttribute('data-orig');
       let count = 0;
       
-      if (val === '__booking__') {
+     if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
       } else {
-          // ספירה מדויקת אך ורק מתוך שדה הקטגוריה, כדי שהמספר יתאים למה שיוצג בסינון
-          count = allItemsForCount.filter(i => (i.filterCategory || '').toLowerCase().includes(val.toLowerCase())).length;
+          // ספירה מדויקת אך ורק מתוך שורת ה"לסינון:" או מקטגוריית הפריט
+          count = allItemsForCount.filter(i => {
+              const filterLineMatch = (i.description || '').match(/לסינון:\s*(.*)/i);
+              const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(val.toLowerCase()) : false;
+              const inCategory = (i.category || '').toLowerCase().includes(val.toLowerCase());
+              return inFilterLine || inCategory;
+          }).length;
       }
       
       btn.innerHTML = `${origText} <span class="qf-badge">${count}</span>`;
