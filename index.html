@@ -14,7 +14,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0c0f14;--bg-elevated:#131820;--bg-card:#161c25;--bg-muted:#1c2230;
-  --border:rgba(255,255,255,.08);--text:#e8ecf2;--text-muted:#6b7a94;--text-dim:#3d4a60;
+  --border:rgba(255,255,255,.08);--text:#e8ecf2;--text-muted:#94a3b8;--text-dim:#64748b;
   --accent:#22d3ee;--accent-glow:rgba(34,211,238,.12);--accent-border:rgba(34,211,238,.28);
   --success:#4ade80;--success-glow:rgba(74,222,128,.12);
   --warning:#fbbf24;--warning-glow:rgba(251,191,36,.11);
@@ -24,7 +24,7 @@
 }
 html.light{
   --bg:#f2f4f8;--bg-elevated:#e8ecf1;--bg-card:#ffffff;--bg-muted:#edf0f5;
-  --border:rgba(0,0,0,.08);--text:#111827;--text-muted:#6b7280;--text-dim:#9ca3af;
+  --border:rgba(0,0,0,.08);--text:#111827;--text-muted:#4b5563;--text-dim:#6b7280;
   --accent:#0891b2;--accent-glow:rgba(8,145,178,.09);--accent-border:rgba(8,145,178,.25);
   --success:#16a34a;--success-glow:rgba(22,163,74,.09);
   --warning:#d97706;--warning-glow:rgba(217,119,6,.09);
@@ -322,11 +322,11 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card-details{display:none;padding:0 14px 14px;gap:10px;flex-direction:column}
 .card.expanded .card-details{display:flex}
 .details-divider{height:1px;background:var(--border);border-radius:1px;margin-bottom:4px}
-.card-desc{font-size:14px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+.card-desc{font-size:15px;color:var(--text);opacity:0.9;font-weight:500;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
 
-.detail-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-muted);line-height:1.55;word-break:break-word;}
+.detail-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--text);opacity:0.9;font-weight:500;line-height:1.55;word-break:break-word;}
 .detail-row svg{width:14px;height:14px;flex-shrink:0;margin-top:2px}
-.detail-row .dr-label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;margin-top:2px;flex-shrink:0}
+.detail-row .dr-label{font-size:12px;font-weight:800;color:var(--text-dim);text-transform:uppercase;margin-top:2px;flex-shrink:0}
 .detail-row .dr-value{flex:1}
 
 .detail-row.booking {
@@ -635,19 +635,19 @@ input:checked + .b-slider:before { transform: translateX(14px); background-color
       </button>
     </div>
 
-   <div class="quick-filters" id="quick-filters">
+  <div class="quick-filters" id="quick-filters">
        <button class="qf-btn" data-val="__booking__" data-orig="🚨 דורש שריון">🚨 דורש שריון</button>
-       <button class="qf-btn" data-val="לינה" data-orig="🛏️ לינה">🛏️ לינה</button>
-       <button class="qf-btn" data-val="אוכל" data-orig="🍜 אוכל ושתייה">🍜 אוכל ושתייה</button>
-       <button class="qf-btn" data-val="אטרקציה" data-orig="🎢 אטרקציות">🎢 אטרקציות</button>
-       <button class="qf-btn" data-val="קניות" data-orig="🛍️ קניות">🛍️ קניות</button>
-       <button class="qf-btn" data-val="תצפית" data-orig="🏙️ תצפיות">🏙️ תצפיות</button>
-       <button class="qf-btn" data-val="מרחצאות" data-orig="♨️ מרחצאות וספא">♨️ מרחצאות וספא</button>
-       <button class="qf-btn" data-val="טבע" data-orig="🌿 פארקים וטבע">🌿 פארקים וטבע</button>
-       <button class="qf-btn" data-val="מוזיאון" data-orig="🏛️ מוזיאונים">🏛️ מוזיאונים</button>
-       <button class="qf-btn" data-val="היסטוריה" data-orig="⛩️ היסטוריה ותרבות">⛩️ היסטוריה ותרבות</button>
-       <button class="qf-btn" data-val="תחבורה" data-orig="🚆 תחבורה">🚆 תחבורה</button>
-       <button class="qf-btn" data-val="לוגיסטיקה" data-orig="🧳 לוגיסטיקה">🧳 לוגיסטיקה</button>
+       <button class="qf-btn" data-val="__qf__לינה" data-orig="🛏️ לינה">🛏️ לינה</button>
+       <button class="qf-btn" data-val="__qf__אוכל" data-orig="🍜 אוכל ושתייה">🍜 אוכל ושתייה</button>
+       <button class="qf-btn" data-val="__qf__אטרקציה" data-orig="🎢 אטרקציות">🎢 אטרקציות</button>
+       <button class="qf-btn" data-val="__qf__קניות" data-orig="🛍️ קניות">🛍️ קניות</button>
+       <button class="qf-btn" data-val="__qf__תצפית" data-orig="🏙️ תצפיות">🏙️ תצפיות</button>
+       <button class="qf-btn" data-val="__qf__מרחצאות" data-orig="♨️ מרחצאות וספא">♨️ מרחצאות וספא</button>
+       <button class="qf-btn" data-val="__qf__טבע" data-orig="🌿 פארקים וטבע">🌿 פארקים וטבע</button>
+       <button class="qf-btn" data-val="__qf__מוזיאון" data-orig="🏛️ מוזיאונים">🏛️ מוזיאונים</button>
+       <button class="qf-btn" data-val="__qf__היסטוריה" data-orig="⛩️ היסטוריה ותרבות">⛩️ היסטוריה ותרבות</button>
+       <button class="qf-btn" data-val="__qf__תחבורה" data-orig="🚆 תחבורה">🚆 תחבורה</button>
+       <button class="qf-btn" data-val="__qf__לוגיסטיקה" data-orig="🧳 לוגיסטיקה">🧳 לוגיסטיקה</button>
     </div>
 
     <nav id="tab-bar">
@@ -2636,7 +2636,7 @@ function updateUI() {
             state.searchQuery === '__cost__' ? '__cost__' : 
             state.searchQuery.toLowerCase();
 
- const filterFn = i => {
+const filterFn = i => {
     if (q === '__booking__') return i.requiresBooking === true;
     if (q === '__done__') return state.completedIds.has(i.id);
     if (q === '__cost__') {
@@ -2646,16 +2646,17 @@ function updateUI() {
     if (q === '__all__') return true;
     if (!q) return true;
     
-    // הסינונים המהירים יחפשו אך ורק בשורת "לסינון:" בתוך התיאור, או בעמודת הקטגוריה
-        const predefinedCategories = ["לינה", "אוכל", "אטרקציה", "קניות", "תצפית", "מרחצאות", "טבע", "מוזיאון", "היסטוריה", "תחבורה", "לוגיסטיקה"];
-        if (predefinedCategories.includes(q)) {
-            const filterLineMatch = (i.description || '').match(/לסינון:\s*(.*)/i);
-            const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(q) : false;
-            const inCategory = (i.category || '').toLowerCase().includes(q);
-            return inFilterLine || inCategory;
-        }
+    // מנוע חיפוש חדש וקפדני לסינונים המהירים (מבוסס על הקידומת __qf__)
+    if (q.startsWith('__qf__')) {
+        const filterVal = q.replace('__qf__', '');
+        // שימוש בביטוי רגולרי שלוכד באופן הרמטי אך ורק את השורה שמתחילה ב-"לסינון:" ולא שום טקסט מעבר לה
+        const filterLineMatch = (i.description || '').match(/(?:^|\n)\s*לסינון:\s*([^\n\r]*)/i);
+        const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(filterVal) : false;
+        const inCategory = (i.category || '').toLowerCase().includes(filterVal);
+        return inFilterLine || inCategory;
+    }
     
-    // אם המשתמש סתם הקליד מילה בתיבת החיפוש החופשי - חפש בכל השדות
+    // אם המשתמש סתם הקליד מילה בתיבת החיפוש החופשי - חפש בכל השדות הרגילים
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2665,7 +2666,7 @@ function updateUI() {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
   
-  // חישוב והצגה של תגית המספרים לכל פילטר באופן קבוע
+  // חישוב והצגה של תגית המספרים לכל פילטר באופן קבוע - מותאם למנוע המדויק החדש
   const allItemsForCount = [...d.itinerary, ...d.options, ...d.tips, ...d.checklist, ...d.dictionary];
   
 document.querySelectorAll('.qf-btn').forEach(btn => {
@@ -2675,12 +2676,13 @@ document.querySelectorAll('.qf-btn').forEach(btn => {
       
      if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
-      } else {
-          // ספירה מדויקת אך ורק מתוך שורת ה"לסינון:" או מקטגוריית הפריט
+      } else if (val.startsWith('__qf__')) {
+          const filterVal = val.replace('__qf__', '').toLowerCase();
+          // ספירה מדויקת לחלוטין מתוך שורת הסינון בלבד
           count = allItemsForCount.filter(i => {
-              const filterLineMatch = (i.description || '').match(/לסינון:\s*(.*)/i);
-              const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(val.toLowerCase()) : false;
-              const inCategory = (i.category || '').toLowerCase().includes(val.toLowerCase());
+              const filterLineMatch = (i.description || '').match(/(?:^|\n)\s*לסינון:\s*([^\n\r]*)/i);
+              const inFilterLine = filterLineMatch ? filterLineMatch[1].toLowerCase().includes(filterVal) : false;
+              const inCategory = (i.category || '').toLowerCase().includes(filterVal);
               return inFilterLine || inCategory;
           }).length;
       }
