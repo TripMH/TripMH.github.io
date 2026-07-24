@@ -2265,8 +2265,9 @@ function renderTripCard(item, q, prevItem) {
 
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
 
-  const badges = [
+ const badges = [
     item.priority ? `<span class="badge" style="background:rgba(251,191,36,.15);color:var(--warning);border:1px solid rgba(251,191,36,.3)">${hlHtml(item.priority, q)}</span>` : '',
+    item.category ? `<span class="badge badge-cat" style="background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent)">${svgIcon('tag')} ${hlHtml(item.category, q)}</span>` : '',
     item.weather ? `<span class="badge" style="background:var(--bg-muted);color:var(--text);border:1px solid var(--border)">${hlHtml(item.weather, q)}</span>` : '',
     timeDisp       ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(timeDisp,q)}</span>` : '',
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() || 'מפה',q)}</span>` : '',
@@ -2274,6 +2275,9 @@ function renderTripCard(item, q, prevItem) {
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
     item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🚨 ${hlHtml(item.risk,q)}</span>` : ''
   ].filter(Boolean).join('');
+
+  // נקה את שורת ה"לסינון: X" מהתיאור כדי למנוע כפילויות מיותרות בממשק
+  const cleanDescription = (item.description || '').replace(/(?:^|\n)\s*.*לסינון:\s*([^\n\r]*)/i, '').trim();
 
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
 
@@ -2327,7 +2331,7 @@ function renderTripCard(item, q, prevItem) {
   <div class="card-details">
     <div class="details-divider"></div>
     ${highlightTransit}
-    ${item.description ? `<div class="card-desc">${hlHtml(item.description,q)}</div>` : ''}
+    ${cleanDescription ? `<div class="card-desc">${hlHtml(cleanDescription,q)}</div>` : ''}
     ${notesRow}${prepareRow}${facilitiesRow}${addressRow}${ciRow}${coRow}${bookingRow}
     <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
   </div>
@@ -2645,7 +2649,7 @@ const filterFn = i => {
     if (q === '__all__') return true;
     if (!q) return true;
 
-    // מנוע חיפוש גמיש לסינונים המהירים
+    // מנוע חיפוש חדש וקשיח לסינונים המהירים - מחפש אך ורק בעמודת "קטגוריות לסינון" (category)
     if (q.startsWith('__qf__')) {
         const filterVal = q.replace('__qf__', '').trim();
         let searchTerms = [filterVal];
@@ -2655,18 +2659,12 @@ const filterFn = i => {
             searchTerms = ['תחבורה', 'לוגיסטיקה', 'טיסה', 'טיסות', 'רכבת', 'רכבות', 'אוטובוס', 'אוטובוסים', 'שינקנסן', 'מונית', 'רכב'];
         }
 
-        // הביטוי הרגולרי קורא הכל מאחרי המילה "לסינון:" ומתעלם מאימוג'ים שמופיעים לפניה
-        const filterLineMatch = (i.description || '').match(/לסינון:\s*([^\n\r]*)/i);
-        const filterLineText = filterLineMatch ? filterLineMatch[1].toLowerCase() : '';
         const categoryText = (i.category || '').toLowerCase();
 
-        return searchTerms.some(term => {
-            const t = term.toLowerCase();
-            return filterLineText.includes(t) || categoryText.includes(t);
-        });
+        return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
     }
 
-    // חיפוש חופשי רגיל
+    // חיפוש חופשי רגיל (מתיבת החיפוש העליונה) מחפש בכל השדות כרגיל
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2676,7 +2674,7 @@ const filterFn = i => {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
 
-  // ספירת התגים מעודכנת לאותו מנוע חיפוש בדיוק
+  // ספירת התגים מעודכנת לאותו מנוע חיפוש פשוט ומדויק
   const allItemsForCount = [...d.itinerary, ...d.options, ...d.tips, ...d.checklist, ...d.dictionary];
 
 document.querySelectorAll('.qf-btn').forEach(btn => {
@@ -2695,14 +2693,8 @@ document.querySelectorAll('.qf-btn').forEach(btn => {
           }
 
           count = allItemsForCount.filter(i => {
-              const filterLineMatch = (i.description || '').match(/לסינון:\s*([^\n\r]*)/i);
-              const filterLineText = filterLineMatch ? filterLineMatch[1].toLowerCase() : '';
               const categoryText = (i.category || '').toLowerCase();
-
-              return searchTerms.some(term => {
-                  const t = term.toLowerCase();
-                  return filterLineText.includes(t) || categoryText.includes(t);
-              });
+              return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
           }).length;
       }
 
