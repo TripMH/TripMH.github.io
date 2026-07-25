@@ -1393,7 +1393,7 @@ const ALIASES = {
   prepare:   ['מה צריך להכין מראש', 'להכין מראש', 'ציוד נדרש'],
   checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה', 'צ\'ק-אין'],
   checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה', 'צ\'ק-אאוט'],
-  category:  ['קטגוריה','category','נושא','topic','סוג','type','tag','תג','תחום'],
+  category:  ['קטגוריה','קטגוריות','category','נושא','topic','סוג','type','tag','תג','תחום'],
   hebrew:    ['עברית', 'hebrew'],
   english:   ['אנגלית', 'english'],
   japanese:  ['יפנית', 'japanese', 'שפה זרה'],
@@ -2649,20 +2649,27 @@ const filterFn = i => {
     if (q === '__all__') return true;
     if (!q) return true;
 
-    // מנוע חיפוש חדש וקשיח לסינונים המהירים - מחפש אך ורק בעמודת "קטגוריות לסינון" (category)
-    if (q.startsWith('__qf__')) {
-        const filterVal = q.replace('__qf__', '').trim();
-        let searchTerms = [filterVal];
-
-        // איחוד כלל סוגי התחבורה והלוגיסטיקה תחת קטגוריה אחת
-        if (filterVal === 'תחבורה') {
-            searchTerms = ['תחבורה', 'לוגיסטיקה', 'טיסה', 'טיסות', 'רכבת', 'רכבות', 'אוטובוס', 'אוטובוסים', 'שינקנסן', 'מונית', 'רכב'];
+  // מנוע חיפוש חכם לקטגוריות ולתת-קטגוריות החדשות
+        if (q.startsWith('__qf__')) {
+            const filterVal = q.replace('__qf__', '').trim();
+            const termsMap = {
+                'לינה': ['לינה', 'דירה', 'מלון', 'הוסטל', 'ריוקאן', 'קפסולות'],
+                'אוכל': ['אוכל', 'מסעדה', 'שתייה', 'סופרמרקט', 'שוק', 'ארוחות', 'מזון'],
+                'אטרקציה': ['אטרקציה', 'שעשועים', 'אמנות', 'מופע', 'ספורט', 'אקסטרים', 'טכנולוגיה'],
+                'קניות': ['קניות', 'חנות', 'כלבו', 'סופרמרקט', 'אופנה', 'שוק', 'אנימה', 'טכנולוגיה'],
+                'תצפית': ['תצפית', 'גלגל ענק', 'נוף'],
+                'מרחצאות': ['מרחצאות', 'ספא', 'אונסן', 'טיפול'],
+                'טבע': ['טבע', 'פארק', 'גן', 'חוף', 'יער', 'טיילת'],
+                'מוזיאון': ['מוזיאון', 'תערוכה', 'אמנות', 'תרבות'],
+                'היסטוריה': ['היסטוריה', 'תרבות', 'טירה', 'ארמון', 'מקדש', 'דת', 'קהילה', 'מורשת'],
+                'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה']
+            };
+            
+            const searchTerms = termsMap[filterVal] || [filterVal];
+            const categoryText = (i.category || '').toLowerCase();
+            
+            return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
         }
-
-        const categoryText = (i.category || '').toLowerCase();
-
-        return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
-    }
 
     // חיפוש חופשי רגיל (מתיבת החיפוש העליונה) מחפש בכל השדות כרגיל
     return Object.values(i).some(v => String(v).toLowerCase().includes(q));
@@ -2684,13 +2691,22 @@ document.querySelectorAll('.qf-btn').forEach(btn => {
 
      if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
-      } else if (val.startsWith('__qf__')) {
-          const filterVal = val.replace('__qf__', '').toLowerCase().trim();
-          let searchTerms = [filterVal];
-
-          if (filterVal === 'תחבורה') {
-              searchTerms = ['תחבורה', 'לוגיסטיקה', 'טיסה', 'טיסות', 'רכבת', 'רכבות', 'אוטובוס', 'אוטובוסים', 'שינקנסן', 'מונית', 'רכב'];
-          }
+    } else if (val.startsWith('__qf__')) {
+          const filterVal = val.replace('__qf__', '').trim();
+          const termsMap = {
+              'לינה': ['לינה', 'דירה', 'מלון', 'הוסטל', 'ריוקאן', 'קפסולות'],
+              'אוכל': ['אוכל', 'מסעדה', 'שתייה', 'סופרמרקט', 'שוק', 'ארוחות', 'מזון'],
+              'אטרקציה': ['אטרקציה', 'שעשועים', 'אמנות', 'מופע', 'ספורט', 'אקסטרים', 'טכנולוגיה'],
+              'קניות': ['קניות', 'חנות', 'כלבו', 'סופרמרקט', 'אופנה', 'שוק', 'אנימה', 'טכנולוגיה'],
+              'תצפית': ['תצפית', 'גלגל ענק', 'נוף'],
+              'מרחצאות': ['מרחצאות', 'ספא', 'אונסן', 'טיפול'],
+              'טבע': ['טבע', 'פארק', 'גן', 'חוף', 'יער', 'טיילת'],
+              'מוזיאון': ['מוזיאון', 'תערוכה', 'אמנות', 'תרבות'],
+              'היסטוריה': ['היסטוריה', 'תרבות', 'טירה', 'ארמון', 'מקדש', 'דת', 'קהילה', 'מורשת'],
+              'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה']
+          };
+          
+          const searchTerms = termsMap[filterVal] || [filterVal];
 
           count = allItemsForCount.filter(i => {
               const categoryText = (i.category || '').toLowerCase();
