@@ -2091,19 +2091,34 @@ window.applySpecialFilter = function(filterTag) {
     // הופעת כפתור האיפוס בשדה החיפוש רק אם סונן משהו ספציפי
     if (filterTag === '__all__' || filterTag === '') {
         document.getElementById('search-clear').classList.remove('visible');
+        setTab('itinerary', true);
     } else {
         document.getElementById('search-clear').classList.add('visible');
     }
 
     updateUI();
-    setTab('itinerary', true);
+
+    // מעבר חכם ללשונית שיש בה תוצאות
+    if (filterTag !== '__all__' && filterTag !== '') {
+        const tabs = ['itinerary', 'options', 'checklist', 'tips', 'dictionary'];
+        let foundTab = false;
+        for (const t of tabs) {
+             const countEl = document.getElementById('count-' + t);
+             if (countEl && parseInt(countEl.textContent || '0') > 0) {
+                 if (state.activeTab !== t) setTab(t, true);
+                 foundTab = true;
+                 break;
+             }
+        }
+        if (!foundTab) setTab('itinerary', true);
+    }
     
     setTimeout(() => {
         const contentOffset = document.getElementById('tab-content').getBoundingClientRect().top + window.scrollY - 100;
         window.scrollTo({ top: contentOffset, behavior: 'smooth' });
     }, 50);
 };
-
+   
 function toggleBooked(id) {
   const isBooked = state.bookedIds.has(id);
   if (isBooked) {
@@ -2643,40 +2658,39 @@ function updateUI() {
             state.searchQuery === '__cost__' ? '__cost__' : 
             state.searchQuery.toLowerCase();
 
-const filterFn = i => {
-    if (q === '__booking__') return i.requiresBooking === true;
-    if (q === '__done__') return state.completedIds.has(i.id);
-    if (q === '__cost__') {
-        const costVal = (i.cost || '').replace(/[^0-9.]/g, '');
-        return costVal !== '' && parseFloat(costVal) > 0;
-    }
-    if (q === '__all__') return true;
-    if (!q) return true;
+const qfTermsMap = {
+      'לינה': ['לינה', 'דירה', 'מלון', 'הוסטל', 'ריוקאן', 'קפסולות', 'hotel', 'hostel', 'airbnb', 'accommodation', 'resort'],
+      'אוכל': ['אוכל', 'מסעדה', 'שתייה', 'סופרמרקט', 'שוק', 'ארוחות', 'מזון', 'בית קפה', 'קפה', 'food', 'restaurant', 'cafe', 'dining', 'eat', 'sushi', 'ramen'],
+      'אטרקציה': ['אטרקציה', 'שעשועים', 'אמנות', 'מופע', 'ספורט', 'אקסטרים', 'טכנולוגיה', 'attraction', 'amusement', 'show', 'entertainment'],
+      'קניות': ['קניות', 'חנות', 'כלבו', 'סופרמרקט', 'אופנה', 'שוק', 'אנימה', 'טכנולוגיה', 'shopping', 'mall', 'store', 'market', 'buy'],
+      'תצפית': ['תצפית', 'גלגל ענק', 'נוף', 'observatory', 'view', 'tower', 'lookout'],
+      'מרחצאות': ['מרחצאות', 'ספא', 'אונסן', 'טיפול', 'onsen', 'spa', 'bath', 'hot spring'],
+      'טבע': ['טבע', 'פארק', 'גן', 'חוף', 'יער', 'טיילת', 'nature', 'park', 'garden', 'beach', 'forest', 'zoo'],
+      'מוזיאון': ['מוזיאון', 'תערוכה', 'אמנות', 'תרבות', 'museum', 'exhibition', 'gallery', 'art'],
+      'היסטוריה': ['היסטוריה', 'תרבות', 'טירה', 'ארמון', 'מקדש', 'דת', 'קהילה', 'מורשת', 'history', 'culture', 'castle', 'temple', 'shrine', 'palace'],
+      'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה', 'transport', 'train', 'bus', 'flight', 'airport', 'station']
+  };
 
-  // מנוע חיפוש חכם לקטגוריות ולתת-קטגוריות החדשות
-        if (q.startsWith('__qf__')) {
-            const filterVal = q.replace('__qf__', '').trim();
-            const termsMap = {
-                'לינה': ['לינה', 'דירה', 'מלון', 'הוסטל', 'ריוקאן', 'קפסולות'],
-                'אוכל': ['אוכל', 'מסעדה', 'שתייה', 'סופרמרקט', 'שוק', 'ארוחות', 'מזון'],
-                'אטרקציה': ['אטרקציה', 'שעשועים', 'אמנות', 'מופע', 'ספורט', 'אקסטרים', 'טכנולוגיה'],
-                'קניות': ['קניות', 'חנות', 'כלבו', 'סופרמרקט', 'אופנה', 'שוק', 'אנימה', 'טכנולוגיה'],
-                'תצפית': ['תצפית', 'גלגל ענק', 'נוף'],
-                'מרחצאות': ['מרחצאות', 'ספא', 'אונסן', 'טיפול'],
-                'טבע': ['טבע', 'פארק', 'גן', 'חוף', 'יער', 'טיילת'],
-                'מוזיאון': ['מוזיאון', 'תערוכה', 'אמנות', 'תרבות'],
-                'היסטוריה': ['היסטוריה', 'תרבות', 'טירה', 'ארמון', 'מקדש', 'דת', 'קהילה', 'מורשת'],
-                'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה']
-            };
-            
-            const searchTerms = termsMap[filterVal] || [filterVal];
-            const categoryText = (i.category || '').toLowerCase();
-            
-            return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
-        }
+  const getSearchText = (i) => [i.category, i.placeName, i.title, i.description, i.content, i.area].filter(Boolean).join(' ').toLowerCase();
 
-    // חיפוש חופשי רגיל (מתיבת החיפוש העליונה) מחפש בכל השדות כרגיל
-    return Object.values(i).some(v => String(v).toLowerCase().includes(q));
+  const filterFn = i => {
+      if (q === '__booking__') return i.requiresBooking === true;
+      if (q === '__done__') return state.completedIds.has(i.id);
+      if (q === '__cost__') {
+          const costVal = (i.cost || '').replace(/[^0-9.]/g, '');
+          return costVal !== '' && parseFloat(costVal) > 0;
+      }
+      if (q === '__all__') return true;
+      if (!q) return true;
+
+      if (q.startsWith('__qf__')) {
+          const filterVal = q.replace('__qf__', '').trim();
+          const searchTerms = qfTermsMap[filterVal] || [filterVal];
+          const searchText = getSearchText(i);
+          return searchTerms.some(term => searchText.includes(term.toLowerCase()));
+      }
+
+      return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
   const fi = d.itinerary.filter(filterFn);
@@ -2685,41 +2699,27 @@ const filterFn = i => {
   const fc = d.checklist.filter(filterFn);
   const fd = d.dictionary.filter(filterFn);
 
-  // ספירת התגים מעודכנת לאותו מנוע חיפוש פשוט ומדויק
   const allItemsForCount = [...d.itinerary, ...d.options, ...d.tips, ...d.checklist, ...d.dictionary];
 
-document.querySelectorAll('.qf-btn').forEach(btn => {
+  document.querySelectorAll('.qf-btn').forEach(btn => {
       const val = btn.dataset.val;
       const origText = btn.getAttribute('data-orig');
       let count = 0;
 
-     if (val === '__booking__') {
+      if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
-    } else if (val.startsWith('__qf__')) {
+      } else if (val.startsWith('__qf__')) {
           const filterVal = val.replace('__qf__', '').trim();
-          const termsMap = {
-              'לינה': ['לינה', 'דירה', 'מלון', 'הוסטל', 'ריוקאן', 'קפסולות'],
-              'אוכל': ['אוכל', 'מסעדה', 'שתייה', 'סופרמרקט', 'שוק', 'ארוחות', 'מזון'],
-              'אטרקציה': ['אטרקציה', 'שעשועים', 'אמנות', 'מופע', 'ספורט', 'אקסטרים', 'טכנולוגיה'],
-              'קניות': ['קניות', 'חנות', 'כלבו', 'סופרמרקט', 'אופנה', 'שוק', 'אנימה', 'טכנולוגיה'],
-              'תצפית': ['תצפית', 'גלגל ענק', 'נוף'],
-              'מרחצאות': ['מרחצאות', 'ספא', 'אונסן', 'טיפול'],
-              'טבע': ['טבע', 'פארק', 'גן', 'חוף', 'יער', 'טיילת'],
-              'מוזיאון': ['מוזיאון', 'תערוכה', 'אמנות', 'תרבות'],
-              'היסטוריה': ['היסטוריה', 'תרבות', 'טירה', 'ארמון', 'מקדש', 'דת', 'קהילה', 'מורשת'],
-              'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה']
-          };
-          
-          const searchTerms = termsMap[filterVal] || [filterVal];
-
+          const searchTerms = qfTermsMap[filterVal] || [filterVal];
           count = allItemsForCount.filter(i => {
-              const categoryText = (i.category || '').toLowerCase();
-              return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
+              const searchText = getSearchText(i);
+              return searchTerms.some(term => searchText.includes(term.toLowerCase()));
           }).length;
       }
 
       btn.innerHTML = `${origText} <span class="qf-badge">${count}</span>`;
   });
+   
   const fCal = [...fi, ...fo].filter(i => i.dateVal > 0).sort((a,b) => a.dateVal - b.dateVal);
 
   let itineraryHtml = '';
@@ -2755,12 +2755,12 @@ document.querySelectorAll('.qf-btn').forEach(btn => {
   document.getElementById('panel-tips').innerHTML      = ft.length || !q ? renderPanel(ft,'category','טיפ','tip',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
   document.getElementById('panel-dictionary').innerHTML= fd.length || !q ? renderPanel(fd,'category','מילה','dictionary',q) : `<p style="text-align:center;padding:64px 20px;color:var(--text-muted);font-size:14px">אין תוצאות לחיפוש זה.</p>`;
 
-  document.getElementById('count-itinerary').textContent = d.itinerary.length;
-  document.getElementById('count-options').textContent   = d.options.length;
+document.getElementById('count-itinerary').textContent = fi.length;
+  document.getElementById('count-options').textContent   = fo.length;
   
-  const cc = document.getElementById('count-checklist'); if (cc) cc.textContent = d.checklist.length;
-  const ct = document.getElementById('count-tips'); if (ct) ct.textContent = d.tips.length;
-  const cd = document.getElementById('count-dictionary'); if (cd) cd.textContent = d.dictionary.length;
+  const cc = document.getElementById('count-checklist'); if (cc) cc.textContent = fc.length;
+  const ct = document.getElementById('count-tips'); if (ct) ct.textContent = ft.length;
+  const cd = document.getElementById('count-dictionary'); if (cd) cd.textContent = fd.length;
 
   const totalCompleted = state.completedIds.size;
   const totalItems = d.itinerary.length + d.options.length + d.tips.length + d.checklist.length;
