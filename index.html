@@ -1375,7 +1375,7 @@ const ALIASES = {
   priority:  ['עדיפות', 'priority'],
   address:   ['מיקום במפה', 'כתובת', 'address', 'קואורדינטות'],
   weather:   ['מזג אוויר אידיאלי', 'מזג אוויר', 'weather'],
-  desc:      ['תיאור ומה ניתן לעשות', 'תיאור', 'מה לעשות', 'desc', 'content', 'פרטים', 'תוכן', 'מידע', 'פירוט'],
+  desc:      ['תיאור ומה ניתן לעשות', 'תיאור', 'מה לעשות', 'desc', 'content', 'פרטים', 'תוכן', 'מידע', 'פירוט', 'ריכוז הנחיות וטיפים (מסוכם לפי נושא)'],
   trans:     ['תחבורה והגעה ליעד', 'תחבורה', 'הגעה', 'איך', 'transport', 'transit', 'how to get', 'getting there'],
   area:      ['אזור במסלול', 'אזור', 'עיר', 'מיקום', 'area', 'city', 'location', 'neighborhood'],
   time:      ['טווח שעות מומלץ', 'שעות', 'זמן פתיחה', 'מתי', 'time', 'טווח שעות', 'שעת פתיחה', 'opening hours'],
@@ -1385,7 +1385,7 @@ const ALIASES = {
   book:      ['איך ומתי להזמין', 'הזמנה', 'שריון', 'כרטיסים', 'booking', 'reservation', 'להזמין'],
   bookHow:   ['איך להזמין','דרך איפה','פלטפורמה','היכן'],
   bookWhen:  ['מתי להזמין','זמן מומלץ להזמנה','תזמון'],
-  link:      ['קישור', 'אתר', 'url', 'link', 'website'],
+  link:      ['קישור', 'אתר', 'url', 'link', 'website', 'אפליקציות וקישורים רלוונטיים'],
   navPrev:   ['משך נסיעה מהיעד הקודם', 'משך נסיעה'],
   mapPrev:   ['ניווט גוגל מפות (מהיעד הקודם)', 'ניווט גוגל מפות', 'ניווט'],
   risk:      ['סיכון', 'risk'],
@@ -1393,7 +1393,7 @@ const ALIASES = {
   prepare:   ['מה צריך להכין מראש', 'להכין מראש', 'ציוד נדרש'],
   checkIn:   ['צ\'ק אין', 'check in', 'check-in', 'קבלת חדרים', 'שעת כניסה', 'צ\'ק-אין'],
   checkOut:  ['צ\'ק אאוט', 'check out', 'check-out', 'פינוי חדרים', 'שעת יציאה', 'צ\'ק-אאוט'],
-  category:  ['קטגוריה','קטגוריות','category','נושא','topic','סוג','type','tag','תג','תחום'],
+  category:  ['קטגוריות לסינון','קטגוריה','קטגוריות','category','נושא','topic','סוג','type','tag','תג','תחום'],
   hebrew:    ['עברית', 'hebrew'],
   english:   ['אנגלית', 'english'],
   japanese:  ['יפנית', 'japanese', 'שפה זרה'],
@@ -1946,13 +1946,13 @@ function downloadFilesSequentially(files) {
 function exportCSV() {
   const BOM = '\uFEFF';
   const files = [];
-  const itiHeaders = ['אייקון','יום / תאריך','שם המקום','עדיפות','מזג אוויר','טווח שעות','משך ביקור','עלות','תחבורה','זמן ממיקום קודם','צ\'ק-אין','צ\'ק-אאוט','איך ומתי להזמין (צ\'ק-אין/אאוט)','אזור במסלול','כתובת','תיאור','הערות','מתקנים','להכין מראש','סיכון','קישור','ניווט גוגל מפות','הושלם','טופל/הוזמן'];
+ const itiHeaders = ['אייקון','יום / תאריך','שם המקום','קטגוריות לסינון','עדיפות','מזג אוויר','טווח שעות','משך ביקור','עלות','תחבורה','זמן ממיקום קודם','צ\'ק-אין','צ\'ק-אאוט','איך ומתי להזמין (צ\'ק-אין/אאוט)','אזור במסלול','כתובת','תיאור','הערות','מתקנים','להכין מראש','סיכון','קישור','ניווט גוגל מפות','הושלם','טופל/הוזמן'];
 
   function buildItiExport(dataArr, name) {
       if (dataArr.length > 0) {
           let csv = BOM + csvRow(itiHeaders);
           dataArr.forEach(i => csv += csvRow([
-              i.icon, i.dayLabel, i.placeName, i.priority, i.weather, i.timeRange, i.duration, i.cost, i.transport, i.travelTimePrev, i.checkIn, i.checkOut, i.booking, i.area, i.address, i.description, i.notes, i.facilities, i.prepare, i.risk, i.link, i.mapPrev,
+              i.icon, i.dayLabel, i.placeName, i.category, i.priority, i.weather, i.timeRange, i.duration, i.cost, i.transport, i.travelTimePrev, i.checkIn, i.checkOut, i.booking, i.area, i.address, i.description, i.notes, i.facilities, i.prepare, i.risk, i.link, i.mapPrev,
               state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא'
           ]));
           files.push({ content: csv, filename: `TripMH_${name}.csv`, mime: 'text/csv;charset=utf-8' });
@@ -2872,6 +2872,9 @@ function buildEditForm(item) {
 </div>
 <div class="edit-row">
   <div class="edit-group"><label class="edit-label">יום / תאריך</label><input class="edit-input" id="ef-dayLabel" value="${escHtml(item.dayLabel)}" autocomplete="off" /></div>
+  <div class="edit-group"><label class="edit-label">קטגוריות לסינון</label><input class="edit-input" id="ef-category" value="${escHtml(item.category)}" autocomplete="off" placeholder="למשל: תרבות והיסטוריה | ארמון" /></div>
+</div>
+<div class="edit-row">
   <div class="edit-group"><label class="edit-label">שעות פעילות</label><input class="edit-input" id="ef-timeRange" value="${escHtml(item.timeRange)}" autocomplete="off" /></div>
   <div class="edit-group"><label class="edit-label">מזג אוויר אידיאלי</label><input class="edit-input" id="ef-weather" value="${escHtml(item.weather)}" autocomplete="off" /></div>
 </div>
@@ -2917,9 +2920,9 @@ function readEditForm(item) {
 
   const type = (document.getElementById('ef-type')?.value) || item.type;
   const link = g('ef-link');
-  const updated = {
+ const updated = {
     ...item, type,
-    placeName:g('ef-placeName'), icon:g('ef-icon') || '📍', dayLabel:g('ef-dayLabel'), dateVal:parseDateVal(g('ef-dayLabel')),
+    placeName:g('ef-placeName'), icon:g('ef-icon') || '📍', dayLabel:g('ef-dayLabel'), dateVal:parseDateVal(g('ef-dayLabel')), category:g('ef-category'),
     timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), address:g('ef-address'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
     priority:g('ef-priority'), weather:g('ef-weather'), notes:g('ef-notes'), travelTimePrev:g('ef-travelTimePrev'), mapPrev:g('ef-mapPrev'), risk:g('ef-risk'), facilities:g('ef-facilities'), prepare:g('ef-prepare')
@@ -2949,8 +2952,8 @@ function openAdd(type) {
   if (type === 'dictionary') { item.hebrew=''; item.english=''; item.japanese=''; item.hebPronun=''; item.romaji=''; item.category='כללי'; item.context=''; }
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
-  else {
-    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', address:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'', priority:'', weather:'', notes:'', travelTimePrev:'', mapPrev:'', risk:'', facilities:'', prepare:'' });
+ else {
+    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, category:'', description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', address:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'', priority:'', weather:'', notes:'', travelTimePrev:'', mapPrev:'', risk:'', facilities:'', prepare:'' });
   }
   
   state.editItem = item;
