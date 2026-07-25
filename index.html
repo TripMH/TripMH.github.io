@@ -1700,14 +1700,18 @@ async function processFiles(files) {
             }, x => x.title === taskTitle);
             if(res.isNew) stats.added++; else stats.updated++;
         }
-      } else if (fileType === 'tips') {
-        const anyValue = place || desc || catCol || Object.values(obj).some(v => v.trim());
+     } else if (fileType === 'tips') {
+        const anyValue = place || desc || catCol || address || Object.values(obj).some(v => v.trim());
         if (anyValue) {
-          const title = place || catCol || Object.values(obj).find(v => v.trim()) || `טיפ ${ri}`;
-          const content = desc || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
+          const title = place || catCol || address || `טיפ ${ri}`;
+          const contentArr = [];
+          if (address) contentArr.push(`📍 מיקום/אזור: ${address}`);
+          if (desc) contentArr.push(desc);
+          const content = contentArr.join('\n\n') || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
+          
           const res = mergeItem(state.data.tips, {
             id:genId(), type:'tip', _idx:ri, title, content, category: catCol || area || 'כללי',
-            link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')), icon:'💡'
+            link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')), icon: iconCsv || '💡'
           }, x => x.title === title && x.content === content);
           if(res.isNew) stats.added++; else stats.updated++;
         }
@@ -1726,7 +1730,7 @@ async function processFiles(files) {
 
         const item = {
           id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
-          placeName: placeNameFixed, dayLabel: rawDay, dateVal: parseDateVal(rawDay),
+          placeName: placeNameFixed, dayLabel: rawDay, dateVal: parseDateVal(rawDay), category: catCol,
           description: desc, timeRange: timeStr,
           duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
           booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, address, 
