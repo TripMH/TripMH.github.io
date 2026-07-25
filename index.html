@@ -2671,8 +2671,8 @@ const qfTermsMap = {
       'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה', 'transport', 'train', 'bus', 'flight', 'airport', 'station']
   };
 
- // פונקציה לחיפוש קפדני עבור הפילטרים המהירים - מחפשת *רק* בקטגוריה או בשם המקום (מתעלמת מהתיאור הארוך!)
-  const getStrictFilterText = (i) => [i.category, i.placeName, i.title].filter(Boolean).join(' ').toLowerCase();
+// פונקציה לחיפוש סופר-קפדני עבור הפילטרים המהירים - מחפשת *אך ורק* בקטגוריה!
+  const getCategoryFilterText = (i) => (i.category || '').toLowerCase();
 
   const filterFn = i => {
       if (q === '__booking__') return i.requiresBooking === true;
@@ -2684,14 +2684,19 @@ const qfTermsMap = {
       if (q === '__all__') return true;
       if (!q) return true;
 
+      // סינון מהיר מחפש *רק* בעמודת הקטגוריה מול מילון המילים הנרדפות
       if (q.startsWith('__qf__')) {
           const filterVal = q.replace('__qf__', '').trim();
           const searchTerms = qfTermsMap[filterVal] || [filterVal];
-          const strictText = getStrictFilterText(i);
-          return searchTerms.some(term => strictText.includes(term.toLowerCase()));
+          const categoryText = getCategoryFilterText(i);
+          
+          // אם אין קטגוריה לפריט, הוא לא יכנס לפילטר המהיר
+          if (!categoryText) return false;
+          
+          return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
       }
 
-      // חיפוש חופשי רגיל (שורת החיפוש למעלה) ממשיך לחפש בכל הטקסטים כרגיל
+      // חיפוש חופשי (משורת החיפוש העליונה) מחפש בכל שדה רלוונטי
       return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2710,12 +2715,13 @@ const qfTermsMap = {
 
       if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
-      } else if (val.startsWith('__qf__')) {
+     } else if (val.startsWith('__qf__')) {
           const filterVal = val.replace('__qf__', '').trim();
           const searchTerms = qfTermsMap[filterVal] || [filterVal];
           count = allItemsForCount.filter(i => {
-              const strictText = getStrictFilterText(i);
-              return searchTerms.some(term => strictText.includes(term.toLowerCase()));
+              const categoryText = getCategoryFilterText(i);
+              if (!categoryText) return false;
+              return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
           }).length;
       }
 
