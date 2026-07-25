@@ -2671,7 +2671,8 @@ const qfTermsMap = {
       'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה', 'transport', 'train', 'bus', 'flight', 'airport', 'station']
   };
 
-  const getSearchText = (i) => [i.category, i.placeName, i.title, i.description, i.content, i.area].filter(Boolean).join(' ').toLowerCase();
+ // פונקציה לחיפוש קפדני עבור הפילטרים המהירים - מחפשת *רק* בקטגוריה או בשם המקום (מתעלמת מהתיאור הארוך!)
+  const getStrictFilterText = (i) => [i.category, i.placeName, i.title].filter(Boolean).join(' ').toLowerCase();
 
   const filterFn = i => {
       if (q === '__booking__') return i.requiresBooking === true;
@@ -2686,10 +2687,11 @@ const qfTermsMap = {
       if (q.startsWith('__qf__')) {
           const filterVal = q.replace('__qf__', '').trim();
           const searchTerms = qfTermsMap[filterVal] || [filterVal];
-          const searchText = getSearchText(i);
-          return searchTerms.some(term => searchText.includes(term.toLowerCase()));
+          const strictText = getStrictFilterText(i);
+          return searchTerms.some(term => strictText.includes(term.toLowerCase()));
       }
 
+      // חיפוש חופשי רגיל (שורת החיפוש למעלה) ממשיך לחפש בכל הטקסטים כרגיל
       return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2712,8 +2714,8 @@ const qfTermsMap = {
           const filterVal = val.replace('__qf__', '').trim();
           const searchTerms = qfTermsMap[filterVal] || [filterVal];
           count = allItemsForCount.filter(i => {
-              const searchText = getSearchText(i);
-              return searchTerms.some(term => searchText.includes(term.toLowerCase()));
+              const strictText = getStrictFilterText(i);
+              return searchTerms.some(term => strictText.includes(term.toLowerCase()));
           }).length;
       }
 
