@@ -2671,7 +2671,7 @@ const qfTermsMap = {
       'תחבורה': ['תחבורה', 'לוגיסטיקה', 'טיסה', 'רכבת', 'אוטובוס', 'שייט', 'שילוח', 'רפואי', 'שדה תעופה', 'transport', 'train', 'bus', 'flight', 'airport', 'station']
   };
 
-// פונקציה לחיפוש סופר-קפדני עבור הפילטרים המהירים - מחפשת *אך ורק* בקטגוריה!
+// פונקציה לחיפוש סופר-קפדני עבור הפילטרים המהירים - מחפשת *אך ורק* בעמודת הקטגוריה ב-CSV!
   const getCategoryFilterText = (i) => (i.category || '').toLowerCase();
 
   const filterFn = i => {
@@ -2690,13 +2690,13 @@ const qfTermsMap = {
           const searchTerms = qfTermsMap[filterVal] || [filterVal];
           const categoryText = getCategoryFilterText(i);
           
-          // אם אין קטגוריה לפריט, הוא לא יכנס לפילטר המהיר
+          // אם אין קטגוריה לפריט, הוא לא יכנס לפילטר המהיר בשום מצב
           if (!categoryText) return false;
           
           return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
       }
 
-      // חיפוש חופשי (משורת החיפוש העליונה) מחפש בכל שדה רלוונטי
+      // חיפוש חופשי (משורת החיפוש העליונה) מחפש בכל שדה רלוונטי כרגיל
       return Object.values(i).some(v => String(v).toLowerCase().includes(q));
   };
 
@@ -2715,10 +2715,11 @@ const qfTermsMap = {
 
       if (val === '__booking__') {
           count = allItemsForCount.filter(i => i.requiresBooking === true).length;
-     } else if (val.startsWith('__qf__')) {
+      } else if (val.startsWith('__qf__')) {
           const filterVal = val.replace('__qf__', '').trim();
           const searchTerms = qfTermsMap[filterVal] || [filterVal];
           count = allItemsForCount.filter(i => {
+              // גם בספירת התגים שלמעלה, אנחנו סופרים נטו לפי קטגוריה!
               const categoryText = getCategoryFilterText(i);
               if (!categoryText) return false;
               return searchTerms.some(term => categoryText.includes(term.toLowerCase()));
