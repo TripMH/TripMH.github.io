@@ -358,6 +358,15 @@ html.light mark{background:rgba(217,119,6,.22)}
 .link-btn.primary:hover{opacity:0.9; color:var(--bg);}
 .link-btn svg{width:16px;height:16px;flex-shrink:0}
 
+/* רשימת קישורים מסודרת בטיפים */
+.tip-links-block{border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-muted);padding:12px;}
+.tip-links-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;}
+.tip-links-title svg{width:16px;height:16px;flex-shrink:0;}
+.tip-links-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+@media(min-width:520px){.tip-links-grid{grid-template-columns:1fr 1fr;}}
+.link-btn.tip-link{padding:10px 12px;font-size:12.5px;background:var(--bg-card);}
+.link-btn.tip-link:hover{border-color:var(--accent);color:var(--accent);}
+
 /* כפתור הקראה יפנית נוח במילון */
 .speaker-btn {
   width: 44px;
@@ -1322,6 +1331,33 @@ function getSmartLinkLabel(url, label) {
   if (u.includes('tabelog') || u.includes('tripadvisor') || u.includes('google.com/maps')) return 'ביקורות ומידע על המקום';
   if (u.includes('instagram.com') || u.includes('facebook.com') || u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
   return 'האתר הרשמי';
+}
+
+/* מפרק טקסט חופשי המכיל שם + כתובת (בכל שורה) לרשימת קישורים מסודרת עם תוויות ברורות */
+function buildTipLinks(raw) {
+  if (!raw) return [];
+  const urlRe = /(https?:\/\/[^\s]+|mailto:[^\s]+)/i;
+  const lines = String(raw).split(/\n|(?=https?:\/\/)/);
+  const out = [];
+  let lastLabel = '';
+  for (const ln of lines) {
+    const t = ln.trim();
+    if (!t) continue;
+    const m = t.match(urlRe);
+    if (m) {
+      const url = m[1].replace(/[)\].,;]+$/, '');
+      let label = t.replace(urlRe, '').replace(/[:：\-–—]\s*$/, '').trim();
+      if (!label) label = lastLabel || getSmartLinkLabel(url, '');
+      if (/facebook\.com\/share\/g\//i.test(url)) label = label || 'קבוצת פייסבוק';
+      if (/play\.google\.com/i.test(url) && (!label || label === getSmartLinkLabel(url, ''))) label = (lastLabel || 'הורדת אפליקציה') + ' (Android)';
+      out.push({ label: label.replace(/^[•\-\*]\s*/, ''), url });
+    } else {
+      lastLabel = t.replace(/[:：]\s*$/, '').replace(/^[•\-\*]\s*/, '').trim();
+    }
+  }
+  // הסרת כפילויות לפי כתובת
+  const seen = new Set();
+  return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
 }
 
 /* =========================================================
@@ -2363,10 +2399,19 @@ function renderTipCard(item, q) {
   const checkStyle = done ? 'border-color:var(--success);background:var(--success-glow);color:var(--success);' : 'color:transparent;';
   const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
 
-  const urls = (item.link || '').match(/(https?:\/\/[^\s,]+)/gi) || [];
+  // בונה רשימת קישורים מסודרת מעמודת הקישורים (label -> url) גם כשיש קישורים רבים
+  const tipLinks = buildTipLinks(item.link);
   let linksHtml = '';
-  if (urls.length === 1) {
-      linksHtml = `<a href="${urls[0]}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(item.linkLabel||'למידע נוסף')}</a>`;
+  if (tipLinks.length === 1) {
+      linksHtml = `<a href="${tipLinks[0].url}" target="_blank" rel="noopener noreferrer" class="link-btn primary">${svgIcon('link')} ${escHtml(tipLinks[0].label || item.linkLabel || 'למידע נוסף')}</a>`;
+  } else if (tipLinks.length > 1) {
+      linksHtml = `
+      <div class="tip-links-block">
+        <div class="tip-links-title">${svgIcon('link')} קישורים ואפליקציות (${tipLinks.length})</div>
+        <div class="tip-links-grid">
+          ${tipLinks.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn tip-link" onclick="event.stopPropagation()">${svgIcon('link')} ${escHtml(l.label)}</a>`).join('')}
+        </div>
+      </div>`;
   }
 
   const navBtns = [
