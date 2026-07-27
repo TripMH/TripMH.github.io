@@ -1333,28 +1333,53 @@ function getSmartLinkLabel(url, label) {
   return 'האתר הרשמי';
 }
 
-/* מפרק טקסט חופשי המכיל שם + כתובת (בכל שורה) לרשימת קישורים מסודרת עם תוויות ברורות */
+/* מפרק טקסט חופשי המכיל שם + כתובת (בכל שורה) לרשימת קישורים מסודרת עם תוויות ברורות ומיספור תקין */
 function buildTipLinks(raw) {
   if (!raw) return [];
   const urlRe = /(https?:\/\/[^\s]+|mailto:[^\s]+)/i;
-  const lines = String(raw).split(/\n|(?=https?:\/\/)/);
+  const lines = String(raw).split('\n'); // חלוקה קשיחה רק לפי ירידת שורה
   const out = [];
-  let lastLabel = '';
-  for (const ln of lines) {
-    const t = ln.trim();
+  let currentGroup = '';
+  let groupCount = 1;
+
+  for (let ln of lines) {
+    let t = ln.trim();
     if (!t) continue;
-    const m = t.match(urlRe);
-    if (m) {
-      const url = m[1].replace(/[)\].,;]+$/, '');
-      let label = t.replace(urlRe, '').replace(/[:：\-–—]\s*$/, '').trim();
-      if (!label) label = lastLabel || getSmartLinkLabel(url, '');
-      if (/facebook\.com\/share\/g\//i.test(url)) label = label || 'קבוצת פייסבוק';
-      if (/play\.google\.com/i.test(url) && (!label || label === getSmartLinkLabel(url, ''))) label = (lastLabel || 'הורדת אפליקציה') + ' (Android)';
-      out.push({ label: label.replace(/^[•\-\*]\s*/, ''), url });
+
+    const match = t.match(urlRe);
+    if (match) {
+      const url = match[1].replace(/[)\].,;]+$/, '');
+      // הוצאת הקישור מהשורה כדי למצוא את הטקסט שנשאר ככותרת
+      let labelText = t.replace(url, '')
+                       .replace(/^[\d\.\-\•\*]+\s*/, '') // הסרת מספרים או בולטים בהתחלה
+                       .replace(/[:：\-–—|]+$/, '') // הסרת מקפים בסוף
+                       .replace(/^[:：\-–—|]+/, '') // הסרת מקפים בהתחלה
+                       .trim();
+
+      let finalLabel = '';
+
+      if (labelText) {
+        // אם כתוב רק "אתר" או "אפליקציה", נחבר את זה לשם הקבוצה
+        if ((labelText === 'אתר' || labelText === 'אפליקציה') && currentGroup) {
+           finalLabel = `${currentGroup} (${labelText})`;
+        } else {
+           finalLabel = labelText;
+        }
+      } else if (currentGroup) {
+        // אם יש רק קישור תחת כותרת, נמספר אותו אוטומטית
+        finalLabel = `${currentGroup} (${groupCount++})`;
+      } else {
+        finalLabel = getSmartLinkLabel(url, '');
+      }
+
+      out.push({ label: finalLabel, url: url });
     } else {
-      lastLabel = t.replace(/[:：]\s*$/, '').replace(/^[•\-\*]\s*/, '').trim();
+      // שורה ללא קישור היא כותרת של קבוצה
+      currentGroup = t.replace(/[:：\-–—]\s*$/, '').replace(/^[\d\.\-\•\*]+\s*/, '').trim();
+      groupCount = 1; // איפוס מונה לקבוצה החדשה
     }
   }
+
   // הסרת כפילויות לפי כתובת
   const seen = new Set();
   return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
