@@ -2379,9 +2379,23 @@ function renderTripCard(item, q, prevItem) {
 
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
 
+ const parsedLinks = buildTipLinks(item.link);
+  let linksHtml = '';
+  if (parsedLinks.length === 1) {
+      linksHtml = `<a href="${parsedLinks[0].url}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(parsedLinks[0].label || item.linkLabel || 'לאתר הרשמי')}</a>`;
+  } else if (parsedLinks.length > 1) {
+      linksHtml = `
+      <div class="tip-links-block" style="margin-bottom: 8px;">
+        <div class="tip-links-title">${svgIcon('link')} קישורים ואפליקציות הזמנה (${parsedLinks.length})</div>
+        <div class="tip-links-grid">
+          ${parsedLinks.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn tip-link" onclick="event.stopPropagation()">${svgIcon('link')} ${escHtml(l.label)}</a>`).join('')}
+        </div>
+      </div>`;
+  }
+
   const navBtns = [
     mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" style="font-size:14px; padding:12px; justify-content:center; background:var(--accent); color:var(--bg); box-shadow:0 4px 12px rgba(34,211,238,.3); border:none;">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
-    item.link  ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(item.linkLabel||'לאתר הרשמי')}</a>` : '',
+    linksHtml,
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
 
@@ -3003,8 +3017,8 @@ function buildEditForm(item) {
   <div class="edit-group"><label class="edit-label">סיכון</label><input class="edit-input" id="ef-risk" value="${escHtml(item.risk)}" autocomplete="off" /></div>
 </div>
 <div class="edit-group"><label class="edit-label">מה להכין מראש</label><input class="edit-input" id="ef-prepare" value="${escHtml(item.prepare)}" autocomplete="off" /></div>
-<div class="edit-row"><div class="edit-group" style="flex:2"><label class="edit-label">קישור (מידע נוסף)</label><input class="edit-input" id="ef-link" value="${escHtml(item.link)}" type="url" /></div><div class="edit-group"><label class="edit-label">גוגל מפות (מיעד קודם)</label><input class="edit-input" id="ef-mapPrev" value="${escHtml(item.mapPrev)}" /></div></div>
-<div class="edit-group">
+<div class="edit-group"><label class="edit-label">קישורים ואפליקציות להזמנה (כל קישור בשורה נפרדת)</label><textarea class="edit-input" id="ef-link" rows="3" dir="ltr" style="text-align:left;">${escHtml(item.link)}</textarea></div>
+<div class="edit-group"><label class="edit-label">גוגל מפות (מיעד קודם)</label><input class="edit-input" id="ef-mapPrev" value="${escHtml(item.mapPrev)}" /></div><div class="edit-group">
   <label class="edit-label">סוג</label>
   <select class="edit-input" id="ef-type">
     <option value="itinerary" ${item.type==='itinerary'?'selected':''}>מסלול ראשי</option>
