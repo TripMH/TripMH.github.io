@@ -1855,12 +1855,13 @@ function setCalendarReminder(id) {
   else if (m3) daysToSub = parseInt(m3[1], 10);
   else if (txt.includes('חודשיים')) daysToSub = 60;
   else if (txt.includes('חודש')) daysToSub = 30;
-  else if (txt.includes('שבועיים')) daysToSub = 14;
-      else if (txt.includes('שבוע')) daysToSub = 7;
+ else if (txt.includes('שבועיים')) daysToSub = 14;
+  else if (txt.includes('שבוע')) daysToSub = 7;
+  else daysToSub = 14;
 
-      // האירוע עצמו יוגדר בדיוק לזמן בו נפתחת ההזמנה בפועל
-      targetDate.setDate(targetDate.getDate() - daysToSub);
-      targetDate.setHours(hour, min, 0, 0);
+  // קביעת האירוע בדיוק לזמן פתיחת ההזמנה
+  targetDate.setDate(targetDate.getDate() - daysToSub);
+  targetDate.setHours(hour, min, 0, 0);
   
   if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
       if (targetDate.getHours() < 6) {
@@ -1895,7 +1896,8 @@ function setCalendarReminder(id) {
 
   const title = encodeURIComponent(`🚨 שריון: ${item.placeName}`);
   
-  let descRaw = `תזכורת אוטומטית ממערכת TripMH!\n\nהגיע הזמן לשריין עבור:\n📌 ${item.placeName}\n\n`;
+ let descRaw = `תזכורת אוטומטית ממערכת TripMH!\n\nהגיע הזמן לשריין עבור:\n📌 ${item.placeName}\n\n`;
+  descRaw += `💡 שים לב: אירוע זה הוגדר במדויק לשעת פתיחת ההזמנות! מומלץ להוסיף כעת ביומן התראה גם ליום לפני כהכנה, בנוסף להתראה של שעת הפתיחה.\n\n`;
   if (item.booking) descRaw += `📝 פירוט ההזמנה:\n${item.booking}\n\n`;
   if (item.link) descRaw += `🔗 קישור ישיר להזמנה:\n${item.link}`;
   
@@ -1940,6 +1942,7 @@ window.downloadICS = function() {
       else if (txt.includes('שבועיים')) daysToSub = 14;
       else if (txt.includes('שבוע')) daysToSub = 7;
 
+      // האירוע עצמו יוגדר בדיוק לזמן בו נפתחת ההזמנה בפועל
       targetDate.setDate(targetDate.getDate() - daysToSub);
       targetDate.setHours(hour, min, 0, 0);
       
@@ -1970,6 +1973,21 @@ window.downloadICS = function() {
       if (item.link) desc += `\\n\\n🔗 קישור ישיר להזמנה:\\n${item.link}`;
       ics += `DESCRIPTION:${desc}\r\n`;
       if (item.address || item.area) ics += `LOCATION:${(item.address || item.area).replace(/,/g, '\\,')}\r\n`;
+      
+      // תזכורת 1: התראה קופצת בדיוק 24 שעות לפני הפתיחה (הכנה)
+      ics += "BEGIN:VALARM\r\n";
+      ics += "TRIGGER:-PT24H\r\n";
+      ics += "ACTION:DISPLAY\r\n";
+      ics += `DESCRIPTION:הכנה: מחר נפתחת ההזמנה ל: ${item.placeName.replace(/,/g, '\\,')}\r\n`;
+      ics += "END:VALARM\r\n";
+
+      // תזכורת 2: התראה קופצת בדיוק בזמן פתיחת ההזמנה
+      ics += "BEGIN:VALARM\r\n";
+      ics += "TRIGGER:PT0M\r\n";
+      ics += "ACTION:DISPLAY\r\n";
+      ics += `DESCRIPTION:עכשיו נפתחה ההזמנה ל: ${item.placeName.replace(/,/g, '\\,')}\r\n`;
+      ics += "END:VALARM\r\n";
+
       ics += "END:VEVENT\r\n";
   });
 
