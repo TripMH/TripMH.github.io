@@ -1856,11 +1856,11 @@ function setCalendarReminder(id) {
   else if (txt.includes('חודשיים')) daysToSub = 60;
   else if (txt.includes('חודש')) daysToSub = 30;
   else if (txt.includes('שבועיים')) daysToSub = 14;
-  else if (txt.includes('שבוע')) daysToSub = 7;
-  else daysToSub = 14;
+      else if (txt.includes('שבוע')) daysToSub = 7;
 
-  targetDate.setDate(targetDate.getDate() - daysToSub);
-  targetDate.setHours(hour, min, 0, 0);
+      // האירוע עצמו יוגדר בדיוק לזמן בו נפתחת ההזמנה בפועל
+      targetDate.setDate(targetDate.getDate() - daysToSub);
+      targetDate.setHours(hour, min, 0, 0);
   
   if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
       if (targetDate.getHours() < 6) {
