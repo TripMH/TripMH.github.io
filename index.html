@@ -2379,14 +2379,14 @@ function renderTripCard(item, q, prevItem) {
 
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
 
- const parsedLinks = buildTipLinks(item.link);
+const parsedLinks = buildTipLinks(item.link);
   let linksHtml = '';
   if (parsedLinks.length === 1) {
       linksHtml = `<a href="${parsedLinks[0].url}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(parsedLinks[0].label || item.linkLabel || 'לאתר הרשמי')}</a>`;
   } else if (parsedLinks.length > 1) {
       linksHtml = `
       <div class="tip-links-block" style="margin-bottom: 8px;">
-        <div class="tip-links-title">${svgIcon('link')} קישורים ואפליקציות הזמנה (${parsedLinks.length})</div>
+        <div class="tip-links-title">${svgIcon('link')} קישורים ואפליקציות (${parsedLinks.length})</div>
         <div class="tip-links-grid">
           ${parsedLinks.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn tip-link" onclick="event.stopPropagation()">${svgIcon('link')} ${escHtml(l.label)}</a>`).join('')}
         </div>
