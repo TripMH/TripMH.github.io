@@ -1681,8 +1681,27 @@ async function processFiles(files) {
       const desc  = getCol(obj,'desc');
       const area = getCol(obj,'area');
       const address = getCol(obj,'address');
-      const catCol = getCol(obj,'category');
-      const link  = getCol(obj,'link');
+     const catCol = getCol(obj,'category');
+      
+      // איסוף חכם של כל הקישורים - אוסף אוטומטית כל עמודה ששמה מכיל מילים רלוונטיות
+      let combinedLinks = [];
+      Object.keys(obj).forEach(k => {
+          const lk = k.toLowerCase();
+          // זיהוי עמודות המיועדות לקישורים (אפשר להוסיף ב-CSV עמודות כמו "קישור לתפריט", "אתר רשמי", "link 2" וכו')
+          if (lk.includes('קישור') || lk.includes('אתר') || lk.includes('url') || lk.includes('link') || lk.includes('website')) {
+              let val = obj[k].trim();
+              if (val) {
+                  // אם התא מכיל רק כתובת URL נטו, נשתמש בשם העמודה שבחרת ב-CSV ככותרת הכפתור
+                  if (/^https?:\/\/[^\s]+$/i.test(val)) {
+                      combinedLinks.push(`${k}\n${val}`);
+                  } else {
+                      combinedLinks.push(val);
+                  }
+              }
+          }
+      });
+      const link = combinedLinks.join('\n\n');
+      
       const hebrew = getCol(obj,'hebrew');
       const task = getCol(obj,'task');
       const iconCsv = getCol(obj, 'icon');
