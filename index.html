@@ -1325,11 +1325,17 @@ function getSmartLinkLabel(url, label) {
   const u = url.toLowerCase();
   
   if (u.includes('mailto:')) return 'שליחת אימייל';
+  if (u.includes('tablecheck.com')) return 'הזמנת שולחן (TableCheck)';
+  if (u.includes('tabelog.com')) return 'ביקורות ודירוג (Tabelog)';
+  if (u.includes('facebook.com')) return 'עמוד פייסבוק / וואצאפ';
+  if (u.includes('instagram.com')) return 'אינסטגרם (Instagram)';
   if (u.includes('booking.com') || u.includes('agoda.com') || u.includes('airbnb') || u.includes('hotels.com')) return 'הזמנת לינה / מלון';
   if (u.includes('klook.com') || u.includes('getyourguide') || u.includes('kkday')) return 'הזמנת אטרקציה / כרטיסים';
   if (u.includes('lawson') || u.includes('eplus') || u.includes('ticket') || u.includes('pia.jp') || u.includes('l-tike') || u.includes('viagogo')) return 'רכישת כרטיסים להופעה';
-  if (u.includes('tabelog') || u.includes('tripadvisor') || u.includes('google.com/maps')) return 'ביקורות ומידע על המקום';
-  if (u.includes('instagram.com') || u.includes('facebook.com') || u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
+  if (u.includes('tripadvisor')) return 'ביקורות (TripAdvisor)';
+  if (u.includes('google.com/maps')) return 'מיקום בגוגל מפות';
+  if (u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
+  
   return 'האתר הרשמי';
 }
 
@@ -1337,7 +1343,7 @@ function getSmartLinkLabel(url, label) {
 function buildTipLinks(raw) {
   if (!raw) return [];
   const urlRe = /(https?:\/\/[^\s]+|mailto:[^\s]+)/i;
-  const lines = String(raw).split('\n'); // חלוקה קשיחה רק לפי ירידת שורה
+  const lines = String(raw).split('\n'); 
   const out = [];
   let currentGroup = '';
   let groupCount = 1;
@@ -1349,24 +1355,22 @@ function buildTipLinks(raw) {
     const match = t.match(urlRe);
     if (match) {
       const url = match[1].replace(/[)\].,;]+$/, '');
-      // הוצאת הקישור מהשורה כדי למצוא את הטקסט שנשאר ככותרת
       let labelText = t.replace(url, '')
-                       .replace(/^[\d\.\-\•\*]+\s*/, '') // הסרת מספרים או בולטים בהתחלה
-                       .replace(/[:：\-–—|]+$/, '') // הסרת מקפים בסוף
-                       .replace(/^[:：\-–—|]+/, '') // הסרת מקפים בהתחלה
+                       .replace(/^[\d\.\-\•\*]+\s*/, '') 
+                       .replace(/[:：\-–—|]+$/, '') 
+                       .replace(/^[:：\-–—|]+/, '') 
                        .trim();
 
       let finalLabel = '';
+      const isGenericGroup = /^(קישור|אתר|url|link|website)s?\s*[\d]*$/i.test(currentGroup);
 
       if (labelText) {
-        // אם כתוב רק "אתר" או "אפליקציה", נחבר את זה לשם הקבוצה
-        if ((labelText === 'אתר' || labelText === 'אפליקציה') && currentGroup) {
+        if ((labelText === 'אתר' || labelText === 'אפליקציה') && currentGroup && !isGenericGroup) {
            finalLabel = `${currentGroup} (${labelText})`;
         } else {
            finalLabel = labelText;
         }
-      } else if (currentGroup) {
-        // אם יש רק קישור תחת כותרת, נמספר אותו אוטומטית
+      } else if (currentGroup && !isGenericGroup) {
         finalLabel = `${currentGroup} (${groupCount++})`;
       } else {
         finalLabel = getSmartLinkLabel(url, '');
@@ -1374,13 +1378,11 @@ function buildTipLinks(raw) {
 
       out.push({ label: finalLabel, url: url });
     } else {
-      // שורה ללא קישור היא כותרת של קבוצה
       currentGroup = t.replace(/[:：\-–—]\s*$/, '').replace(/^[\d\.\-\•\*]+\s*/, '').trim();
-      groupCount = 1; // איפוס מונה לקבוצה החדשה
+      groupCount = 1; 
     }
   }
 
-  // הסרת כפילויות לפי כתובת
   const seen = new Set();
   return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
 }
@@ -1683,17 +1685,22 @@ async function processFiles(files) {
       const address = getCol(obj,'address');
      const catCol = getCol(obj,'category');
       
+    const catCol = getCol(obj,'category');
+      
       // איסוף חכם של כל הקישורים - אוסף אוטומטית כל עמודה ששמה מכיל מילים רלוונטיות
       let combinedLinks = [];
       Object.keys(obj).forEach(k => {
           const lk = k.toLowerCase();
-          // זיהוי עמודות המיועדות לקישורים (אפשר להוסיף ב-CSV עמודות כמו "קישור לתפריט", "אתר רשמי", "link 2" וכו')
           if (lk.includes('קישור') || lk.includes('אתר') || lk.includes('url') || lk.includes('link') || lk.includes('website')) {
               let val = obj[k].trim();
               if (val) {
-                  // אם התא מכיל רק כתובת URL נטו, נשתמש בשם העמודה שבחרת ב-CSV ככותרת הכפתור
                   if (/^https?:\/\/[^\s]+$/i.test(val)) {
-                      combinedLinks.push(`${k}\n${val}`);
+                      // מונע הדבקה של שם עמודה גנרי (כמו "קישור 2") מעל הכתובת
+                      if (/^(קישור|אתר|url|link|website)s?\s*[\d]*$/i.test(k.trim())) {
+                          combinedLinks.push(val);
+                      } else {
+                          combinedLinks.push(`${k}\n${val}`);
+                      }
                   } else {
                       combinedLinks.push(val);
                   }
