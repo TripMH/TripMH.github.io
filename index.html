@@ -1388,11 +1388,7 @@ function buildTipLinks(raw) {
   const seen = new Set();
   return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
 }
-
-  const seen = new Set();
-  return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
-}
-
+  
 /* =========================================================
    CSV PARSER
 ========================================================= */
@@ -1690,9 +1686,7 @@ async function processFiles(files) {
       const area = getCol(obj,'area');
       const address = getCol(obj,'address');
      const catCol = getCol(obj,'category');
-      
-    const catCol = getCol(obj,'category');
-      
+           
     // איסוף חכם של כל הקישורים - מושך רק את התוכן נטו כדי לאפשר לזיהוי החכם לעבוד
       let combinedLinks = [];
       Object.keys(obj).forEach(k => {
