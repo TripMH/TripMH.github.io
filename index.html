@@ -1339,11 +1339,12 @@ function getSmartLinkLabel(url, label) {
   return 'האתר הרשמי';
 }
 
-/* מפרק טקסט חופשי המכיל שם + כתובת (בכל שורה) לרשימת קישורים מסודרת עם תוויות ברורות ומיספור תקין */
+/* מפרק טקסט חופשי המכיל שם + כתובת (בכל שורה או בהפרדת קו אנכי) לרשימת קישורים מסודרת עם תוויות ברורות ומיספור תקין */
 function buildTipLinks(raw) {
   if (!raw) return [];
   const urlRe = /(https?:\/\/[^\s]+|mailto:[^\s]+)/i;
-  const lines = String(raw).split('\n'); 
+  // כאן הוספנו את הפיצול גם לפי קו אנכי (|) ולא רק לפי ירידת שורה
+  const lines = String(raw).split(/\n|\|/); 
   const out = [];
   let currentGroup = '';
   let groupCount = 1;
