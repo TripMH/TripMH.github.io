@@ -1362,7 +1362,8 @@ function buildTipLinks(raw) {
                        .trim();
 
       let finalLabel = '';
-      const isGenericGroup = /^(קישור|אתר|url|link|website)s?\s*[\d]*$/i.test(currentGroup);
+      // זיהוי חזק יותר למילים גנריות - לא נשתמש בהן בתור שם הכפתור
+      const isGenericGroup = /(קישור|אתר|url|link|website|לינק|אפליקצי)/i.test(currentGroup);
 
       if (labelText) {
         if ((labelText === 'אתר' || labelText === 'אפליקציה') && currentGroup && !isGenericGroup) {
@@ -1373,6 +1374,7 @@ function buildTipLinks(raw) {
       } else if (currentGroup && !isGenericGroup) {
         finalLabel = `${currentGroup} (${groupCount++})`;
       } else {
+        // אם אין טקסט ספציפי ליד הקישור - תן למנגנון החכם לעשות את העבודה!
         finalLabel = getSmartLinkLabel(url, '');
       }
 
@@ -1382,6 +1384,10 @@ function buildTipLinks(raw) {
       groupCount = 1; 
     }
   }
+
+  const seen = new Set();
+  return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
+}
 
   const seen = new Set();
   return out.filter(l => { if (seen.has(l.url)) return false; seen.add(l.url); return true; });
@@ -1687,23 +1693,14 @@ async function processFiles(files) {
       
     const catCol = getCol(obj,'category');
       
-      // איסוף חכם של כל הקישורים - אוסף אוטומטית כל עמודה ששמה מכיל מילים רלוונטיות
+    // איסוף חכם של כל הקישורים - מושך רק את התוכן נטו כדי לאפשר לזיהוי החכם לעבוד
       let combinedLinks = [];
       Object.keys(obj).forEach(k => {
           const lk = k.toLowerCase();
-          if (lk.includes('קישור') || lk.includes('אתר') || lk.includes('url') || lk.includes('link') || lk.includes('website')) {
+          if (lk.includes('קישור') || lk.includes('אתר') || lk.includes('url') || lk.includes('link') || lk.includes('website') || lk.includes('לינק')) {
               let val = obj[k].trim();
               if (val) {
-                  if (/^https?:\/\/[^\s]+$/i.test(val)) {
-                      // מונע הדבקה של שם עמודה גנרי (כמו "קישור 2") מעל הכתובת
-                      if (/^(קישור|אתר|url|link|website)s?\s*[\d]*$/i.test(k.trim())) {
-                          combinedLinks.push(val);
-                      } else {
-                          combinedLinks.push(`${k}\n${val}`);
-                      }
-                  } else {
-                      combinedLinks.push(val);
-                  }
+                  combinedLinks.push(val);
               }
           }
       });
