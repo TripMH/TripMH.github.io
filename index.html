@@ -3169,13 +3169,6 @@ function applyTheme(dark) {
 ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
 
-  const headerEl = document.getElementById('app-header');
-  if (headerEl) {
-    new ResizeObserver(() => {
-      document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
-    }).observe(headerEl);
-  }
-
   const dark = (() => {
     const v = localStorage.getItem(LS_DARK);
     return v !== null ? v === 'true' : true;
@@ -3413,12 +3406,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true);
   });
 
-  // Search
+ // Search (עם מנגנון השהיה - Debounce - לשיפור ביצועים)
+  let searchTimeout;
   document.getElementById('search-input').addEventListener('input', e => {
-    state.searchQuery = e.target.value;
     document.getElementById('search-clear').classList.toggle('visible', !!e.target.value);
-    document.querySelectorAll('.qf-btn, .stat-item').forEach(b => b.classList.remove('active')); // Reset filters
-    updateUI();
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      state.searchQuery = e.target.value;
+      document.querySelectorAll('.qf-btn, .stat-item').forEach(b => b.classList.remove('active')); // Reset filters
+      updateUI();
+    }, 250); // ממתין 250 מילישניות מסיום ההקלדה לפני הסינון
   });
   document.getElementById('search-clear').addEventListener('click', () => {
     state.searchQuery = '';
