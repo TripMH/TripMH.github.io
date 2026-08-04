@@ -72,8 +72,7 @@ html.light mark{background:rgba(217,119,6,.22)}
    HEADER
 ========================================================= */
 #app-header{
-  position:sticky;
-  top:0;
+  position:relative;
   z-index:40;
   background:color-mix(in srgb,var(--bg) 92%,transparent);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -252,7 +251,7 @@ html.light mark{background:rgba(217,119,6,.22)}
    AGENDA DAY GROUP
 ========================================================= */
 .agenda-day-group { margin-bottom: 24px; }
-.section-header{position:sticky;top:235px;z-index:10;padding:8px 14px;
+.section-header{position:sticky;top:0;z-index:40;padding:8px 14px;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   display:flex;align-items:center;justify-content:space-between;
   border-bottom: 1px solid var(--border);
@@ -277,7 +276,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 285px;}
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 60px;}
 .card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
@@ -2289,11 +2288,11 @@ window.scrollToItem = function(id) {
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${id}"]`);
     if(el) {
-      const headerOffset = 285; 
+      const headerOffset = 60; 
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
-      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+          window.scrollTo({ top: offsetPosition, behavior: "smooth" });
       
       el.style.transition = 'all 0.3s';
       const oldBg = el.style.backgroundColor;
@@ -3169,6 +3168,13 @@ function applyTheme(dark) {
    BOOT & EVENT WIRING
 ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
+
+  const headerEl = document.getElementById('app-header');
+  if (headerEl) {
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+    }).observe(headerEl);
+  }
 
   const dark = (() => {
     const v = localStorage.getItem(LS_DARK);
