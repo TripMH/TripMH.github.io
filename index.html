@@ -41,7 +41,7 @@ html, body {
   -webkit-font-smoothing:antialiased;
   width:100%;
   min-height:100vh;
-  overflow-x:hidden; 
+  overflow-x:clip; 
   direction:rtl;
   scroll-behavior: smooth;
 }
@@ -252,7 +252,7 @@ html.light mark{background:rgba(217,119,6,.22)}
    AGENDA DAY GROUP
 ========================================================= */
 .agenda-day-group { margin-bottom: 24px; }
-.section-header{position:sticky;top:184px;z-index:10;padding:8px 14px;
+.section-header{position:sticky;top:235px;z-index:10;padding:8px 14px;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   display:flex;align-items:center;justify-content:space-between;
   border-bottom: 1px solid var(--border);
@@ -277,7 +277,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 155px;} 
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 285px;}
 .card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
@@ -2289,7 +2289,7 @@ window.scrollToItem = function(id) {
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${id}"]`);
     if(el) {
-      const headerOffset = 180; 
+      const headerOffset = 285; 
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
