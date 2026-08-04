@@ -1840,88 +1840,111 @@ async function processFiles(files) {
 }
 
 /* =========================================================
-   CALENDAR REMINDERS & ICS BATCH EXPORT
+   CALENDAR REMINDERS & ICS BATCH EXPORT (FIXED & ACCURATE)
 ========================================================= */
-function setCalendarReminder(id) {
-  const arr = [...state.data.itinerary, ...state.data.options];
-  const item = arr.find(x => x.id === id);
-  if (!item || !item.dateVal) {
-    addToast('לא הוגדר תאריך יעד לאטרקציה זו (חסר תאריך בקובץ)', 'error');
-    return;
-  }
 
-  const targetDate = new Date(item.dateVal);
-  const txt = (item.booking || '').toLowerCase();
+// פונקציית עזר לחישוב התאריך והשעה המדויקים, כולל טיפול בשעון יפן (JST) וחישוב חודשים תקין
+function getAccurateBookingDate(item) {
+  if (!item || !item.dateVal) return null;
   
-  let daysToSub = 0;
+  // מתחילים מהתאריך של האטרקציה עצמה
+  let targetDate = new Date(item.dateVal);
+  let txt = (item.booking || '').toLowerCase();
+  
+  // 1. חילוץ שעת הפתיחה מתוך הטקסט (ברירת מחדל 10:00)
   let hour = 10;
   let min = 0;
-
   const timeMatch = txt.match(/([0-2]?\d):([0-5]\d)/);
   if (timeMatch) {
      hour = parseInt(timeMatch[1], 10);
      min = parseInt(timeMatch[2], 10);
   }
 
-  const m1 = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
-  const m2 = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
-  const m3 = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
+  // 2. חישוב ימים/שבועות/חודשים אחורה (עם חישוב לוח שנה אמיתי ולא שטוח של 30 יום)
+  const mMonth = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
+  const mWeek = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
+  const mDay = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
   
-  if (m1) daysToSub = parseInt(m1[1], 10) * 30;
-  else if (m2) daysToSub = parseInt(m2[1], 10) * 7;
-  else if (m3) daysToSub = parseInt(m3[1], 10);
-  else if (txt.includes('חודשיים')) daysToSub = 60;
-  else if (txt.includes('חודש')) daysToSub = 30;
- else if (txt.includes('שבועיים')) daysToSub = 14;
-  else if (txt.includes('שבוע')) daysToSub = 7;
-  else daysToSub = 14;
-
-  // קביעת האירוע בדיוק לזמן פתיחת ההזמנה
-  targetDate.setDate(targetDate.getDate() - daysToSub);
-  targetDate.setHours(hour, min, 0, 0);
-  
-  if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
-      if (targetDate.getHours() < 6) {
-          targetDate.setDate(targetDate.getDate() - 1); 
-      }
-      targetDate.setHours(20, 0, 0, 0); 
+  if (txt.includes('חודשיים')) {
+      targetDate.setMonth(targetDate.getMonth() - 2);
+  } else if (mMonth) {
+      targetDate.setMonth(targetDate.getMonth() - parseInt(mMonth[1], 10));
+  } else if (txt.includes('חודש')) {
+      targetDate.setMonth(targetDate.getMonth() - 1);
+  } else if (mWeek) {
+      targetDate.setDate(targetDate.getDate() - (parseInt(mWeek[1], 10) * 7));
+  } else if (txt.includes('שבועיים')) {
+      targetDate.setDate(targetDate.getDate() - 14);
+  } else if (txt.includes('שבוע')) {
+      targetDate.setDate(targetDate.getDate() - 7);
+  } else if (mDay) {
+      targetDate.setDate(targetDate.getDate() - parseInt(mDay[1], 10));
+  } else {
+      // אם לא צוין כלום, ברירת מחדל 14 יום לפני
+      targetDate.setDate(targetDate.getDate() - 14);
   }
-  
-  const now = new Date();
-  if (targetDate < now) {
-      targetDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
-      if (hour >= 22 || hour < 6) {
-          targetDate.setHours(20, 0, 0, 0);
-      } else {
-          targetDate.setHours(hour, min, 0, 0);
-      }
-  }
-  
-  const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000));
 
+  // 3. טיפול חכם בשעון יפן (JST) מול זמן מקומי כדי לא לפספס פתיחות ליליות
+  // JST זה UTC+9. אנחנו נייצר תאריך UTC מדויק לחלוטין כדי שההתראה תקפוץ בשעה הנכונה בישראל!
+  const isJST = txt.includes('jst') || txt.includes('יפן') || txt.includes('japan');
+  
+  let finalUtcMs;
+  if (isJST) {
+      // אם זה שעון יפן, אנחנו מפחיתים 9 שעות כדי לקבל את זמן ה-UTC המדויק
+      finalUtcMs = Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), hour - 9, min, 0);
+  } else {
+      // זמן מקומי רגיל (ישראל)
+      targetDate.setHours(hour, min, 0, 0);
+      finalUtcMs = targetDate.getTime();
+  }
+
+  return new Date(finalUtcMs);
+}
+
+// פונקציית עזר לפרמוט תאריך לתבנית של גוגל יומן וקובץ ICS (תבנית UTC עם Z בסוף)
+function formatIcsDate(dateObj) {
   const pad = n => String(n).padStart(2, '0');
-  const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  return `${dateObj.getUTCFullYear()}${pad(dateObj.getUTCMonth()+1)}${pad(dateObj.getUTCDate())}T${pad(dateObj.getUTCHours())}${pad(dateObj.getUTCMinutes())}00Z`;
+}
+
+function setCalendarReminder(id) {
+  const arr = [...state.data.itinerary, ...state.data.options];
+  const item = arr.find(x => x.id === id);
+  
+  const exactDate = getAccurateBookingDate(item);
+  if (!exactDate) {
+    addToast('לא הוגדר תאריך יעד לאטרקציה זו (חסר תאריך בקובץ)', 'error');
+    return;
+  }
+
+  // בדיקה חכמה - אם התאריך המדויק כבר עבר, נדחוף את ההתראה ל-24 שעות מעכשיו
+  const now = new Date();
+  if (exactDate < now) {
+      exactDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
+  }
+
+  // תאריך הסיום הוא 30 דקות אחרי תחילת האירוע
+  const endDate = new Date(exactDate.getTime() + (30 * 60 * 1000));
 
   let hash = 0;
   const strToHash = item.placeName || item.id;
   for (let i = 0; i < strToHash.length; i++) {
       hash = strToHash.charCodeAt(i) + ((hash << 5) - hash);
   }
-  
   const calendarColors = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
   const colorId = calendarColors[Math.abs(hash) % calendarColors.length];
 
   const title = encodeURIComponent(`🚨 שריון: ${item.placeName}`);
   
- let descRaw = `תזכורת אוטומטית ממערכת TripMH!\n\nהגיע הזמן לשריין עבור:\n📌 ${item.placeName}\n\n`;
-  descRaw += `💡 שים לב: אירוע זה הוגדר במדויק לשעת פתיחת ההזמנות! מומלץ להוסיף כעת ביומן התראה גם ליום לפני כהכנה, בנוסף להתראה של שעת הפתיחה.\n\n`;
+  let descRaw = `תזכורת אוטומטית ממערכת TripMH!\n\nהגיע הזמן לשריין עבור:\n📌 ${item.placeName}\n\n`;
+  descRaw += `💡 שים לב: אירוע זה הוגדר במדויק לשעת הפתיחה! (אם צוין JST או 'יפן', השעה הומרה אוטומטית לזמן המקומי שלך עכשיו).\n\n`;
   if (item.booking) descRaw += `📝 פירוט ההזמנה:\n${item.booking}\n\n`;
   if (item.link) descRaw += `🔗 קישור ישיר להזמנה:\n${item.link}`;
   
   const desc = encodeURIComponent(descRaw);
   const loc = encodeURIComponent(item.address || item.area || '');
   
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmtLocal(targetDate)}/${fmtLocal(endDate)}&details=${desc}&location=${loc}&colorId=${colorId}`;
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatIcsDate(exactDate)}/${formatIcsDate(endDate)}&details=${desc}&location=${loc}&colorId=${colorId}`;
   window.open(url, '_blank');
   addToast('מעביר ליצירת תזכורת מדויקת ב-Google Calendar...', 'success');
 }
@@ -1936,55 +1959,26 @@ window.downloadICS = function() {
   }
 
   let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TripMH//Smart Planner//HE\r\nCALSCALE:GREGORIAN\r\n";
+  const now = new Date();
 
   items.forEach(item => {
-      const targetDate = new Date(item.dateVal);
-      let daysToSub = 14;
-      const txt = (item.booking || '').toLowerCase();
+      let exactDate = getAccurateBookingDate(item);
+      if (!exactDate) return;
       
-      let hour = 10;
-      let min = 0;
-      const timeMatch = txt.match(/([0-2]?\d):([0-5]\d)/);
-      if (timeMatch) { hour = parseInt(timeMatch[1], 10); min = parseInt(timeMatch[2], 10); }
-
-      const m1 = txt.match(/(\d+)\s*(חודשים|months|חודש|month)/);
-      const m2 = txt.match(/(\d+)\s*(שבועות|weeks|שבוע|week)/);
-      const m3 = txt.match(/(\d+)\s*(ימים|days|יום|day)/);
-      
-      if (m1) daysToSub = parseInt(m1[1], 10) * 30;
-      else if (m2) daysToSub = parseInt(m2[1], 10) * 7;
-      else if (m3) daysToSub = parseInt(m3[1], 10);
-      else if (txt.includes('חודשיים')) daysToSub = 60;
-      else if (txt.includes('חודש')) daysToSub = 30;
-      else if (txt.includes('שבועיים')) daysToSub = 14;
-      else if (txt.includes('שבוע')) daysToSub = 7;
-
-      // האירוע עצמו יוגדר בדיוק לזמן בו נפתחת ההזמנה בפועל
-      targetDate.setDate(targetDate.getDate() - daysToSub);
-      targetDate.setHours(hour, min, 0, 0);
-      
-      if (targetDate.getHours() >= 22 || targetDate.getHours() < 6) {
-          if (targetDate.getHours() < 6) targetDate.setDate(targetDate.getDate() - 1); 
-          targetDate.setHours(20, 0, 0, 0); 
+      // אם זמן הפתיחה כבר עבר מבחינה לוגית, נקפוץ אוטומטית למחר כדי שלא תתפספס התזכורת
+      if (exactDate < now) {
+          exactDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
       }
       
-      const now = new Date();
-      if (targetDate < now) {
-          targetDate.setTime(now.getTime() + (24 * 60 * 60 * 1000));
-          if (hour >= 22 || hour < 6) targetDate.setHours(20, 0, 0, 0);
-          else targetDate.setHours(hour, min, 0, 0);
-      }
-      
-      const endDate = new Date(targetDate.getTime() + (30 * 60 * 1000));
-      const pad = n => String(n).padStart(2, '0');
-      const fmtLocal = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+      const endDate = new Date(exactDate.getTime() + (30 * 60 * 1000));
 
       ics += "BEGIN:VEVENT\r\n";
       ics += `UID:${item.id}@tripmh\r\n`;
-      ics += `DTSTAMP:${fmtLocal(new Date())}Z\r\n`;
-      ics += `DTSTART:${fmtLocal(targetDate)}\r\n`;
-      ics += `DTEND:${fmtLocal(endDate)}\r\n`;
+      ics += `DTSTAMP:${formatIcsDate(new Date())}\r\n`;
+      ics += `DTSTART:${formatIcsDate(exactDate)}\r\n`;
+      ics += `DTEND:${formatIcsDate(endDate)}\r\n`;
       ics += `SUMMARY:🚨 שריון: ${item.placeName.replace(/,/g, '\\,')}\r\n`;
+      
       let desc = `תזכורת אוטומטית ממערכת TripMH!\\nהגיע הזמן לשריין עבור:\\n📌 ${item.placeName}\\n`;
       if (item.booking) desc += `\\n📝 פירוט ההזמנה:\\n${item.booking.replace(/\n/g, '\\n')}`;
       if (item.link) desc += `\\n\\n🔗 קישור ישיר להזמנה:\\n${item.link}`;
@@ -2012,7 +2006,7 @@ window.downloadICS = function() {
   downloadBlob(ics, 'TripMH_Bookings.ics', 'text/calendar;charset=utf-8');
   addToast('קובץ היומן ירד! פתח אותו במכשיר כדי להוסיף הכל בבת אחת.', 'success');
 };
-
+   
 /* =========================================================
    EXPORT: SEPARATE FILES CASCADED
 ========================================================= */
