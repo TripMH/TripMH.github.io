@@ -296,6 +296,19 @@ html.light mark{background:rgba(217,119,6,.22)}
 .micro-ui-content span { color: var(--text-dim); font-size: 13px; line-height: 1.4; display: block; word-break: break-word; }
 
 /* =========================================================
+   DROPDOWN MENU (LINKS)
+========================================================= */
+.links-dropdown { position: relative; flex: 1; min-width: 120px; }
+.links-dropdown-btn { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; font-size: 13px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--bg-muted); color: var(--text-muted); cursor: pointer; transition: background 0.15s; font-family: inherit; font-weight: 500; }
+.links-dropdown-btn:hover { background: color-mix(in srgb, var(--text-muted) 12%, transparent); color: var(--text); }
+.links-dropdown-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.links-dropdown-menu { position: absolute; top: calc(100% + 6px); right: 0; left: 0; background: var(--bg-elevated); border: 1px solid var(--accent-border); border-radius: var(--r-sm); padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.2s ease; z-index: 60; min-width: 200px; }
+.links-dropdown.open .links-dropdown-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.links-dropdown-item { padding: 10px 12px; font-size: 13px; color: var(--text); text-decoration: none; border-radius: 4px; display: flex; align-items: center; gap: 8px; transition: background 0.15s; word-break: break-word; }
+.links-dropdown-item:hover { background: var(--accent-glow); color: var(--accent); }
+.links-dropdown-item svg { width: 14px; height: 14px; opacity: 0.7; flex-shrink: 0; }
+   
+/* =========================================================
    CARDS
 ========================================================= */
 .card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 60px;}
@@ -2432,12 +2445,33 @@ function renderTripCard(item, q, prevItem) {
       `).join('') + `</div>`;
   }
 
-  // 2. כפתורי פעולה קריטיים (CTAs) שמופיעים למעלה באזור תמיד גלוי
+ // 2. כפתורי פעולה קריטיים (CTAs) שמופיעים למעלה באזור תמיד גלוי
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
+  const parsedLinks = buildTipLinks(item.link);
+  
+  let topLinkBtn = '';
+  if (parsedLinks.length === 1) {
+      // יש רק קישור אחד - כפתור רגיל
+      topLinkBtn = `<a href="${parsedLinks[0].url}" target="_blank" rel="noopener noreferrer" class="link-btn" onclick="event.stopPropagation()">${svgIcon('link')} כרטיסים/הזמנה</a>`;
+  } else if (parsedLinks.length > 1) {
+      // יש מספר קישורים - פתיחת תפריט צף אלגנטי
+      const dropdownItems = parsedLinks.map(l => 
+          `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="links-dropdown-item" onclick="event.stopPropagation()">${svgIcon('link')} ${escHtml(l.label)}</a>`
+      ).join('');
+      
+      topLinkBtn = `
+      <div class="links-dropdown" onclick="event.stopPropagation(); this.classList.toggle('open');">
+          <button class="links-dropdown-btn">${svgIcon('link')} כרטיסים והזמנות (${parsedLinks.length}) ▾</button>
+          <div class="links-dropdown-menu">
+              ${dropdownItems}
+          </div>
+      </div>`;
+  }
+
   const topActions = `
   <div class="card-top-actions">
       ${mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" onclick="event.stopPropagation()">${svgIcon('nav')} גוגל מפות</a>` : ''}
-      ${item.link ? `<a href="${buildTipLinks(item.link)[0]?.url || item.link}" target="_blank" rel="noopener noreferrer" class="link-btn" onclick="event.stopPropagation()">${svgIcon('link')} כרטיסים/הזמנה</a>` : ''}
+      ${topLinkBtn}
   </div>`;
 
   // 3. תצוגת לוגיסטיקה ומעברים (Timeline Transit)
@@ -3379,6 +3413,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+// Close generic dropdowns (like the multiple links menu) when clicking outside
+  window.addEventListener('click', e => {
+      if (!e.target.closest('.links-dropdown')) {
+          document.querySelectorAll('.links-dropdown.open').forEach(el => el.classList.remove('open'));
+      }
+  });
+   
   // Upload modal
   document.getElementById('btn-upload').addEventListener('click', () =>
     document.getElementById('modal-upload').classList.remove('hidden'));
