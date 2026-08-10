@@ -302,7 +302,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 .links-dropdown-btn { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; font-size: 13px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--bg-muted); color: var(--text-muted); cursor: pointer; transition: background 0.15s; font-family: inherit; font-weight: 500; }
 .links-dropdown-btn:hover { background: color-mix(in srgb, var(--text-muted) 12%, transparent); color: var(--text); }
 .links-dropdown-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-.links-dropdown-menu { position: absolute; top: calc(100% + 6px); right: 0; left: 0; background: var(--bg-elevated); border: 1px solid var(--accent-border); border-radius: var(--r-sm); padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.2s ease; z-index: 60; min-width: 200px; }
+.links-dropdown-menu { position: absolute; top: calc(100% + 6px); right: 0; left: 0; background: var(--bg-elevated); border: 1px solid var(--accent-border); border-radius: var(--r-sm); padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.2s ease; z-index: 999; min-width: 200px; }
 .links-dropdown.open .links-dropdown-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .links-dropdown-item { padding: 10px 12px; font-size: 13px; color: var(--text); text-decoration: none; border-radius: 4px; display: flex; align-items: center; gap: 8px; transition: background 0.15s; word-break: break-word; }
 .links-dropdown-item:hover { background: var(--accent-glow); color: var(--accent); }
@@ -311,7 +311,7 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    CARDS
 ========================================================= */
-.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);overflow:hidden;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 60px;}
+.card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg-card);position:relative;transition:border-color .2s, box-shadow .3s, background-color .3s;box-shadow: 0 4px 20px rgba(0,0,0,0.15); scroll-margin-top: 60px;}
 .card.done{opacity:.46;filter:saturate(.35);box-shadow:none;}
 .card.done .card-title{text-decoration:line-through;color:var(--text-muted)}
 .card.done .card-check{border-color:var(--success)!important;background:var(--success-glow)!important;color:var(--success)!important}
