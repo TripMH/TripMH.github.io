@@ -2372,7 +2372,7 @@ window.closeMobilePreview = function() {
   document.getElementById('mps-backdrop').classList.remove('open');
   document.getElementById('mobile-preview-sheet').classList.remove('open');
 };
-
+   
 /* =========================================================
    CARD RENDERERS
 ========================================================= */
@@ -2415,7 +2415,7 @@ function renderTripCard(item, q, prevItem) {
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() || 'מפה',q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent);">🚨 ${hlHtml(item.risk,q)}</span>` : ''
+    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🚨 ${hlHtml(item.risk,q)}</span>` : ''
   ].filter(Boolean).join('');
 
   // 1. מנגנון חילוץ Micro-UI מהתיאור
@@ -2445,7 +2445,7 @@ function renderTripCard(item, q, prevItem) {
       `).join('') + `</div>`;
   }
 
- // 2. כפתורי פעולה קריטיים (CTAs) שמופיעים למעלה באזור תמיד גלוי
+  // 2. כפתורי פעולה קריטיים (CTAs) שמופיעים למעלה באזור תמיד גלוי
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
   const parsedLinks = buildTipLinks(item.link);
   
@@ -2483,7 +2483,6 @@ function renderTripCard(item, q, prevItem) {
       timelineTransitHtml = `<div class="timeline-transit">${svgIcon('bus')} ${tText.join(' <span style="opacity:0.3; margin:0 4px;">|</span> ')}</div>`;
   }
 
-  const parsedLinks = buildTipLinks(item.link);
   let linksHtml = '';
   if (parsedLinks.length > 1) {
       linksHtml = `
@@ -2545,7 +2544,7 @@ function renderTripCard(item, q, prevItem) {
   </article>
 </div>`;
 }
-   
+
 function renderTipCard(item, q) {
   const done     = state.completedIds.has(item.id);
   const expanded = state.expandedIds.has(item.id);
@@ -2567,6 +2566,36 @@ function renderTipCard(item, q) {
       </div>`;
   }
 
+  const navBtns = [
+    linksHtml,
+    `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
+  ].filter(Boolean).join('');
+
+  return `
+<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
+  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
+    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
+      ${done ? svgIcon('check') : ''}
+    </button>
+    <div class="card-main">
+      <div class="card-title-row">
+        <div class="card-title-inner">
+          <span class="card-icon" aria-hidden="true">💡</span>
+          <h3 class="card-title">${hlHtml(item.title,q)}</h3>
+        </div>
+        <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
+      </div>
+      <div class="card-badges">${catBadge}</div>
+    </div>
+  </div>
+  <div class="card-details">
+    <div class="details-divider"></div>
+    ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
+    <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
+  </div>
+</article>`;
+}
+   
   const navBtns = [
     linksHtml,
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
