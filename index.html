@@ -2571,62 +2571,6 @@ function renderTipCard(item, q) {
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
   ].filter(Boolean).join('');
 
-  return `
-<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
-      ${done ? svgIcon('check') : ''}
-    </button>
-    <div class="card-main">
-      <div class="card-title-row">
-        <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">💡</span>
-          <h3 class="card-title">${hlHtml(item.title,q)}</h3>
-        </div>
-        <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
-      </div>
-      <div class="card-badges">${catBadge}</div>
-    </div>
-  </div>
-  <div class="card-details">
-    <div class="details-divider"></div>
-    ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
-    <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
-  </div>
-</article>`;
-}
-   
-  const navBtns = [
-    linksHtml,
-    `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך טיפ</button>`,
-  ].filter(Boolean).join('');
-
-  return `
-<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
-      ${done ? svgIcon('check') : ''}
-    </button>
-    <div class="card-main">
-      <div class="card-title-row">
-        <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">💡</span>
-          <h3 class="card-title">${hlHtml(item.title,q)}</h3>
-        </div>
-        <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
-      </div>
-      <div class="card-badges">${catBadge}</div>
-    </div>
-  </div>
-  <div class="card-details">
-    <div class="details-divider"></div>
-    ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
-    <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
-  </div>
-</article>`;
-}
-
-function renderChecklistCard(item, q) {
   const done = state.completedIds.has(item.id);
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
   return `
