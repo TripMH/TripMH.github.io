@@ -1253,7 +1253,16 @@ window.showBudgetBreakdown = function() {
 /* =========================================================
    COPY & TTS HELPERS (WITH OFFLINE SUPPORT)
 ========================================================= */
-function copyField(id, field, e) {
+window.fallbackCopy = function(text, e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed"; document.body.appendChild(textArea);
+    textArea.focus(); textArea.select();
+    try { document.execCommand('copy'); addToast('הועתק: ' + text, 'success'); } catch (err) { addToast('שגיאה בהעתקה', 'error'); }
+    document.body.removeChild(textArea);
+};
+   function copyField(id, field, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   const allItems = [...state.data.itinerary, ...state.data.options, ...state.data.tips, ...state.data.checklist, ...state.data.dictionary];
   const item = allItems.find(x => x.id === id);
@@ -2505,8 +2514,16 @@ function renderTripCard(item, q, prevItem) {
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
   const bookingRow = item.booking && !item.requiresBooking ? `<div class="detail-row booking">${svgIcon('book')}<div><div class="dr-label">מידע:</div><div class="dr-value" style="white-space:pre-wrap;">${hlHtml(item.booking,q)}</div></div></div>` : '';
   
-  const addressRow = item.address ? `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value" style="display:inline-flex;align-items:center;gap:6px;"><span>${hlHtml(item.address,q)}</span> <button class="icon-btn" onclick="copyField('${item.id}', 'address', event)" title="העתק כתובת" style="width:26px;height:26px;color:var(--text-muted);">${svgIcon('copy')}</button></span></div>` : '';
-  const notesRow = item.notes ? `<div class="detail-row">${svgIcon('warn')}<span class="dr-label">הערות וסגירה:</span><span class="dr-value" style="color:var(--warning); font-weight:600;">${hlHtml(item.notes,q)}</span></div>` : '';
+let addressRow = '';
+  if (item.address) {
+      const addresses = item.address.split(/\n|\|/).filter(a => a.trim());
+      if (addresses.length === 1) {
+          addressRow = `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובת:</span><span class="dr-value" style="display:inline-flex;align-items:center;gap:6px;"><span>${hlHtml(addresses[0].trim(),q)}</span> <button class="icon-btn" onclick="fallbackCopy('${escHtml(addresses[0].trim().replace(/'/g, "\\'"))}', event)" title="העתק כתובת" style="width:26px;height:26px;color:var(--text-muted);">${svgIcon('copy')}</button></span></div>`;
+      } else {
+          const addrList = addresses.map(addr => `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;background:var(--bg-card);padding:6px 10px;border-radius:4px;border:1px solid var(--border);"><span>${hlHtml(addr.trim(),q)}</span><button class="icon-btn" onclick="fallbackCopy('${escHtml(addr.trim().replace(/'/g, "\\'"))}', event)" title="העתק כתובת" style="width:26px;height:26px;flex-shrink:0;color:var(--text-muted);background:var(--bg-muted);">${svgIcon('copy')}</button></div>`).join('');
+          addressRow = `<div class="detail-row">${svgIcon('map')}<span class="dr-label">כתובות:</span><div class="dr-value" style="display:flex;flex-direction:column;width:100%;">${addrList}</div></div>`;
+      }
+  }  const notesRow = item.notes ? `<div class="detail-row">${svgIcon('warn')}<span class="dr-label">הערות וסגירה:</span><span class="dr-value" style="color:var(--warning); font-weight:600;">${hlHtml(item.notes,q)}</span></div>` : '';
   const facilitiesRow = item.facilities ? `<div class="detail-row">${svgIcon('pin')}<span class="dr-label">מתקנים:</span><span class="dr-value">${hlHtml(item.facilities,q)}</span></div>` : '';
   const prepareRow = item.prepare ? `<div class="detail-row">${svgIcon('check')}<span class="dr-label">להכין מראש:</span><span class="dr-value" style="color:var(--success); font-weight:600;">${hlHtml(item.prepare,q)}</span></div>` : '';
   const weatherRow = item.weather ? `<div class="detail-row"><span class="dr-label">מזג אוויר מומלץ:</span><span class="dr-value">${hlHtml(item.weather,q)}</span></div>` : '';
