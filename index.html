@@ -271,7 +271,29 @@ html.light mark{background:rgba(217,119,6,.22)}
 .progress-bar-wrap{height:2px;overflow:hidden;background:var(--border);}
 .progress-bar-fill{height:100%;background:var(--accent);transition:width .5s ease}
 .progress-bar-fill.done{background:var(--success)}
-.cards-list{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.cards-list{padding:12px 14px 24px;display:flex;flex-direction:column;gap:0;position:relative;}
+
+/* =========================================================
+   TIMELINE & MICRO-UI
+========================================================= */
+.timeline-wrapper { position: relative; padding-right: 28px; padding-bottom: 20px; }
+.timeline-wrapper::before { content: ''; position: absolute; top: 24px; bottom: -8px; right: 11px; width: 2px; background: var(--border); z-index: 1; }
+.timeline-wrapper:last-child::before { display: none; }
+.timeline-wrapper:last-child { padding-bottom: 0; }
+.timeline-dot { position: absolute; right: 6px; top: 40px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--accent); z-index: 2; box-shadow: 0 0 0 4px var(--bg); }
+.timeline-transit { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid var(--border); padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; position: relative; z-index: 2; margin-right: -16px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.timeline-transit svg { width: 14px; height: 14px; color: var(--accent); }
+
+.card-top-actions { display: flex; gap: 8px; margin-top: 14px; width: 100%; flex-wrap: wrap; border-top: 1px dashed var(--border); padding-top: 12px; }
+.card-top-actions .link-btn { flex: 1; min-width: 120px; padding: 10px; font-size: 13px; justify-content: center; }
+
+.micro-ui-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 16px 0; }
+.micro-ui-item { display: flex; align-items: flex-start; gap: 10px; background: var(--bg-muted); padding: 12px; border-radius: var(--r-sm); border: 1px solid var(--border); transition: border-color .2s; }
+.micro-ui-item:hover { border-color: var(--accent-border); }
+.micro-ui-icon { font-size: 18px; flex-shrink: 0; line-height: 1.2; background: var(--bg-card); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.micro-ui-content { flex: 1; min-width: 0; }
+.micro-ui-content strong { color: var(--text); display: block; font-size: 13px; margin-bottom: 3px; }
+.micro-ui-content span { color: var(--text-dim); font-size: 13px; line-height: 1.4; display: block; word-break: break-word; }
 
 /* =========================================================
    CARDS
@@ -2373,30 +2395,66 @@ function renderTripCard(item, q, prevItem) {
 
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
 
- const badges = [
+  const badges = [
     item.priority ? `<span class="badge" style="background:rgba(251,191,36,.15);color:var(--warning);border:1px solid rgba(251,191,36,.3)">${hlHtml(item.priority, q)}</span>` : '',
-    item.category ? `<span class="badge badge-cat" style="background:var(--purple-glow);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 28%,transparent)">${svgIcon('tag')} ${hlHtml(item.category, q)}</span>` : '',
-    item.weather ? `<span class="badge" style="background:var(--bg-muted);color:var(--text);border:1px solid var(--border)">${hlHtml(item.weather, q)}</span>` : '',
+    item.category ? `<span class="badge badge-cat">${svgIcon('tag')} ${hlHtml(item.category, q)}</span>` : '',
     timeDisp       ? `<span class="badge badge-time">${svgIcon('clock')}${hlHtml(timeDisp,q)}</span>` : '',
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() || 'מפה',q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🚨 ${hlHtml(item.risk,q)}</span>` : ''
+    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent);">🚨 ${hlHtml(item.risk,q)}</span>` : ''
   ].filter(Boolean).join('');
 
-  // נקה את שורת ה"לסינון: X" מהתיאור כדי למנוע כפילויות מיותרות בממשק
-  const cleanDescription = (item.description || '').replace(/(?:^|\n)\s*.*לסינון:\s*([^\n\r]*)/i, '').trim();
+  // 1. מנגנון חילוץ Micro-UI מהתיאור
+  let rawDesc = item.description || '';
+  let cleanDesc = rawDesc;
+  let microUIHtml = '';
+  
+  // תופס שורות שמתחילות באייקונים מוכרים ומייצר מהם כרטיסיות (Badges)
+  const microRegex = /(💡|🍽️|🥤|🎒|🌧️|🚨|💪|🍱|🧴)\s*([^:\n]+):\s*([^\n]+)/g;
+  let match;
+  const microItems = [];
+  while ((match = microRegex.exec(rawDesc)) !== null) {
+      microItems.push({ icon: match[1], title: match[2].trim(), text: match[3].trim() });
+      cleanDesc = cleanDesc.replace(match[0], ''); // מוחק מהטקסט הראשי
+  }
+  cleanDesc = cleanDesc.replace(/(?:^|\n)\s*.*לסינון:\s*([^\n\r]*)/i, '').trim();
 
+  if (microItems.length > 0) {
+      microUIHtml = `<div class="micro-ui-grid">` + microItems.map(m => `
+          <div class="micro-ui-item">
+              <div class="micro-ui-icon">${m.icon}</div>
+              <div class="micro-ui-content">
+                  <strong>${hlHtml(m.title, q)}</strong>
+                  <span>${hlHtml(m.text, q)}</span>
+              </div>
+          </div>
+      `).join('') + `</div>`;
+  }
+
+  // 2. כפתורי פעולה קריטיים (CTAs) שמופיעים למעלה באזור תמיד גלוי
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
+  const topActions = `
+  <div class="card-top-actions">
+      ${mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" onclick="event.stopPropagation()">${svgIcon('nav')} גוגל מפות</a>` : ''}
+      ${item.link ? `<a href="${buildTipLinks(item.link)[0]?.url || item.link}" target="_blank" rel="noopener noreferrer" class="link-btn" onclick="event.stopPropagation()">${svgIcon('link')} כרטיסים/הזמנה</a>` : ''}
+  </div>`;
 
- const parsedLinks = buildTipLinks(item.link);
+  // 3. תצוגת לוגיסטיקה ומעברים (Timeline Transit)
+  let timelineTransitHtml = '';
+  if (item.transport || item.travelTimePrev) {
+      let tText = [];
+      if (item.travelTimePrev) tText.push(`⏳ ${hlHtml(item.travelTimePrev, q)}`);
+      if (item.transport) tText.push(` ${hlHtml(item.transport, q)}`);
+      timelineTransitHtml = `<div class="timeline-transit">${svgIcon('bus')} ${tText.join(' <span style="opacity:0.3; margin:0 4px;">|</span> ')}</div>`;
+  }
+
+  const parsedLinks = buildTipLinks(item.link);
   let linksHtml = '';
-  if (parsedLinks.length === 1) {
-      linksHtml = `<a href="${parsedLinks[0].url}" target="_blank" rel="noopener noreferrer" class="link-btn">${svgIcon('link')} ${escHtml(parsedLinks[0].label || item.linkLabel || 'לאתר הרשמי')}</a>`;
-  } else if (parsedLinks.length > 1) {
+  if (parsedLinks.length > 1) {
       linksHtml = `
       <div class="tip-links-block" style="margin-bottom: 8px;">
-        <div class="tip-links-title">${svgIcon('link')} קישורים ואפליקציות הזמנה (${parsedLinks.length})</div>
+        <div class="tip-links-title">${svgIcon('link')} קישורים נוספים (${parsedLinks.length})</div>
         <div class="tip-links-grid">
           ${parsedLinks.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn tip-link" onclick="event.stopPropagation()">${svgIcon('link')} ${escHtml(l.label)}</a>`).join('')}
         </div>
@@ -2404,21 +2462,9 @@ function renderTripCard(item, q, prevItem) {
   }
 
   const navBtns = [
-    mapUrl ? `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="link-btn primary" style="font-size:14px; padding:12px; justify-content:center; background:var(--accent); color:var(--bg); box-shadow:0 4px 12px rgba(34,211,238,.3); border:none;">${svgIcon('nav')} ניווט בגוגל מפות</a>` : '',
     linksHtml,
     `<button class="link-btn" onclick="openEdit('${item.id}')" style="justify-content:center;border-style:dashed">${svgIcon('edit')} ערוך נתונים</button>`,
   ].filter(Boolean).join('');
-
-  const highlightTransit = (item.transport || item.travelTimePrev) ? `
-  <div class="transit-box">
-    <div class="transit-box-title">
-      <span style="display:flex; width:18px; height:18px; align-items:center; justify-content:center; flex-shrink:0;">${svgIcon('bus')}</span>
-      מידע והגעה מומלצת
-    </div>
-    ${item.travelTimePrev ? `<div class="transit-box-row"><strong>⏳ משך נסיעה מהיעד הקודם:</strong> ${hlHtml(item.travelTimePrev, q)}</div>` : ''}
-    ${item.transport ? `<div class="transit-box-row"><strong>📍 מסלול הגעה:</strong> ${hlHtml(item.transport, q)}</div>` : ''}
-  </div>
-  ` : '';
 
   const ciRow = item.checkIn ? `<div class="detail-row"><span class="dr-label">צ'ק-אין:</span><span class="dr-value" style="font-weight:bold; color:var(--accent);">${hlHtml(item.checkIn,q)}</span></div>` : '';
   const coRow = item.checkOut ? `<div class="detail-row"><span class="dr-label">צ'ק-אאוט:</span><span class="dr-value" style="font-weight:bold; color:var(--warning);">${hlHtml(item.checkOut,q)}</span></div>` : '';
@@ -2428,38 +2474,44 @@ function renderTripCard(item, q, prevItem) {
   const notesRow = item.notes ? `<div class="detail-row">${svgIcon('warn')}<span class="dr-label">הערות וסגירה:</span><span class="dr-value" style="color:var(--warning); font-weight:600;">${hlHtml(item.notes,q)}</span></div>` : '';
   const facilitiesRow = item.facilities ? `<div class="detail-row">${svgIcon('pin')}<span class="dr-label">מתקנים:</span><span class="dr-value">${hlHtml(item.facilities,q)}</span></div>` : '';
   const prepareRow = item.prepare ? `<div class="detail-row">${svgIcon('check')}<span class="dr-label">להכין מראש:</span><span class="dr-value" style="color:var(--success); font-weight:600;">${hlHtml(item.prepare,q)}</span></div>` : '';
+  const weatherRow = item.weather ? `<div class="detail-row"><span class="dr-label">מזג אוויר מומלץ:</span><span class="dr-value">${hlHtml(item.weather,q)}</span></div>` : '';
 
   return `
-<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
-  ${bookingBar}
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
-      ${done ? svgIcon('check') : ''}
-    </button>
-    <div class="card-main">
-      <div class="card-title-row">
-        <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">${escHtml(item.icon||'📍')}</span>
-          <h3 class="card-title">${hlHtml(item.placeName,q)}</h3>
-          <button class="icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום" style="width:26px;height:26px;color:var(--text-muted); margin-right:4px;">
-            ${svgIcon('copy')}
-          </button>
+<div class="timeline-wrapper">
+  ${timelineTransitHtml}
+  <div class="timeline-dot"></div>
+  <article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
+    ${bookingBar}
+    <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
+      <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
+        ${done ? svgIcon('check') : ''}
+      </button>
+      <div class="card-main">
+        <div class="card-title-row">
+          <div class="card-title-inner">
+            <span class="card-icon" aria-hidden="true">${escHtml(item.icon||'📍')}</span>
+            <h3 class="card-title">${hlHtml(item.placeName,q)}</h3>
+            <button class="icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום" style="width:26px;height:26px;color:var(--text-muted); margin-right:4px;">
+              ${svgIcon('copy')}
+            </button>
+          </div>
+          <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
         </div>
-        <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
+        <div class="card-badges">${badges}</div>
+        ${topActions}
       </div>
-      <div class="card-badges">${badges}</div>
     </div>
-  </div>
-  <div class="card-details">
-    <div class="details-divider"></div>
-    ${highlightTransit}
-    ${cleanDescription ? `<div class="card-desc">${hlHtml(cleanDescription,q)}</div>` : ''}
-    ${notesRow}${prepareRow}${facilitiesRow}${addressRow}${ciRow}${coRow}${bookingRow}
-    <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
-  </div>
-</article>`;
+    <div class="card-details">
+      <div class="details-divider"></div>
+      ${microUIHtml}
+      ${cleanDesc ? `<div class="card-desc">${hlHtml(cleanDesc,q)}</div>` : ''}
+      ${weatherRow}${notesRow}${prepareRow}${facilitiesRow}${addressRow}${ciRow}${coRow}${bookingRow}
+      <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
+    </div>
+  </article>
+</div>`;
 }
-
+   
 function renderTipCard(item, q) {
   const done     = state.completedIds.has(item.id);
   const expanded = state.expandedIds.has(item.id);
