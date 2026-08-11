@@ -1451,43 +1451,31 @@ function parseCSV(raw) {
   const nl = text.indexOf('\n');
   const delim = detectDelimiter(nl >= 0 ? text.slice(0, nl) : text);
   const rows = [];
-  let row = [];
-  let inQuotes = false;
-  let field = '';
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (text[i + 1] === '"') {
-          field += '"';
-          i++;
-        } else {
-          inQuotes = false;
+  let i = 0; const n = text.length;
+  while (i < n) {
+    const row = [];
+    while (i < n) {
+      let f = '';
+      if (text[i] === '"') {
+        i++;
+        while (i < n) {
+          if (text[i] === '"') {
+            if (text[i+1] === '"') { f += '"'; i += 2; }
+            else { i++; break; }
+          } else { f += text[i++]; }
         }
       } else {
-        field += char;
+        while (i < n && text[i] !== delim && text[i] !== '\n') f += text[i++];
       }
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === delim) {
-        row.push(field.trim());
-        field = '';
-      } else if (char === '\n') {
-        row.push(field.trim());
-        if (row.some(c => c !== '')) rows.push(row);
-        row = [];
-        field = '';
-      } else {
-        field += char;
-      }
+      row.push(f.trim());
+      if (i < n && text[i] === delim) i++; else break;
     }
+    if (i < n && text[i] === '\n') i++;
+    if (row.length > 0 && row.some(c => c !== '')) rows.push(row);
   }
-  row.push(field.trim());
-  if (row.some(c => c !== '')) rows.push(row);
   return rows;
 }
+
 const ALIASES = {
   icon:      ['אייקון', 'icon', 'סמל'],
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -1835,48 +1823,54 @@ async function processFiles(files) {
             }, x => x.title === taskTitle);
             if(res.isNew) stats.added++; else stats.updated++;
         }
-   } else if (fileType === 'tips') {
+     } else if (fileType === 'tips') {
         const anyValue = place || desc || catCol || address || Object.values(obj).some(v => v.trim());
         if (anyValue) {
-          let rawTitle = place;
-          let rawContent = desc;
-
-          // אם התוכן נשאב בטעות לכותרת (מעל 60 תווים), נעביר אותו לתוכן ונשאיר את הכותרת ריקה כדי שתיווצר אוטומטית
-          if (rawTitle && rawTitle.length > 60 && !rawContent) {
-              rawContent = rawTitle;
-              rawTitle = '';
-          }
-
-          let title = rawTitle || catCol || address;
-          
-          if (!title) {
-             let fallbackText = rawContent || Object.values(obj).find(v => v && v.trim().length > 0) || '';
-             fallbackText = fallbackText.replace(/https?:\/\/[^\s]+/g, '').replace(/[\r\n]+/g, ' ').replace(/[|]/g, '').trim();
-             title = fallbackText.substring(0, 45);
-             if (fallbackText.length > 45) title += '...';
-             if (!title || title.length < 2) title = `טיפ ${ri}`;
-          }
-
-          // וידוא סופי שהכותרת קצרה, גם אם הוזנה כותרת ידנית ארוכה מדי
-          if (title.length > 55) {
-              title = title.substring(0, 55) + '...';
-          }
-          
-          let finalCategory = (catCol || area || 'כללי').trim().replace(/[\r\n]+/g, ' ');
-          if (finalCategory.length > 45) finalCategory = 'כללי'; 
-
+          const title = place || catCol || address || `טיפ ${ri}`;
           const contentArr = [];
           if (address) contentArr.push(`📍 מיקום/אזור: ${address}`);
-          if (rawContent) contentArr.push(rawContent);
-          const finalContent = contentArr.join('\n\n') || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
+          if (desc) contentArr.push(desc);
+          const content = contentArr.join('\n\n') || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
           
           const res = mergeItem(state.data.tips, {
-            id:genId(), type:'tip', _idx:ri, title, content: finalContent, category: finalCategory,
+            id:genId(), type:'tip', _idx:ri, title, content, category: catCol || area || 'כללי',
             link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')), icon: iconCsv || '💡'
-          }, x => x.title === title && x.content === finalContent);
+          }, x => x.title === title && x.content === content);
           if(res.isNew) stats.added++; else stats.updated++;
         }
+      } else {
+        const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(dayCol);
+        const priority = getCol(obj, 'priority');
+        const weather = getCol(obj, 'weather');
+        const notes = getCol(obj, 'notes');
+        const travelTimePrev = getCol(obj, 'navPrev');
+        const mapPrev = getCol(obj, 'mapPrev');
+        const risk = getCol(obj, 'risk');
+        const facilities = getCol(obj, 'facilities');
+        const prepare = getCol(obj, 'prepare');
+
+        const placeNameFixed = place || 'ללא שם';
+
+        const item = {
+          id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
+          placeName: placeNameFixed, dayLabel: rawDay, dateVal: parseDateVal(rawDay), category: catCol,
+          description: desc, timeRange: timeStr,
+          duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
+          booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, address, 
+          link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
+          requiresBooking: reqBook,
+          icon: iconCsv || detectIcon([place, desc, area, address].join(' ')),
+          priority, weather, notes, travelTimePrev, mapPrev, risk, facilities, prepare
+        };
+        
+        const dest = isOpt ? state.data.options : state.data.itinerary;
+        const res = mergeItem(dest, item, x => x.placeName === placeNameFixed && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
+        
+        if (autoBooked) state.bookedIds.add(res.id);
+
+        if(res.isNew) stats.added++; else stats.updated++;
       }
+    }
   }
 
   state.data.itinerary.sort((a,b) => (a.dateVal && b.dateVal && a.dateVal !== b.dateVal) ? a.dateVal-b.dateVal : a._idx-b._idx);
@@ -2576,7 +2570,7 @@ function renderTipCard(item, q) {
   const checkStyle = done ? 'border-color:var(--success);background:var(--success-glow);color:var(--success);' : 'color:transparent;';
   const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
 
-  // בונה רשימת קישורים מסודרת שתוצג רק כשהכרטיסייה פתוחה
+  // בונה רשימת קישורים מסודרת מעמודת הקישורים (label -> url) גם כשיש קישורים רבים
   const tipLinks = buildTipLinks(item.link);
   let linksHtml = '';
   if (tipLinks.length === 1) {
