@@ -1823,54 +1823,48 @@ async function processFiles(files) {
             }, x => x.title === taskTitle);
             if(res.isNew) stats.added++; else stats.updated++;
         }
-     } else if (fileType === 'tips') {
+   } else if (fileType === 'tips') {
         const anyValue = place || desc || catCol || address || Object.values(obj).some(v => v.trim());
         if (anyValue) {
-          const title = place || catCol || address || `טיפ ${ri}`;
+          let rawTitle = place;
+          let rawContent = desc;
+
+          // אם התוכן נשאב בטעות לכותרת (מעל 60 תווים), נעביר אותו לתוכן ונשאיר את הכותרת ריקה כדי שתיווצר אוטומטית
+          if (rawTitle && rawTitle.length > 60 && !rawContent) {
+              rawContent = rawTitle;
+              rawTitle = '';
+          }
+
+          let title = rawTitle || catCol || address;
+          
+          if (!title) {
+             let fallbackText = rawContent || Object.values(obj).find(v => v && v.trim().length > 0) || '';
+             fallbackText = fallbackText.replace(/https?:\/\/[^\s]+/g, '').replace(/[\r\n]+/g, ' ').replace(/[|]/g, '').trim();
+             title = fallbackText.substring(0, 45);
+             if (fallbackText.length > 45) title += '...';
+             if (!title || title.length < 2) title = `טיפ ${ri}`;
+          }
+
+          // וידוא סופי שהכותרת קצרה, גם אם הוזנה כותרת ידנית ארוכה מדי
+          if (title.length > 55) {
+              title = title.substring(0, 55) + '...';
+          }
+          
+          let finalCategory = (catCol || area || 'כללי').trim().replace(/[\r\n]+/g, ' ');
+          if (finalCategory.length > 45) finalCategory = 'כללי'; 
+
           const contentArr = [];
           if (address) contentArr.push(`📍 מיקום/אזור: ${address}`);
-          if (desc) contentArr.push(desc);
-          const content = contentArr.join('\n\n') || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
+          if (rawContent) contentArr.push(rawContent);
+          const finalContent = contentArr.join('\n\n') || Object.entries(obj).filter(([k, v]) => v.trim() && k !== Object.keys(obj)[0]).map(([, v]) => v).join(' • ') || '';
           
           const res = mergeItem(state.data.tips, {
-            id:genId(), type:'tip', _idx:ri, title, content, category: catCol || area || 'כללי',
+            id:genId(), type:'tip', _idx:ri, title, content: finalContent, category: finalCategory,
             link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')), icon: iconCsv || '💡'
-          }, x => x.title === title && x.content === content);
+          }, x => x.title === title && x.content === finalContent);
           if(res.isNew) stats.added++; else stats.updated++;
         }
-      } else {
-        const isOpt = fileType === 'options' || /אופצי|השלמ/i.test(dayCol);
-        const priority = getCol(obj, 'priority');
-        const weather = getCol(obj, 'weather');
-        const notes = getCol(obj, 'notes');
-        const travelTimePrev = getCol(obj, 'navPrev');
-        const mapPrev = getCol(obj, 'mapPrev');
-        const risk = getCol(obj, 'risk');
-        const facilities = getCol(obj, 'facilities');
-        const prepare = getCol(obj, 'prepare');
-
-        const placeNameFixed = place || 'ללא שם';
-
-        const item = {
-          id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
-          placeName: placeNameFixed, dayLabel: rawDay, dateVal: parseDateVal(rawDay), category: catCol,
-          description: desc, timeRange: timeStr,
-          duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
-          booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, address, 
-          link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
-          requiresBooking: reqBook,
-          icon: iconCsv || detectIcon([place, desc, area, address].join(' ')),
-          priority, weather, notes, travelTimePrev, mapPrev, risk, facilities, prepare
-        };
-        
-        const dest = isOpt ? state.data.options : state.data.itinerary;
-        const res = mergeItem(dest, item, x => x.placeName === placeNameFixed && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
-        
-        if (autoBooked) state.bookedIds.add(res.id);
-
-        if(res.isNew) stats.added++; else stats.updated++;
       }
-    }
   }
 
   state.data.itinerary.sort((a,b) => (a.dateVal && b.dateVal && a.dateVal !== b.dateVal) ? a.dateVal-b.dateVal : a._idx-b._idx);
