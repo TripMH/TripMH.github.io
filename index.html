@@ -1445,6 +1445,7 @@ function detectDelimiter(line) {
   if (s > c) return ';';
   return ',';
 }
+   
 function parseCSV(raw) {
   const text = raw.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   if (!text.trim()) return [];
@@ -1454,26 +1455,30 @@ function parseCSV(raw) {
   let row = [];
   let inQuotes = false;
   let field = '';
-  
+
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
-    
+
     if (inQuotes) {
       if (char === '"') {
-        // טיפול במרכאות כפולות בתוך הטקסט
-        if (i + 1 < text.length && text[i + 1] === '"') {
+        const nextChar = text[i + 1];
+        // מנגנון סלחני וחכם לזיהוי סוף עמודה לעומת מרכאות בתוך טקסט (כמו מ"ל או חב"ד)
+        if (nextChar === '"') {
           field += '"';
-          i++; // דילוג על המרכאה הבאה
+          i++; // דילוג על מרכאה כפולה תקנית
+        } else if (nextChar === delim || nextChar === '\n' || i + 1 === text.length) {
+          inQuotes = false; // יציאה תקינה ממרכאות כי הגענו לפסיק או ירידת שורה
         } else {
-          inQuotes = false; // יציאה ממצב מרכאות
+          // מצאנו מרכאה בודדת באמצע משפט - אנחנו מניחים שזה טקסט (כמו מ"ל) וממשיכים
+          field += '"';
         }
       } else {
         field += char;
       }
     } else {
-      // כשאנחנו מחוץ למרכאות
+      // מצב מחוץ למרכאות
       if (char === '"') {
-        inQuotes = true; // כניסה למצב מרכאות, לא משנה היכן הן מופיעות בתא
+        inQuotes = true;
       } else if (char === delim) {
         row.push(field.trim());
         field = '';
@@ -1487,14 +1492,14 @@ function parseCSV(raw) {
       }
     }
   }
-  
-  // דחיפת השדה והשורה האחרונים למערך בסיום הלולאה
+
+  // דחיפת התא והשורה האחרונה
   row.push(field.trim());
   if (row.some(c => c !== '')) rows.push(row);
-  
+
   return rows;
 }
-
+   
 const ALIASES = {
   icon:      ['אייקון', 'icon', 'סמל'],
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
