@@ -1451,31 +1451,43 @@ function parseCSV(raw) {
   const nl = text.indexOf('\n');
   const delim = detectDelimiter(nl >= 0 ? text.slice(0, nl) : text);
   const rows = [];
-  let i = 0; const n = text.length;
-  while (i < n) {
-    const row = [];
-    while (i < n) {
-      let f = '';
-      if (text[i] === '"') {
-        i++;
-        while (i < n) {
-          if (text[i] === '"') {
-            if (text[i+1] === '"') { f += '"'; i += 2; }
-            else { i++; break; }
-          } else { f += text[i++]; }
+  let row = [];
+  let inQuotes = false;
+  let field = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (inQuotes) {
+      if (char === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
         }
       } else {
-        while (i < n && text[i] !== delim && text[i] !== '\n') f += text[i++];
+        field += char;
       }
-      row.push(f.trim());
-      if (i < n && text[i] === delim) i++; else break;
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === delim) {
+        row.push(field.trim());
+        field = '';
+      } else if (char === '\n') {
+        row.push(field.trim());
+        if (row.some(c => c !== '')) rows.push(row);
+        row = [];
+        field = '';
+      } else {
+        field += char;
+      }
     }
-    if (i < n && text[i] === '\n') i++;
-    if (row.length > 0 && row.some(c => c !== '')) rows.push(row);
   }
+  row.push(field.trim());
+  if (row.some(c => c !== '')) rows.push(row);
   return rows;
 }
-
 const ALIASES = {
   icon:      ['אייקון', 'icon', 'סמל'],
   place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
@@ -2564,7 +2576,7 @@ function renderTipCard(item, q) {
   const checkStyle = done ? 'border-color:var(--success);background:var(--success-glow);color:var(--success);' : 'color:transparent;';
   const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
 
-  // בונה רשימת קישורים מסודרת מעמודת הקישורים (label -> url) גם כשיש קישורים רבים
+  // בונה רשימת קישורים מסודרת שתוצג רק כשהכרטיסייה פתוחה
   const tipLinks = buildTipLinks(item.link);
   let linksHtml = '';
   if (tipLinks.length === 1) {
