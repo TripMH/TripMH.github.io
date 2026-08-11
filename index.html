@@ -1452,51 +1452,28 @@ function parseCSV(raw) {
   const nl = text.indexOf('\n');
   const delim = detectDelimiter(nl >= 0 ? text.slice(0, nl) : text);
   const rows = [];
-  let row = [];
-  let inQuotes = false;
-  let field = '';
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-
-    if (inQuotes) {
-      if (char === '"') {
-        const nextChar = text[i + 1];
-        // מנגנון סלחני וחכם לזיהוי סוף עמודה לעומת מרכאות בתוך טקסט (כמו מ"ל או חב"ד)
-        if (nextChar === '"') {
-          field += '"';
-          i++; // דילוג על מרכאה כפולה תקנית
-        } else if (nextChar === delim || nextChar === '\n' || i + 1 === text.length) {
-          inQuotes = false; // יציאה תקינה ממרכאות כי הגענו לפסיק או ירידת שורה
-        } else {
-          // מצאנו מרכאה בודדת באמצע משפט - אנחנו מניחים שזה טקסט (כמו מ"ל) וממשיכים
-          field += '"';
+  let i = 0; const n = text.length;
+  while (i < n) {
+    const row = [];
+    while (i < n) {
+      let f = '';
+      if (text[i] === '"') {
+        i++;
+        while (i < n) {
+          if (text[i] === '"') {
+            if (text[i+1] === '"') { f += '"'; i += 2; }
+            else { i++; break; }
+          } else { f += text[i++]; }
         }
       } else {
-        field += char;
+        while (i < n && text[i] !== delim && text[i] !== '\n') f += text[i++];
       }
-    } else {
-      // מצב מחוץ למרכאות
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === delim) {
-        row.push(field.trim());
-        field = '';
-      } else if (char === '\n') {
-        row.push(field.trim());
-        if (row.some(c => c !== '')) rows.push(row);
-        row = [];
-        field = '';
-      } else {
-        field += char;
-      }
+      row.push(f.trim());
+      if (i < n && text[i] === delim) i++; else break;
     }
+    if (i < n && text[i] === '\n') i++;
+    if (row.length > 0 && row.some(c => c !== '')) rows.push(row);
   }
-
-  // דחיפת התא והשורה האחרונה
-  row.push(field.trim());
-  if (row.some(c => c !== '')) rows.push(row);
-
   return rows;
 }
    
