@@ -2,11 +2,11 @@
 <html lang="he" dir="rtl" class="dark">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0c0f14" id="theme-meta" />
-<title>TripMH — מתכנן הטיול האישי ליפן</title>
-<meta name="description" content="מסלול, צ'ק־ליסט, טיפים, מילון ותקציב לטיול ביפן — בממשק עברי נגיש שעובד גם ללא חיבור רציף." />
-<meta name="color-scheme" content="dark light" />
+<title>TripMH – מתכנן טיול חכם</title>
+<meta name="description" content="אפליקציית ניהול מסלול טיול — עובדת גם אופליין!" />
+<link rel="manifest" href="manifest.json">
 <style>
 /* =========================================================
    RESET & BASE
@@ -606,83 +606,7 @@ html.light .b-toggle-wrapper:hover { background: rgba(0,0,0,0.05); }
     background-color: var(--text-muted); transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1); border-radius: 50%;
 }
 input:checked + .b-slider { background-color: var(--purple); border-color: var(--purple); }
-input:checked + .b-slider:before { transform: translateX(14px); background-color: var(--bg-card); }
-
-/* =========================================================
-   V6 POLISH — RESPONSIVE, RTL, ACCESSIBLE
-========================================================= */
-:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}
-button{font-family:inherit}
-#app{max-width:980px;border-inline:1px solid var(--border);box-shadow:0 0 80px rgba(0,0,0,.22)}
-#app-header{position:sticky;top:0}
-#tab-content{isolation:isolate}
-.panel{min-width:0}
-.agenda-day-group{margin-bottom:12px;scroll-margin-top:190px}
-.agenda-day-group:last-of-type{margin-bottom:0}
-.section-header{top:var(--sticky-offset,0);min-height:46px;padding:10px clamp(12px,2.5vw,22px);gap:12px;background-color:color-mix(in srgb,var(--bg) 94%,transparent)!important;border-top:1px solid var(--border);border-right:0!important}
-.section-header-left{min-width:0;flex:1;gap:8px}
-.section-header-title{font-size:clamp(14px,2vw,16px);line-height:1.45;text-wrap:pretty;overflow-wrap:anywhere}
-.section-badge{flex-shrink:0;font-size:11px;padding:3px 9px}
-.cards-list{padding:12px clamp(12px,2.5vw,22px) 16px;gap:10px}
-.card{border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.08);overflow:hidden}
-.card:hover{border-color:var(--accent-border)}
-.card-body{min-height:68px;padding:14px 16px;gap:12px}
-.card-main,.card-title-inner{min-width:0}
-.card-title{font-size:clamp(15px,2vw,17px);line-height:1.5;text-wrap:pretty;overflow-wrap:anywhere}
-.card-icon{font-size:18px;flex:0 0 auto}
-.card-check{width:28px;height:28px;flex:0 0 28px}
-.card-badges{flex-wrap:wrap;gap:6px}
-.badge{max-width:100%;white-space:normal;line-height:1.35;overflow-wrap:anywhere}
-.card-details{padding-inline:16px}
-.card.expanded .card-details{padding-bottom:16px}
-.card-desc{font-size:15px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
-.nav-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:8px}
-.tip-links-block{min-width:0}
-.tip-links-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
-.link-btn.tip-link{min-width:0;white-space:normal;text-align:start;line-height:1.45;overflow-wrap:anywhere}
-.add-fab{margin:8px auto 28px}
-
-@media (min-width:720px){
-  #app{margin-block:20px;min-height:calc(100vh - 40px);border-radius:20px;overflow:clip}
-  .header-top{padding-inline:22px}
-  .search-wrap,.quick-filters{padding-inline:22px}
-  .cards-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
-  .cards-list>.timeline-wrapper{min-width:0;padding-bottom:0}
-  .cards-list>.timeline-wrapper::before,.cards-list>.timeline-wrapper .timeline-dot{display:none}
-  .cards-list>.timeline-wrapper .timeline-transit{margin-right:0}
-  .cards-list>.card{height:100%}
-  .cards-list>:only-child{grid-column:1/-1;width:min(100%,760px);justify-self:center}
-  .agenda-day-group:has(.card.expanded) .cards-list{grid-template-columns:1fr}
-  .modal-box{max-width:620px}
-}
-
-@media (max-width:420px){
-  html,body{font-size:15px}
-  .header-top{padding:10px 10px 7px}
-  .logo-title{display:none}
-  .header-actions{gap:2px}
-  .icon-btn,.upload-btn{width:36px;height:36px}
-  .pill-counter{padding-inline:6px}
-  .search-wrap{padding:0 10px 8px}
-  .search-icon{right:22px}.search-clear{left:22px}
-  .quick-filters{padding:0 10px 8px}
-  .tab-btn{min-width:58px;padding-inline:2px}
-  .stat-lbl{font-size:9px}
-  .section-header{position:relative;top:auto;padding:9px 10px}
-  .section-header-left{align-items:flex-start;flex-direction:column}
-  .cards-list{padding:10px 10px 14px}
-  .card-body{padding:13px 12px}
-  .card-title-inner{align-items:flex-start}
-  .card-details{padding-inline:12px}
-  .card-desc{font-size:14px;line-height:1.7}
-  .complete-day-btn{min-height:30px}
-}
-
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-}
+input:checked + .b-slider:before { transform: translateX(14px); background-color: #fff; }
 </style>
 </head>
 <body>
@@ -2668,14 +2592,14 @@ function renderTipCard(item, q) {
 
   return `
 <article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
-  <div class="card-body" onclick="toggleExpand('${item.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleExpand('${item.id}')}" role="button" tabindex="0" aria-expanded="${expanded}" aria-label="${escHtml(item.title)} — פתיחת פירוט">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" aria-label="${done?'בטל סימון':'סמן כהושלם'}: ${escHtml(item.title)}" style="${checkStyle}">
+  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
+    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
     <div class="card-main">
       <div class="card-title-row">
         <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">${escHtml(item.icon||'💡')}</span>
+          <span class="card-icon" aria-hidden="true">💡</span>
           <h3 class="card-title">${hlHtml(item.title,q)}</h3>
         </div>
         <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
@@ -3688,7 +3612,14 @@ document.addEventListener('DOMContentLoaded', () => {
       addToast('📶 חיבור האינטרנט חזר', 'success');
   });
 
-
+  if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js?v=48')
+              .then(reg => console.log('SW Registered', reg.scope))
+              .catch(err => console.warn('SW Reg failed', err));
+      });
+  }
+  
   window.addEventListener('scroll', () => {
       const currentScrollY = window.scrollY;
       
