@@ -1451,28 +1451,47 @@ function parseCSV(raw) {
   const nl = text.indexOf('\n');
   const delim = detectDelimiter(nl >= 0 ? text.slice(0, nl) : text);
   const rows = [];
-  let i = 0; const n = text.length;
-  while (i < n) {
-    const row = [];
-    while (i < n) {
-      let f = '';
-      if (text[i] === '"') {
-        i++;
-        while (i < n) {
-          if (text[i] === '"') {
-            if (text[i+1] === '"') { f += '"'; i += 2; }
-            else { i++; break; }
-          } else { f += text[i++]; }
+  let row = [];
+  let inQuotes = false;
+  let field = '';
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    
+    if (inQuotes) {
+      if (char === '"') {
+        // טיפול במרכאות כפולות בתוך הטקסט
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          field += '"';
+          i++; // דילוג על המרכאה הבאה
+        } else {
+          inQuotes = false; // יציאה ממצב מרכאות
         }
       } else {
-        while (i < n && text[i] !== delim && text[i] !== '\n') f += text[i++];
+        field += char;
       }
-      row.push(f.trim());
-      if (i < n && text[i] === delim) i++; else break;
+    } else {
+      // כשאנחנו מחוץ למרכאות
+      if (char === '"') {
+        inQuotes = true; // כניסה למצב מרכאות, לא משנה היכן הן מופיעות בתא
+      } else if (char === delim) {
+        row.push(field.trim());
+        field = '';
+      } else if (char === '\n') {
+        row.push(field.trim());
+        if (row.some(c => c !== '')) rows.push(row);
+        row = [];
+        field = '';
+      } else {
+        field += char;
+      }
     }
-    if (i < n && text[i] === '\n') i++;
-    if (row.length > 0 && row.some(c => c !== '')) rows.push(row);
   }
+  
+  // דחיפת השדה והשורה האחרונים למערך בסיום הלולאה
+  row.push(field.trim());
+  if (row.some(c => c !== '')) rows.push(row);
+  
   return rows;
 }
 
