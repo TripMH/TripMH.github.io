@@ -1445,7 +1445,6 @@ function detectDelimiter(line) {
   if (s > c) return ';';
   return ',';
 }
-   
 function parseCSV(raw) {
   const text = raw.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   if (!text.trim()) return [];
@@ -1476,17 +1475,17 @@ function parseCSV(raw) {
   }
   return rows;
 }
-   
+
 const ALIASES = {
   icon:      ['אייקון', 'icon', 'סמל'],
-  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם', 'טיפ', 'tip', 'הערה'],
+  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
   task:      ['משימה', 'פריט', 'ציוד', 'task', 'item'],
   day:       ['יום','day'],
   date:      ['תאריך','date'],
   priority:  ['עדיפות', 'priority'],
   address:   ['מיקום במפה', 'כתובת', 'address', 'קואורדינטות'],
   weather:   ['מזג אוויר אידיאלי', 'מזג אוויר', 'weather'],
-  desc:      ['תיאור ומה ניתן לעשות', 'תיאור', 'מה לעשות', 'desc', 'content', 'פרטים', 'תוכן', 'מידע', 'פירוט', 'ריכוז הנחיות וטיפים (מסוכם לפי נושא)', 'טיפים', 'הערות'],
+  desc:      ['תיאור ומה ניתן לעשות', 'תיאור', 'מה לעשות', 'desc', 'content', 'פרטים', 'תוכן', 'מידע', 'פירוט', 'ריכוז הנחיות וטיפים (מסוכם לפי נושא)'],
   trans:     ['תחבורה והגעה ליעד', 'תחבורה', 'הגעה', 'איך', 'transport', 'transit', 'how to get', 'getting there'],
   area:      ['אזור במסלול', 'אזור', 'עיר', 'מיקום', 'area', 'city', 'location', 'neighborhood'],
   time:      ['טווח שעות מומלץ', 'שעות', 'זמן פתיחה', 'מתי', 'time', 'טווח שעות', 'שעת פתיחה', 'opening hours'],
@@ -1824,16 +1823,10 @@ async function processFiles(files) {
             }, x => x.title === taskTitle);
             if(res.isNew) stats.added++; else stats.updated++;
         }
-   } else if (fileType === 'tips') {
+     } else if (fileType === 'tips') {
         const anyValue = place || desc || catCol || address || Object.values(obj).some(v => v.trim());
         if (anyValue) {
-          let title = place || catCol || address;
-          if (!title) {
-             const fallbackText = desc || Object.values(obj).find(v => v && v.trim().length > 0) || '';
-             title = fallbackText.trim().substring(0, 45);
-             if (fallbackText.length > 45) title += '...';
-             if (!title) title = `טיפ ${ri}`;
-          }
+          const title = place || catCol || address || `טיפ ${ri}`;
           const contentArr = [];
           if (address) contentArr.push(`📍 מיקום/אזור: ${address}`);
           if (desc) contentArr.push(desc);
@@ -2606,7 +2599,7 @@ function renderTipCard(item, q) {
     <div class="card-main">
       <div class="card-title-row">
         <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">${escHtml(item.icon || '💡')}</span>
+          <span class="card-icon" aria-hidden="true">💡</span>
           <h3 class="card-title">${hlHtml(item.title,q)}</h3>
         </div>
         <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
