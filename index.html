@@ -1502,14 +1502,14 @@ function parseCSV(raw) {
    
 const ALIASES = {
   icon:      ['אייקון', 'icon', 'סמל'],
-  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם'],
+  place:     ['שם המקום','אטרקציה','יעד','מקום','כותרת','title','name','attraction','place','שם', 'טיפ', 'tip', 'הערה'],
   task:      ['משימה', 'פריט', 'ציוד', 'task', 'item'],
   day:       ['יום','day'],
   date:      ['תאריך','date'],
   priority:  ['עדיפות', 'priority'],
   address:   ['מיקום במפה', 'כתובת', 'address', 'קואורדינטות'],
   weather:   ['מזג אוויר אידיאלי', 'מזג אוויר', 'weather'],
-  desc:      ['תיאור ומה ניתן לעשות', 'תיאור', 'מה לעשות', 'desc', 'content', 'פרטים', 'תוכן', 'מידע', 'פירוט', 'ריכוז הנחיות וטיפים (מסוכם לפי נושא)'],
+  desc:      ['תיאור ומה ניתן לעשות', 'תיאור', 'מה לעשות', 'desc', 'content', 'פרטים', 'תוכן', 'מידע', 'פירוט', 'ריכוז הנחיות וטיפים (מסוכם לפי נושא)', 'טיפים', 'הערות'],
   trans:     ['תחבורה והגעה ליעד', 'תחבורה', 'הגעה', 'איך', 'transport', 'transit', 'how to get', 'getting there'],
   area:      ['אזור במסלול', 'אזור', 'עיר', 'מיקום', 'area', 'city', 'location', 'neighborhood'],
   time:      ['טווח שעות מומלץ', 'שעות', 'זמן פתיחה', 'מתי', 'time', 'טווח שעות', 'שעת פתיחה', 'opening hours'],
@@ -1847,10 +1847,16 @@ async function processFiles(files) {
             }, x => x.title === taskTitle);
             if(res.isNew) stats.added++; else stats.updated++;
         }
-     } else if (fileType === 'tips') {
+   } else if (fileType === 'tips') {
         const anyValue = place || desc || catCol || address || Object.values(obj).some(v => v.trim());
         if (anyValue) {
-          const title = place || catCol || address || `טיפ ${ri}`;
+          let title = place || catCol || address;
+          if (!title) {
+             const fallbackText = desc || Object.values(obj).find(v => v && v.trim().length > 0) || '';
+             title = fallbackText.trim().substring(0, 45);
+             if (fallbackText.length > 45) title += '...';
+             if (!title) title = `טיפ ${ri}`;
+          }
           const contentArr = [];
           if (address) contentArr.push(`📍 מיקום/אזור: ${address}`);
           if (desc) contentArr.push(desc);
@@ -2623,7 +2629,7 @@ function renderTipCard(item, q) {
     <div class="card-main">
       <div class="card-title-row">
         <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">💡</span>
+          <span class="card-icon" aria-hidden="true">${escHtml(item.icon || '💡')}</span>
           <h3 class="card-title">${hlHtml(item.title,q)}</h3>
         </div>
         <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
