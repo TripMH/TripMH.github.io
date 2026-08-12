@@ -2436,6 +2436,24 @@ function renderTripCard(item, q, prevItem) {
 
   const checkStyle = done ? `border-color:var(--success);background:var(--success-glow);color:var(--success);` : 'color:transparent;';
 
+let riskBadge = '';
+  if (item.risk) {
+    let rBg = 'var(--danger-glow)', rCol = 'var(--danger)', rIco = '🚨';
+    
+    // בדיקה חכמה של רמת הסיכון ושינוי צבעים ואייקון בהתאם
+    if (item.risk.includes('נמוך')) { 
+      rBg = 'var(--success-glow)'; 
+      rCol = 'var(--success)'; 
+      rIco = '✅'; 
+    } else if (item.risk.includes('בינוני')) { 
+      rBg = 'var(--warning-glow)'; 
+      rCol = 'var(--warning)'; 
+      rIco = '⚠️'; 
+    }
+    
+    riskBadge = `<span class="badge" style="background:${rBg};color:${rCol};border:1px solid color-mix(in srgb,${rCol} 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${rIco} ${hlHtml(item.risk,q)}</span>`;
+  }
+
   const badges = [
     item.priority ? `<span class="badge" style="background:rgba(251,191,36,.15);color:var(--warning);border:1px solid rgba(251,191,36,.3)">${hlHtml(item.priority, q)}</span>` : '',
     item.category ? `<span class="badge badge-cat">${svgIcon('tag')} ${hlHtml(item.category, q)}</span>` : '',
@@ -2443,9 +2461,8 @@ function renderTripCard(item, q, prevItem) {
     item.area      ? `<span class="badge badge-area">${svgIcon('pin')}${hlHtml(item.area.replace(/(https?:\/\/[^\s\)]+)/ig, '').trim() || 'מפה',q)}</span>` : '',
     cost           ? `<span class="badge badge-cost">${svgIcon('money')}${hlHtml(cost,q)}</span>` : '',
     item.duration  ? `<span class="badge badge-dur">${svgIcon('dur')}${hlHtml(item.duration,q)}</span>` : '',
-    item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🚨 ${hlHtml(item.risk,q)}</span>` : ''
+    riskBadge
   ].filter(Boolean).join('');
-
 // 1. מנגנון בניית Micro-UI מתוך העמודות הייעודיות!
   let cleanDesc = (item.description || '').replace(/(?:^|\n)\s*.*לסינון:\s*([^\n\r]*)/i, '').replace(/(\r?\n\s*){2,}/g, '\n\n').trim();
   let microUIHtml = '';
