@@ -1511,6 +1511,14 @@ const ALIASES = {
   romaji:    ['רומאג\'י', 'romaji', 'הגייה באנגלית', 'קריאה'],
   context:   ['הקשר', 'סיטואציה', 'context'],
   linkLabel: ['שם הקישור','טקסט קישור','link label','link name'],
+  // תוספות עבור עמודות ה-FINAL_QA החדשות:
+  foodSol:   ['פתרון תזונה יומי', 'פתרון תזונה', 'תזונה', 'אוכל'],
+  protein:   ['שילוב חלבון', 'חלבון'],
+  loadLevel: ['רמת עומס מובנית', 'רמת עומס', 'עומס'],
+  actionReq: ['תזכורת / פעולה נדרשת', 'תזכורת', 'פעולה נדרשת', 'פעולה'],
+  planB:     ['Plan B — גשם/סגירה/מלא', 'Plan B', 'גיבוי', 'תוכנית חלופית'],
+  ziploc:    ['Ziploc — שימוש מומלץ', 'Ziploc', 'זיפלוק', 'שקיות זיפלוק'],
+  extraCost: ['תקציב קניות אופציונלי', 'תקציב קניות', 'בזבוזים']
 };
 
 function getCol(obj, type) {
@@ -1845,9 +1853,18 @@ async function processFiles(files) {
         const notes = getCol(obj, 'notes');
         const travelTimePrev = getCol(obj, 'navPrev');
         const mapPrev = getCol(obj, 'mapPrev');
-        const risk = getCol(obj, 'risk');
+       const risk = getCol(obj, 'risk');
         const facilities = getCol(obj, 'facilities');
         const prepare = getCol(obj, 'prepare');
+        
+        // שליפת עמודות חדשות
+        const foodSol = getCol(obj, 'foodSol');
+        const protein = getCol(obj, 'protein');
+        const loadLevel = getCol(obj, 'loadLevel');
+        const actionReq = getCol(obj, 'actionReq');
+        const planB = getCol(obj, 'planB');
+        const ziploc = getCol(obj, 'ziploc');
+        const extraCost = getCol(obj, 'extraCost');
 
         const placeNameFixed = place || 'ללא שם';
 
@@ -1860,7 +1877,8 @@ async function processFiles(files) {
           link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
           requiresBooking: reqBook,
           icon: iconCsv || detectIcon([place, desc, area, address].join(' ')),
-          priority, weather, notes, travelTimePrev, mapPrev, risk, facilities, prepare
+          priority, weather, notes, travelTimePrev, mapPrev, risk, facilities, prepare,
+          foodSol, protein, loadLevel, actionReq, planB, ziploc, extraCost
         };
         
         const dest = isOpt ? state.data.options : state.data.itinerary;
@@ -2428,23 +2446,18 @@ function renderTripCard(item, q, prevItem) {
     item.risk ? `<span class="badge" style="background:var(--danger-glow);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🚨 ${hlHtml(item.risk,q)}</span>` : ''
   ].filter(Boolean).join('');
 
-// 1. מנגנון חילוץ Micro-UI מהתיאור
-  let rawDesc = item.description || '';
-  let cleanDesc = rawDesc;
+// 1. מנגנון בניית Micro-UI מתוך העמודות הייעודיות!
+  let cleanDesc = (item.description || '').replace(/(?:^|\n)\s*.*לסינון:\s*([^\n\r]*)/i, '').replace(/(\r?\n\s*){2,}/g, '\n\n').trim();
   let microUIHtml = '';
-  
-  // תופס שורות שמתחילות באייקונים מוכרים ומייצר מהם כרטיסיות (Badges)
-  const microRegex = /(💡|🍽️|🥤|🎒|🌧️|🚨|💪|🍱|🧴)\s*([^:\n]+):\s*([^\n]+)/g;
-  let match;
   const microItems = [];
-  while ((match = microRegex.exec(rawDesc)) !== null) {
-      microItems.push({ icon: match[1], title: match[2].trim(), text: match[3].trim() });
-      cleanDesc = cleanDesc.replace(match[0], ''); // מוחק מהטקסט הראשי
-  }
   
-  // מחיקת שורת 'לסינון' וצמצום רווחים כפולים (שמירה על מבנה נקי מבלי למחוק מידע אמיתי)
-  cleanDesc = cleanDesc.replace(/(?:^|\n)\s*.*לסינון:\s*([^\n\r]*)/i, '').trim();
-  cleanDesc = cleanDesc.replace(/(\r?\n\s*){2,}/g, '\n\n');
+  if (item.foodSol) microItems.push({ icon: '🍽️', title: 'תזונה יומית', text: item.foodSol });
+  if (item.protein) microItems.push({ icon: '🥤', title: 'שילוב חלבון', text: item.protein });
+  if (item.loadLevel) microItems.push({ icon: '🔋', title: 'עומס מובנה', text: item.loadLevel });
+  if (item.planB) microItems.push({ icon: '💡', title: 'Plan B (חלופה)', text: item.planB });
+  if (item.ziploc) microItems.push({ icon: '🎒', title: 'טיפ זיפלוק', text: item.ziploc });
+  if (item.actionReq) microItems.push({ icon: '🚨', title: 'פעולה נדרשת', text: item.actionReq });
+  if (item.extraCost) microItems.push({ icon: '🛍️', title: 'תקציב קניות', text: item.extraCost + ' ₪' });
 
   if (microItems.length > 0) {
       microUIHtml = `<div class="micro-ui-grid">` + microItems.map(m => `
