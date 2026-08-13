@@ -2483,11 +2483,26 @@ let riskBadge = '';
   let microUIHtml = '';
   const microItems = [];
   
+  // פיצול חכם של Plan C מתוך העמודה של Plan B
+  let pbRaw = item.planB || '';
+  let pbText = pbRaw;
+  let pcText = '';
+  
+  const planCMatch = pbRaw.match(/Plan\s*C\s*[:\-]/i);
+  if (planCMatch) {
+      pbText = pbRaw.substring(0, planCMatch.index).trim();
+      pcText = pbRaw.substring(planCMatch.index + planCMatch[0].length).trim();
+  }
+  
   if (item.actionReq) microItems.push({ icon: '🚨', title: 'פעולה נדרשת', text: item.actionReq, color: 'var(--warning)', bg: 'var(--warning-glow)' });
   if (item.foodSol) microItems.push({ icon: '🍽️', title: 'תזונה', text: item.foodSol, color: 'var(--success)', bg: 'var(--success-glow)' });
   if (item.protein) microItems.push({ icon: '🥤', title: 'חלבון', text: item.protein, color: 'var(--success)', bg: 'var(--success-glow)' });
   if (item.loadLevel) microItems.push({ icon: '🔋', title: 'רמת עומס', text: item.loadLevel, color: 'var(--accent)', bg: 'var(--accent-glow)' });
-  if (item.planB) microItems.push({ icon: '💡', title: 'Plan B (חלופה)', text: item.planB, color: 'var(--purple)', bg: 'var(--purple-glow)' });
+  
+  // דחיפת שתי משבצות נפרדות אם זיהינו שיש Plan C!
+  if (pbText) microItems.push({ icon: '💡', title: 'Plan B (חלופה)', text: pbText, color: 'var(--purple)', bg: 'var(--purple-glow)' });
+  if (pcText) microItems.push({ icon: '⏭️', title: 'Plan C (דילוג)', text: pcText, color: 'var(--danger)', bg: 'var(--danger-glow)' });
+  
   if (item.ziploc) microItems.push({ icon: '🎒', title: 'טיפ זיפלוק', text: item.ziploc, color: 'var(--text)', bg: 'var(--bg-muted)' });
   if (item.extraCost && parseFloat(item.extraCost) > 0) microItems.push({ icon: '🛍️', title: 'תקציב חופשי', text: parseFloat(item.extraCost) + ' ₪', color: 'var(--success)', bg: 'var(--success-glow)' });
   
@@ -2504,7 +2519,6 @@ let riskBadge = '';
           </div>
       `).join('') + `</div>`;
   }
-
   // 2. כפתורי פעולה קריטיים עם תפריט צף
   const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
   const parsedLinks = buildTipLinks(item.link);
