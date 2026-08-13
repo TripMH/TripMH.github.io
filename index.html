@@ -2092,11 +2092,16 @@ function downloadBlob(content, filename, mime) {
 }
 
 function downloadFilesSequentially(files) {
-  files.forEach((file, index) => {
-    setTimeout(() => {
+  let index = 0;
+  function downloadNext() {
+      if (index >= files.length) return;
+      const file = files[index];
       downloadBlob(file.content, file.filename, file.mime);
-    }, index * 400);
-  });
+      index++;
+      // השהייה ארוכה יותר של 600 מילישניות כדי שהדפדפנים לא יחסמו את הורדת קבצי ה-CSV כספאם.
+      setTimeout(downloadNext, 600); 
+  }
+  downloadNext();
 }
 
 function exportCSV() {
