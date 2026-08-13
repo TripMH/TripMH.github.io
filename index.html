@@ -2503,7 +2503,7 @@ let riskBadge = '';
   if (pbText) microItems.push({ icon: '💡', title: 'Plan B (חלופה)', text: pbText, color: 'var(--purple)', bg: 'var(--purple-glow)' });
   if (pcText) microItems.push({ icon: '⏭️', title: 'Plan C (דילוג)', text: pcText, color: 'var(--danger)', bg: 'var(--danger-glow)' });
   
-  if (item.ziploc) microItems.push({ icon: '🎒', title: 'טיפ זיפלוק', text: item.ziploc, color: 'var(--text)', bg: 'var(--bg-muted)' });
+  if (item.ziploc) microItems.push({ icon: '🎒', title: 'טיפ זיפלוק/גופיה', text: item.ziploc, color: 'var(--text)', bg: 'var(--bg-muted)' });
   if (item.extraCost && parseFloat(item.extraCost) > 0) microItems.push({ icon: '🛍️', title: 'תקציב חופשי', text: parseFloat(item.extraCost) + ' ₪', color: 'var(--success)', bg: 'var(--success-glow)' });
   
   if (item.qaStatus && !item.qaStatus.includes('תוכני — מבנה תקין')) microItems.push({ icon: '🔎', title: 'QA / סיכון', text: item.qaStatus, color: 'var(--danger)', bg: 'var(--danger-glow)' });
