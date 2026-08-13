@@ -1858,13 +1858,14 @@ async function processFiles(files) {
         const prepare = getCol(obj, 'prepare');
         
         // שליפת עמודות חדשות
-        const foodSol = getCol(obj, 'foodSol');
+       const foodSol = getCol(obj, 'foodSol');
         const protein = getCol(obj, 'protein');
         const loadLevel = getCol(obj, 'loadLevel');
         const actionReq = getCol(obj, 'actionReq');
         const planB = getCol(obj, 'planB');
         const ziploc = getCol(obj, 'ziploc');
         const extraCost = getCol(obj, 'extraCost');
+        const qaStatus = getCol(obj, 'qaStatus');
 
         const placeNameFixed = place || 'ללא שם';
 
@@ -1878,7 +1879,7 @@ async function processFiles(files) {
           requiresBooking: reqBook,
           icon: iconCsv || detectIcon([place, desc, area, address].join(' ')),
           priority, weather, notes, travelTimePrev, mapPrev, risk, facilities, prepare,
-          foodSol, protein, loadLevel, actionReq, planB, ziploc, extraCost
+          foodSol, protein, loadLevel, actionReq, planB, ziploc, extraCost, qaStatus
         };
         
         const dest = isOpt ? state.data.options : state.data.itinerary;
@@ -2102,16 +2103,26 @@ function downloadFilesSequentially(files) {
 function exportCSV() {
   const BOM = '\uFEFF';
   const files = [];
- const itiHeaders = ['אייקון','יום / תאריך','שם המקום','קטגוריות לסינון','עדיפות','מזג אוויר','טווח שעות','משך ביקור','עלות','תחבורה','זמן ממיקום קודם','צ\'ק-אין','צ\'ק-אאוט','איך ומתי להזמין (צ\'ק-אין/אאוט)','אזור במסלול','כתובת','תיאור','הערות','מתקנים','להכין מראש','סיכון','קישור','ניווט גוגל מפות','הושלם','טופל/הוזמן'];
+  const itiHeaders = ['אייקון','יום','תאריך','שם המקום','קטגוריות לסינון','עדיפות','מיקום במפה','מזג אוויר אידיאלי','תיאור ומה ניתן לעשות','תחבורה והגעה ליעד','אזור במסלול','טווח שעות מומלץ','זמן מוערך','ימי סגירה / הערות חשובות','עלות משוערת (₪ ו-¥)','איך ומתי להזמין','קישור','משך נסיעה מהיעד הקודם','ניווט גוגל מפות (מהיעד הקודם)','סיכון','מתקנים ודרישות','מה צריך להכין מראש','פתרון תזונה יומי','שילוב חלבון','רמת עומס מובנית','תזכורת / פעולה נדרשת','Plan B — גשם/סגירה/מלא','Ziploc/T-Shirt Bag — שימוש מומלץ','תקציב קניות אופציונלי (₪)','סטטוס QA','סטטוס ביצוע באפליקציה','סטטוס הזמנה באפליקציה'];
 
   function buildItiExport(dataArr, name) {
       if (dataArr.length > 0) {
           let csv = BOM + csvRow(itiHeaders);
-          dataArr.forEach(i => csv += csvRow([
-              i.icon, i.dayLabel, i.placeName, i.category, i.priority, i.weather, i.timeRange, i.duration, i.cost, i.transport, i.travelTimePrev, i.checkIn, i.checkOut, i.booking, i.area, i.address, i.description, i.notes, i.facilities, i.prepare, i.risk, i.link, i.mapPrev,
-              state.completedIds.has(i.id)?'כן':'לא', state.bookedIds.has(i.id)?'כן':'לא'
-          ]));
-          files.push({ content: csv, filename: `TripMH_${name}.csv`, mime: 'text/csv;charset=utf-8' });
+          dataArr.forEach(i => {
+              let exDay = i.dayLabel;
+              let exDate = '';
+              if(i.dayLabel && i.dayLabel.includes('(')) {
+                  let parts = i.dayLabel.split('(');
+                  exDay = parts[0].trim();
+                  exDate = parts[1].replace(')', '').trim();
+              }
+              csv += csvRow([
+                  i.icon, exDay, exDate, i.placeName, i.category, i.priority, i.address, i.weather, i.description, i.transport, i.area, i.timeRange, i.duration, i.notes, i.cost, i.booking, i.link, i.travelTimePrev, i.mapPrev, i.risk, i.facilities, i.prepare, i.foodSol, i.protein, i.loadLevel, i.actionReq, i.planB, i.ziploc, i.extraCost, i.qaStatus,
+                  state.completedIds.has(i.id) ? 'הושלם' : 'לא הושלם',
+                  state.bookedIds.has(i.id) ? 'הוזמן וטופל' : 'לא הוזמן'
+              ]);
+          });
+          files.push({ content: csv, filename: `TripMH_${name}_Updated.csv`, mime: 'text/csv;charset=utf-8' });
       }
   }
 
@@ -2140,7 +2151,7 @@ function exportCSV() {
 
   downloadFilesSequentially(files);
   document.getElementById('modal-export').classList.add('hidden');
-  addToast(`הורדת ${files.length} קבצי טקסט החלה`, 'success');
+  addToast(`הורדת הקבצים המעודכנים החלה בהצלחה!`, 'success');
 }
 
 function exportJSON(data, completedIds, bookedIds) {
@@ -3161,9 +3172,24 @@ function buildEditForm(item) {
   <div class="edit-group"><label class="edit-label">סיכון</label><input class="edit-input" id="ef-risk" value="${escHtml(item.risk)}" autocomplete="off" /></div>
 </div>
 <div class="edit-group"><label class="edit-label">מה להכין מראש</label><input class="edit-input" id="ef-prepare" value="${escHtml(item.prepare)}" autocomplete="off" /></div>
+<div class="edit-row">
+  <div class="edit-group"><label class="edit-label">תזונה יומית</label><input class="edit-input" id="ef-foodSol" value="${escHtml(item.foodSol)}" autocomplete="off" /></div>
+  <div class="edit-group"><label class="edit-label">שילוב חלבון</label><input class="edit-input" id="ef-protein" value="${escHtml(item.protein)}" autocomplete="off" /></div>
+</div>
+<div class="edit-row">
+  <div class="edit-group"><label class="edit-label">עומס מובנה</label><input class="edit-input" id="ef-loadLevel" value="${escHtml(item.loadLevel)}" autocomplete="off" /></div>
+  <div class="edit-group"><label class="edit-label">פעולה נדרשת</label><input class="edit-input" id="ef-actionReq" value="${escHtml(item.actionReq)}" autocomplete="off" /></div>
+</div>
+<div class="edit-row">
+  <div class="edit-group"><label class="edit-label">Plan B (חלופה)</label><input class="edit-input" id="ef-planB" value="${escHtml(item.planB)}" autocomplete="off" /></div>
+  <div class="edit-group"><label class="edit-label">טיפ זיפלוק</label><input class="edit-input" id="ef-ziploc" value="${escHtml(item.ziploc)}" autocomplete="off" /></div>
+</div>
+<div class="edit-row">
+  <div class="edit-group"><label class="edit-label">תקציב קניות אופציונלי</label><input class="edit-input" id="ef-extraCost" value="${escHtml(item.extraCost)}" autocomplete="off" /></div>
+  <div class="edit-group"><label class="edit-label">סטטוס QA</label><input class="edit-input" id="ef-qaStatus" value="${escHtml(item.qaStatus)}" autocomplete="off" /></div>
+</div>
 <div class="edit-group"><label class="edit-label">קישורים ואפליקציות להזמנה (כל קישור בשורה נפרדת)</label><textarea class="edit-input" id="ef-link" rows="3" dir="ltr" style="text-align:left;">${escHtml(item.link)}</textarea></div>
-<div class="edit-group"><label class="edit-label">גוגל מפות (מיעד קודם)</label><input class="edit-input" id="ef-mapPrev" value="${escHtml(item.mapPrev)}" /></div><div class="edit-group">
-  <label class="edit-label">סוג</label>
+<div class="edit-group"><label class="edit-label">גוגל מפות (מיעד קודם)</label><input class="edit-input" id="ef-mapPrev" value="${escHtml(item.mapPrev)}" /></div><div class="edit-group">  <label class="edit-label">סוג</label>
   <select class="edit-input" id="ef-type">
     <option value="itinerary" ${item.type==='itinerary'?'selected':''}>מסלול ראשי</option>
     <option value="option"    ${item.type==='option'?'selected':''}>אופציה / תוספת</option>
@@ -3184,7 +3210,8 @@ function readEditForm(item) {
     placeName:g('ef-placeName'), icon:g('ef-icon') || '📍', dayLabel:g('ef-dayLabel'), dateVal:parseDateVal(g('ef-dayLabel')), category:g('ef-category'),
     timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), address:g('ef-address'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
-    priority:g('ef-priority'), weather:g('ef-weather'), notes:g('ef-notes'), travelTimePrev:g('ef-travelTimePrev'), mapPrev:g('ef-mapPrev'), risk:g('ef-risk'), facilities:g('ef-facilities'), prepare:g('ef-prepare')
+    priority:g('ef-priority'), weather:g('ef-weather'), notes:g('ef-notes'), travelTimePrev:g('ef-travelTimePrev'), mapPrev:g('ef-mapPrev'), risk:g('ef-risk'), facilities:g('ef-facilities'), prepare:g('ef-prepare'),
+    foodSol:g('ef-foodSol'), protein:g('ef-protein'), loadLevel:g('ef-loadLevel'), actionReq:g('ef-actionReq'), planB:g('ef-planB'), ziploc:g('ef-ziploc'), extraCost:g('ef-extraCost'), qaStatus:g('ef-qaStatus')
   };
   
   updated.requiresBooking = needsBooking(updated.booking);
@@ -3211,8 +3238,8 @@ function openAdd(type) {
   if (type === 'dictionary') { item.hebrew=''; item.english=''; item.japanese=''; item.hebPronun=''; item.romaji=''; item.category='כללי'; item.context=''; }
   else if (type === 'checklist') { item.type='task'; item.title=''; item.description=''; item.category='כללי'; }
   else if (type === 'tip') { item.title=''; item.category='כללי'; item.content=''; item.link=''; item.linkLabel='למידע נוסף'; item.icon='💡'; }
- else {
-    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, category:'', description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', address:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'', priority:'', weather:'', notes:'', travelTimePrev:'', mapPrev:'', risk:'', facilities:'', prepare:'' });
+else {
+    Object.assign(item, { placeName:'', dayLabel:'', dateVal:0, category:'', description:'', timeRange:'', checkIn:'', checkOut:'', duration:'', cost:'', transport:'', booking:'', area:'', address:'', link:'', linkLabel:'מידע נוסף', requiresBooking:false, icon:'', priority:'', weather:'', notes:'', travelTimePrev:'', mapPrev:'', risk:'', facilities:'', prepare:'', foodSol:'', protein:'', loadLevel:'', actionReq:'', planB:'', ziploc:'', extraCost:'', qaStatus:'' });
   }
   
   state.editItem = item;
