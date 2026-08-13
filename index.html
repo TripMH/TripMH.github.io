@@ -287,13 +287,12 @@ html.light mark{background:rgba(217,119,6,.22)}
 .card-top-actions { display: flex; gap: 8px; margin-top: 14px; width: 100%; flex-wrap: wrap; border-top: 1px dashed var(--border); padding-top: 12px; }
 .card-top-actions .link-btn { flex: 1; min-width: 120px; padding: 10px; font-size: 13px; justify-content: center; }
 
-.micro-ui-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 16px 0; }
-.micro-ui-item { display: flex; align-items: flex-start; gap: 10px; background: var(--bg-muted); padding: 12px; border-radius: var(--r-sm); border: 1px solid var(--border); transition: border-color .2s; }
-.micro-ui-item:hover { border-color: var(--accent-border); }
-.micro-ui-icon { font-size: 18px; flex-shrink: 0; line-height: 1.2; background: var(--bg-card); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.micro-ui-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 16px; }
+.micro-ui-item { display: flex; align-items: flex-start; gap: 10px; background: var(--bg-muted); padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--border); transition: border-color .2s, transform .2s; }
+.micro-ui-icon { font-size: 16px; flex-shrink: 0; line-height: 1.2; background: var(--bg-card); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .micro-ui-content { flex: 1; min-width: 0; }
-.micro-ui-content strong { color: var(--text); display: block; font-size: 13px; margin-bottom: 3px; }
-.micro-ui-content span { color: var(--text-dim); font-size: 13px; line-height: 1.4; display: block; word-break: break-word; }
+.micro-ui-content strong { display: block; font-size: 12px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.02em; }
+.micro-ui-content span { color: var(--text-dim); font-size: 12.5px; line-height: 1.35; display: block; word-break: break-word; font-weight: 500;}
 
 /* =========================================================
    DROPDOWN MENU (LINKS)
@@ -2479,21 +2478,23 @@ let riskBadge = '';
   let microUIHtml = '';
   const microItems = [];
   
-  if (item.foodSol) microItems.push({ icon: '🍽️', title: 'תזונה יומית', text: item.foodSol });
-  if (item.protein) microItems.push({ icon: '🥤', title: 'שילוב חלבון', text: item.protein });
-  if (item.loadLevel) microItems.push({ icon: '🔋', title: 'עומס מובנה', text: item.loadLevel });
-  if (item.planB) microItems.push({ icon: '💡', title: 'Plan B (חלופה)', text: item.planB });
-  if (item.ziploc) microItems.push({ icon: '🎒', title: 'טיפ זיפלוק/גופיה', text: item.ziploc });
-  if (item.actionReq) microItems.push({ icon: '🚨', title: 'פעולה נדרשת', text: item.actionReq });
-  if (item.extraCost) microItems.push({ icon: '🛍️', title: 'תקציב קניות', text: item.extraCost + ' ₪' });
+  if (item.actionReq) microItems.push({ icon: '🚨', title: 'פעולה נדרשת', text: item.actionReq, color: 'var(--warning)', bg: 'var(--warning-glow)' });
+  if (item.foodSol) microItems.push({ icon: '🍽️', title: 'תזונה', text: item.foodSol, color: 'var(--success)', bg: 'var(--success-glow)' });
+  if (item.protein) microItems.push({ icon: '🥤', title: 'חלבון', text: item.protein, color: 'var(--success)', bg: 'var(--success-glow)' });
+  if (item.loadLevel) microItems.push({ icon: '🔋', title: 'רמת עומס', text: item.loadLevel, color: 'var(--accent)', bg: 'var(--accent-glow)' });
+  if (item.planB) microItems.push({ icon: '💡', title: 'Plan B (חלופה)', text: item.planB, color: 'var(--purple)', bg: 'var(--purple-glow)' });
+  if (item.ziploc) microItems.push({ icon: '🎒', title: 'טיפ זיפלוק', text: item.ziploc, color: 'var(--text)', bg: 'var(--bg-muted)' });
+  if (item.extraCost && parseFloat(item.extraCost) > 0) microItems.push({ icon: '🛍️', title: 'תקציב חופשי', text: parseFloat(item.extraCost) + ' ₪', color: 'var(--success)', bg: 'var(--success-glow)' });
+  
+  if (item.qaStatus && !item.qaStatus.includes('תוכני — מבנה תקין')) microItems.push({ icon: '🔎', title: 'QA / סיכון', text: item.qaStatus, color: 'var(--danger)', bg: 'var(--danger-glow)' });
 
   if (microItems.length > 0) {
       microUIHtml = `<div class="micro-ui-grid">` + microItems.map(m => `
-          <div class="micro-ui-item">
-              <div class="micro-ui-icon">${m.icon}</div>
+          <div class="micro-ui-item" style="background: color-mix(in srgb, ${m.bg} 40%, transparent); border-color: color-mix(in srgb, ${m.color} 30%, transparent);">
+              <div class="micro-ui-icon" style="color: ${m.color}; border-color: color-mix(in srgb, ${m.color} 30%, transparent);">${m.icon}</div>
               <div class="micro-ui-content">
-                  <strong>${hlHtml(m.title, q)}</strong>
-                  <span>${hlHtml(m.text, q)}</span>
+                  <strong style="color: ${m.color};">${hlHtml(m.title, q)}</strong>
+                  <span style="color: var(--text-dim);">${hlHtml(m.text, q)}</span>
               </div>
           </div>
       `).join('') + `</div>`;
