@@ -1363,22 +1363,48 @@ function hlHtml(raw, q) {
    SMART LINKS
 ========================================================= */
 function getSmartLinkLabel(url, label) {
-  if (label && label !== 'מידע נוסף' && label !== 'למידע נוסף') return label; 
+  if (label && label !== 'מידע נוסף' && label !== 'למידע נוסף') {
+    // מנקה נקודתיים מיותרות שנדבקו לשם הפלטפורמה
+    const cln = label.replace(/[:：\-–—|]+$/, '').trim();
+    const low = cln.toLowerCase();
+    
+    // זיהוי ועיצוב מושלם גם אם הוקלד ידנית
+    if(low === 'klook') return 'Klook (אטרקציות וכרטיסים)';
+    if(low === 'trip' || low === 'trip.com') return 'Trip.com (אטרקציות וכרטיסים)';
+    if(low === 'kkday') return 'KKday (אטרקציות וכרטיסים)';
+    if(low === 'getyourguide') return 'GetYourGuide';
+    if(low === 'pelago') return 'Pelago';
+    if(low === 'booking' || low === 'booking.com') return 'Booking.com (הזמנת לינה)';
+    if(low === 'agoda') return 'Agoda (הזמנת לינה)';
+    if(low === 'airbnb') return 'Airbnb (דירות ולינה)';
+    if(low === 'hostelworld') return 'Hostelworld (הוסטלים)';
+    if(low === 'רשמי' || low === 'אתר רשמי') return 'האתר הרשמי';
+    return cln;
+  }
   if (!url) return 'מידע נוסף';
   const u = url.toLowerCase();
-  
+
+  // מנגנון זיהוי חכם לפי הדומיין
   if (u.includes('mailto:')) return 'שליחת אימייל';
   if (u.includes('tablecheck.com')) return 'הזמנת שולחן (TableCheck)';
   if (u.includes('tabelog.com')) return 'ביקורות ודירוג (Tabelog)';
-  if (u.includes('facebook.com')) return 'עמוד פייסבוק / וואצאפ';
+  if (u.includes('facebook.com')) return 'פייסבוק / וואצאפ';
   if (u.includes('instagram.com')) return 'אינסטגרם (Instagram)';
-  if (u.includes('booking.com') || u.includes('agoda.com') || u.includes('airbnb') || u.includes('hotels.com')) return 'הזמנת לינה / מלון';
-  if (u.includes('klook.com') || u.includes('getyourguide') || u.includes('kkday')) return 'הזמנת אטרקציה / כרטיסים';
+  if (u.includes('booking.com')) return 'Booking.com (הזמנת לינה)';
+  if (u.includes('agoda.com')) return 'Agoda (הזמנת לינה)';
+  if (u.includes('airbnb.')) return 'Airbnb (הזמנת דירה)';
+  if (u.includes('hostelworld.com')) return 'Hostelworld (הוסטלים)';
+  if (u.includes('hotels.com')) return 'Hotels.com (הזמנת לינה)';
+  if (u.includes('klook.com')) return 'Klook (אטרקציות)';
+  if (u.includes('getyourguide.com')) return 'GetYourGuide';
+  if (u.includes('kkday.com')) return 'KKday (אטרקציות)';
+  if (u.includes('trip.com')) return 'Trip.com';
+  if (u.includes('pelago.co')) return 'Pelago';
   if (u.includes('lawson') || u.includes('eplus') || u.includes('ticket') || u.includes('pia.jp') || u.includes('l-tike') || u.includes('viagogo')) return 'רכישת כרטיסים להופעה';
-  if (u.includes('tripadvisor')) return 'ביקורות (TripAdvisor)';
+  if (u.includes('tripadvisor')) return 'TripAdvisor (ביקורות)';
   if (u.includes('google.com/maps')) return 'מיקום בגוגל מפות';
-  if (u.includes('twitter.com') || u.includes('x.com')) return 'עמוד הרשת החברתית';
-  
+  if (u.includes('twitter.com') || u.includes('x.com')) return 'X (Twitter)';
+
   return 'האתר הרשמי';
 }
 
@@ -1386,8 +1412,7 @@ function getSmartLinkLabel(url, label) {
 function buildTipLinks(raw) {
   if (!raw) return [];
   const urlRe = /(https?:\/\/[^\s]+|mailto:[^\s]+)/i;
-  // כאן הוספנו את הפיצול גם לפי קו אנכי (|) ולא רק לפי ירידת שורה
-  const lines = String(raw).split(/\n|\|/); 
+  const lines = String(raw).split(/\n|\|/);
   const out = [];
   let currentGroup = '';
   let groupCount = 1;
@@ -1399,33 +1424,31 @@ function buildTipLinks(raw) {
     const match = t.match(urlRe);
     if (match) {
       const url = match[1].replace(/[)\].,;]+$/, '');
-      let labelText = t.replace(url, '')
-                       .replace(/^[\d\.\-\•\*]+\s*/, '') 
-                       .replace(/[:：\-–—|]+$/, '') 
-                       .replace(/^[:：\-–—|]+/, '') 
+      let labelText = t.replace(url, '').trim()
+                       .replace(/^[\d\.\-\•\*]+\s*/, '')
+                       .replace(/[:：\-–—|]+$/, '')
+                       .replace(/^[:：\-–—|]+/, '')
                        .trim();
 
       let finalLabel = '';
-      // זיהוי חזק יותר למילים גנריות - לא נשתמש בהן בתור שם הכפתור
       const isGenericGroup = /(קישור|אתר|url|link|website|לינק|אפליקצי)/i.test(currentGroup);
 
       if (labelText) {
         if ((labelText === 'אתר' || labelText === 'אפליקציה') && currentGroup && !isGenericGroup) {
            finalLabel = `${currentGroup} (${labelText})`;
         } else {
-           finalLabel = labelText;
+           finalLabel = getSmartLinkLabel(url, labelText);
         }
       } else if (currentGroup && !isGenericGroup) {
         finalLabel = `${currentGroup} (${groupCount++})`;
       } else {
-        // אם אין טקסט ספציפי ליד הקישור - תן למנגנון החכם לעשות את העבודה!
         finalLabel = getSmartLinkLabel(url, '');
       }
 
       out.push({ label: finalLabel, url: url });
     } else {
       currentGroup = t.replace(/[:：\-–—]\s*$/, '').replace(/^[\d\.\-\•\*]+\s*/, '').trim();
-      groupCount = 1; 
+      groupCount = 1;
     }
   }
 
