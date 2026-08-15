@@ -1369,15 +1369,15 @@ function getSmartLinkLabel(url, label) {
     const low = cln.toLowerCase();
     
     // זיהוי ועיצוב מושלם גם אם הוקלד ידנית
-    if(low === 'klook') return 'Klook (אטרקציות וכרטיסים)';
-    if(low === 'trip' || low === 'trip.com') return 'Trip.com (אטרקציות וכרטיסים)';
-    if(low === 'kkday') return 'KKday (אטרקציות וכרטיסים)';
+    if(low === 'klook') return 'Klook';
+    if(low === 'trip' || low === 'trip.com') return 'Trip.com';
+    if(low === 'kkday') return 'KKday';
     if(low === 'getyourguide') return 'GetYourGuide';
     if(low === 'pelago') return 'Pelago';
-    if(low === 'booking' || low === 'booking.com') return 'Booking.com (הזמנת לינה)';
-    if(low === 'agoda') return 'Agoda (הזמנת לינה)';
-    if(low === 'airbnb') return 'Airbnb (דירות ולינה)';
-    if(low === 'hostelworld') return 'Hostelworld (הוסטלים)';
+    if(low === 'booking' || low === 'booking.com') return 'Booking.com';
+    if(low === 'agoda') return 'Agoda';
+    if(low === 'airbnb') return 'Airbnb';
+    if(low === 'hostelworld') return 'Hostelworld';
     if(low === 'רשמי' || low === 'אתר רשמי') return 'האתר הרשמי';
     return cln;
   }
