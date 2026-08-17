@@ -1311,7 +1311,8 @@ function fallbackTTS(textToSpeak, lang) {
 function speakField(id, field, lang, e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   
-  const item = state.data.dictionary.find(x => x.id === id);
+  const allItems = [...state.data.itinerary, ...state.data.options, ...state.data.dictionary, ...state.data.tips, ...state.data.checklist];
+  const item = allItems.find(x => x.id === id);
   if (!item || !item[field]) return;
   
   const textToSpeak = item[field];
@@ -1889,13 +1890,18 @@ async function processFiles(files) {
         const extraCost = getCol(obj, 'extraCost');
         const qaStatus = getCol(obj, 'qaStatus');
 
-        const placeNameFixed = place || 'ללא שם';
+const placeNameFixed = place || 'ללא שם';
+        
+        // שמירת הנתונים המדויקים כפי שהם הגיעו מקובץ ה-CSV הגולמי
+        const rawTime = getCol(obj,'time');
+        const rawCost = getCol(obj,'cost');
 
         const item = {
           id:genId(), type: isOpt ? 'option' : 'itinerary', _idx:ri,
           placeName: placeNameFixed, dayLabel: rawDay, dateVal: parseDateVal(rawDay), category: catCol,
+          rawDayStr: dayCol, rawDateStr: dateCol, rawTimeStr: rawTime, rawCostStr: rawCost,
           description: desc, timeRange: timeStr,
-          duration: getCol(obj,'dur'), cost: formatCost(getCol(obj,'cost')), transport: getCol(obj,'trans'),
+          duration: getCol(obj,'dur'), cost: formatCost(rawCost), transport: getCol(obj,'trans'),
           booking: finalBooking, checkIn: checkIn, checkOut: checkOut, area, address, 
           link, linkLabel: getSmartLinkLabel(link, getCol(obj,'linkLabel')),
           requiresBooking: reqBook,
@@ -1904,11 +1910,10 @@ async function processFiles(files) {
           foodSol, protein, loadLevel, actionReq, planB, ziploc, extraCost, qaStatus
         };
         
-        const dest = isOpt ? state.data.options : state.data.itinerary;
+const dest = isOpt ? state.data.options : state.data.itinerary;
         const res = mergeItem(dest, item, x => x.placeName === placeNameFixed && x.dayLabel === rawDay && x.timeRange === timeStr && x.description === desc);
         
         if (autoBooked) state.bookedIds.add(res.id);
-
         if(res.isNew) stats.added++; else stats.updated++;
       }
     }
@@ -2132,19 +2137,29 @@ function exportCSV() {
   const files = [];
   const itiHeaders = ['אייקון','יום','תאריך','שם המקום','קטגוריות לסינון','עדיפות','מיקום במפה','מזג אוויר אידיאלי','תיאור ומה ניתן לעשות','תחבורה והגעה ליעד','אזור במסלול','טווח שעות מומלץ','זמן מוערך','ימי סגירה / הערות חשובות','עלות משוערת (₪ ו-¥)','איך ומתי להזמין','קישור','משך נסיעה מהיעד הקודם','ניווט גוגל מפות (מהיעד הקודם)','סיכון','מתקנים ודרישות','מה צריך להכין מראש','פתרון תזונה יומי','שילוב חלבון','רמת עומס מובנית','תזכורת / פעולה נדרשת','Plan B — גשם/סגירה/מלא','Ziploc/T-Shirt Bag — שימוש מומלץ','תקציב קניות אופציונלי (₪)','סטטוס QA','סטטוס ביצוע באפליקציה','סטטוס הזמנה באפליקציה'];
 
-  function buildItiExport(dataArr, name) {
+function buildItiExport(dataArr, name) {
       if (dataArr.length > 0) {
           let csv = BOM + csvRow(itiHeaders);
           dataArr.forEach(i => {
-              let exDay = i.dayLabel;
-              let exDate = '';
-              if(i.dayLabel && i.dayLabel.includes('(')) {
-                  let parts = i.dayLabel.split('(');
-                  exDay = parts[0].trim();
-                  exDate = parts[1].replace(')', '').trim();
+              let exDay = i.rawDayStr !== undefined ? i.rawDayStr : i.dayLabel;
+              let exDate = i.rawDateStr !== undefined ? i.rawDateStr : '';
+              let exTime = i.rawTimeStr !== undefined ? i.rawTimeStr : i.timeRange;
+              let exCost = i.rawCostStr !== undefined ? i.rawCostStr : i.cost;
+              
+              if(i.rawDayStr === undefined && i.dayLabel && i.dayLabel.includes('(')) {
+                  let match = i.dayLabel.match(/^(.*?)\s*\(([^)]+)\)$/);
+                  if(match) {
+                      exDay = match[1].trim();
+                      exDate = match[2].trim();
+                  } else {
+                      let parts = i.dayLabel.split('(');
+                      exDay = parts[0].trim();
+                      exDate = parts[1].replace(')', '').trim();
+                  }
               }
+
               csv += csvRow([
-                  i.icon, exDay, exDate, i.placeName, i.category, i.priority, i.address, i.weather, i.description, i.transport, i.area, i.timeRange, i.duration, i.notes, i.cost, i.booking, i.link, i.travelTimePrev, i.mapPrev, i.risk, i.facilities, i.prepare, i.foodSol, i.protein, i.loadLevel, i.actionReq, i.planB, i.ziploc, i.extraCost, i.qaStatus,
+                  i.icon, exDay, exDate, i.placeName, i.category, i.priority, i.address, i.weather, i.description, i.transport, i.area, exTime, i.duration, i.notes, exCost, i.booking, i.link, i.travelTimePrev, i.mapPrev, i.risk, i.facilities, i.prepare, i.foodSol, i.protein, i.loadLevel, i.actionReq, i.planB, i.ziploc, i.extraCost, i.qaStatus,
                   state.completedIds.has(i.id) ? 'הושלם' : 'לא הושלם',
                   state.bookedIds.has(i.id) ? 'הוזמן וטופל' : 'לא הוזמן'
               ]);
@@ -2622,12 +2637,15 @@ let addressRow = '';
       <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
         ${done ? svgIcon('check') : ''}
       </button>
-      <div class="card-main">
-        <div class="card-title-row">
+<div class="card-main">
+<div class="card-title-row">
           <div class="card-title-inner">
             <span class="card-icon" aria-hidden="true">${escHtml(item.icon||'📍')}</span>
+            <button class="icon-btn" onclick="speakField('${item.id}', 'placeName', 'en-US', event)" title="הקרא את שם המקום" style="width:26px;height:26px;color:var(--text-muted); flex-shrink:0;">
+              ${svgIcon('speaker')}
+            </button>
             <h3 class="card-title">${hlHtml(item.placeName,q)}</h3>
-            <button class="icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום" style="width:26px;height:26px;color:var(--text-muted); margin-right:4px;">
+            <button class="icon-btn" onclick="copyField('${item.id}', 'placeName', event)" title="העתק שם מקום" style="width:26px;height:26px;color:var(--text-muted); margin-right:auto; flex-shrink:0;">
               ${svgIcon('copy')}
             </button>
           </div>
@@ -2676,14 +2694,17 @@ function renderTipCard(item, q) {
 
   return `
 <article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
-  <div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
+<div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
     <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
     <div class="card-main">
-      <div class="card-title-row">
+<div class="card-title-row">
         <div class="card-title-inner">
           <span class="card-icon" aria-hidden="true">💡</span>
+          <button class="icon-btn" onclick="speakField('${item.id}', 'title', 'he-IL', event)" title="הקרא את שם הטיפ" style="width:26px;height:26px;color:var(--text-muted); flex-shrink:0;">
+            ${svgIcon('speaker')}
+          </button>
           <h3 class="card-title">${hlHtml(item.title,q)}</h3>
         </div>
         <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
@@ -2707,11 +2728,12 @@ function renderChecklistCard(item, q) {
     <button class="card-check" onclick="toggleComplete('${item.id}')" style="flex-shrink:0; ${checkStyle}">
       ${done ? svgIcon('check') : ''}
     </button>
+    <button class="icon-btn" onclick="speakField('${item.id}', 'title', 'he-IL', event)" title="הקרא" style="flex-shrink:0; color:var(--text-muted); width:26px; height:26px;">${svgIcon('speaker')}</button>
     <div style="flex:1; cursor:pointer;" onclick="openEdit('${item.id}')">
       <div style="font-size:15px; font-weight:600; color:var(--text); ${done ? 'text-decoration:line-through;color:var(--text-muted);' : ''}">${hlHtml(item.title,q)}</div>
       ${item.description ? `<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${hlHtml(item.description,q)}</div>` : ''}
     </div>
-    <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0;">${svgIcon('edit')}</button>
+    <button class="icon-btn" onclick="openEdit('${item.id}')" style="flex-shrink:0; color:var(--text-muted);">${svgIcon('edit')}</button>
   </article>`;
 }
 
@@ -3246,12 +3268,26 @@ function readEditForm(item) {
   if (item.type === 'task') return { ...item, title:g('ef-title'), category:g('ef-category'), description:g('ef-description') };
   if (item.type === 'tip') return { ...item, title:g('ef-title'), category:g('ef-category'), content:g('ef-content'), link:g('ef-link'), linkLabel:g('ef-linkLabel') };
 
-  const type = (document.getElementById('ef-type')?.value) || item.type;
+const type = (document.getElementById('ef-type')?.value) || item.type;
   const link = g('ef-link');
+  
+  const newDayLabel = g('ef-dayLabel');
+  const newTime = g('ef-timeRange');
+  const newCost = g('ef-cost');
+  
+  let newRawDay = newDayLabel;
+  let newRawDate = '';
+  let dayMatch = newDayLabel.match(/^(.*?)\s*\(([^)]+)\)$/);
+  if (dayMatch) {
+      newRawDay = dayMatch[1].trim();
+      newRawDate = dayMatch[2].trim();
+  }
+
  const updated = {
     ...item, type,
-    placeName:g('ef-placeName'), icon:g('ef-icon') || '📍', dayLabel:g('ef-dayLabel'), dateVal:parseDateVal(g('ef-dayLabel')), category:g('ef-category'),
-    timeRange:g('ef-timeRange'), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost:g('ef-cost'), duration:g('ef-duration'),
+    placeName:g('ef-placeName'), icon:g('ef-icon') || '📍', dayLabel:newDayLabel, dateVal:parseDateVal(newDayLabel), category:g('ef-category'),
+    rawDayStr: newRawDay, rawDateStr: newRawDate, rawTimeStr: newTime, rawCostStr: newCost,
+    timeRange: formatTime(newTime), checkIn:g('ef-checkIn'), checkOut:g('ef-checkOut'), description:g('ef-description'), cost: formatCost(newCost), duration:g('ef-duration'),
     transport:g('ef-transport'), booking:g('ef-booking'), area:g('ef-area'), address:g('ef-address'), link:link, linkLabel:getSmartLinkLabel(link, g('ef-linkLabel')),
     priority:g('ef-priority'), weather:g('ef-weather'), notes:g('ef-notes'), travelTimePrev:g('ef-travelTimePrev'), mapPrev:g('ef-mapPrev'), risk:g('ef-risk'), facilities:g('ef-facilities'), prepare:g('ef-prepare'),
     foodSol:g('ef-foodSol'), protein:g('ef-protein'), loadLevel:g('ef-loadLevel'), actionReq:g('ef-actionReq'), planB:g('ef-planB'), ziploc:g('ef-ziploc'), extraCost:g('ef-extraCost'), qaStatus:g('ef-qaStatus')
