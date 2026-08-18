@@ -2135,7 +2135,8 @@ function downloadFilesSequentially(files) {
 function exportCSV() {
   const BOM = '\uFEFF';
   const files = [];
-  const itiHeaders = ['אייקון','יום','תאריך','שם המקום','קטגוריות לסינון','עדיפות','מיקום במפה','מזג אוויר אידיאלי','תיאור ומה ניתן לעשות','תחבורה והגעה ליעד','אזור במסלול','טווח שעות מומלץ','זמן מוערך','ימי סגירה / הערות חשובות','עלות משוערת (₪ ו-¥)','איך ומתי להזמין','קישור','משך נסיעה מהיעד הקודם','ניווט גוגל מפות (מהיעד הקודם)','סיכון','מתקנים ודרישות','מה צריך להכין מראש','פתרון תזונה יומי','שילוב חלבון','רמת עומס מובנית','תזכורת / פעולה נדרשת','Plan B — גשם/סגירה/מלא','Ziploc/T-Shirt Bag — שימוש מומלץ','תקציב קניות אופציונלי (₪)','סטטוס QA','סטטוס ביצוע באפליקציה','סטטוס הזמנה באפליקציה'];
+  // נוספו: צ'ק-אין וצ'ק-אאוט שחסרו בייצוא, כדי שהורדה תהיה תואמת 1:1 למסך העריכה
+  const itiHeaders = ['אייקון','יום','תאריך','שם המקום','קטגוריות לסינון','עדיפות','מיקום במפה','מזג אוויר אידיאלי','תיאור ומה ניתן לעשות','תחבורה והגעה ליעד','אזור במסלול','טווח שעות מומלץ','זמן מוערך','צ\'ק-אין / קבלת חדרים','צ\'ק-אאוט / פינוי','ימי סגירה / הערות חשובות','עלות משוערת (₪ ו-¥)','איך ומתי להזמין','קישור','משך נסיעה מהיעד הקודם','ניווט גוגל מפות (מהיעד הקודם)','סיכון','מתקנים ודרישות','מה צריך להכין מראש','פתרון תזונה יומי','שילוב חלבון','רמת עומס מובנית','תזכורת / פעולה נדרשת','Plan B — גשם/סגירה/מלא','Ziploc/T-Shirt Bag — שימוש מומלץ','תקציב קניות אופציונלי (₪)','סטטוס QA','סטטוס ביצוע באפליקציה','סטטוס הזמנה באפליקציה'];
 
 function buildItiExport(dataArr, name) {
       if (dataArr.length > 0) {
@@ -2159,7 +2160,7 @@ function buildItiExport(dataArr, name) {
               }
 
               csv += csvRow([
-                  i.icon, exDay, exDate, i.placeName, i.category, i.priority, i.address, i.weather, i.description, i.transport, i.area, exTime, i.duration, i.notes, exCost, i.booking, i.link, i.travelTimePrev, i.mapPrev, i.risk, i.facilities, i.prepare, i.foodSol, i.protein, i.loadLevel, i.actionReq, i.planB, i.ziploc, i.extraCost, i.qaStatus,
+                  i.icon, exDay, exDate, i.placeName, i.category, i.priority, i.address, i.weather, i.description, i.transport, i.area, exTime, i.duration, i.checkIn || '', i.checkOut || '', i.notes, exCost, i.booking, i.link, i.travelTimePrev, i.mapPrev, i.risk, i.facilities, i.prepare, i.foodSol, i.protein, i.loadLevel, i.actionReq, i.planB, i.ziploc, i.extraCost, i.qaStatus,
                   state.completedIds.has(i.id) ? 'הושלם' : 'לא הושלם',
                   state.bookedIds.has(i.id) ? 'הוזמן וטופל' : 'לא הוזמן'
               ]);
@@ -2178,8 +2179,9 @@ function buildItiExport(dataArr, name) {
   }
 
   if (state.data.tips.length > 0) {
-      let csv = BOM + csvRow(['כותרת','קטגוריה','תוכן','קישור']);
-      state.data.tips.forEach(i => csv += csvRow([i.title, i.category, i.content, i.link]));
+      // נוסף: 'שם הקישור' (linkLabel) שחסר בייצוא
+      let csv = BOM + csvRow(['כותרת','קטגוריה','תוכן','קישור','שם הקישור']);
+      state.data.tips.forEach(i => csv += csvRow([i.title, i.category, i.content, i.link, i.linkLabel || '']));
       files.push({ content: csv, filename: 'TripMH_טיפים.csv', mime: 'text/csv;charset=utf-8' });
   }
 
