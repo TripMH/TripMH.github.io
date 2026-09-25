@@ -2829,7 +2829,8 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
 
     html += `
 <div class="agenda-day-group">
-<div class="section-header" style="cursor:pointer; border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 12%, var(--bg)), var(--bg));" onclick="this.parentElement.querySelector('.cards-list').classList.toggle('hidden'); this.parentElement.querySelector('.progress-bar-wrap').classList.toggle('hidden');">    <div class="section-header-left">
+  <div class="section-header" style="cursor:pointer; border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 12%, var(--bg)), var(--bg));" onclick="this.parentElement.querySelector('.cards-list').classList.toggle('hidden'); if(this.parentElement.querySelector('.progress-bar-wrap')) this.parentElement.querySelector('.progress-bar-wrap').classList.toggle('hidden');">
+    <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
       ${completeAllBtn}
       ${mapBtn}
