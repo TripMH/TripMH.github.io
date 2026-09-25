@@ -2403,26 +2403,40 @@ window.scrollToItem = function(id) {
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${id}"]`);
     if(el) {
-      const headerOffset = 60; 
-      const elementPosition = el.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+      // 1. קודם כל - נפתח את היום הספציפי אם הוא מוסתר
+      const dayGroup = el.closest('.agenda-day-group');
+      if (dayGroup) {
+          const list = dayGroup.querySelector('.cards-list');
+          const progress = dayGroup.querySelector('.progress-bar-wrap');
+          if (list && list.classList.contains('hidden')) {
+              list.classList.remove('hidden');
+              if (progress) progress.classList.remove('hidden');
+          }
+      }
+      
+      // 2. נמתין חלקיק שנייה (50 מילישניות) כדי שהדפדפן יחשב את הגובה החדש לפני הגלילה
+      setTimeout(() => {
+          const headerOffset = 60; 
+          const elementPosition = el.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
           window.scrollTo({ top: offsetPosition, behavior: "smooth" });
-      
-      el.style.transition = 'all 0.3s';
-      const oldBg = el.style.backgroundColor;
-      el.style.backgroundColor = 'var(--accent-glow)';
-      el.style.borderColor = 'var(--accent)';
-      setTimeout(() => {
-        el.style.backgroundColor = oldBg;
-        el.style.borderColor = '';
-      }, 1500);
-      
-      if(!state.expandedIds.has(id)) toggleExpand(id);
+          
+          el.style.transition = 'all 0.3s';
+          const oldBg = el.style.backgroundColor;
+          el.style.backgroundColor = 'var(--accent-glow)';
+          el.style.borderColor = 'var(--accent)';
+          
+          setTimeout(() => {
+            el.style.backgroundColor = oldBg;
+            el.style.borderColor = '';
+          }, 1500);
+          
+          if(!state.expandedIds.has(id)) toggleExpand(id);
+      }, 50); // <- ההשהיה הקריטית שפותרת את הקפיצה!
     }
   }, 100);
 };
-
 /* =========================================================
    MOBILE BOTTOM SHEET PREVIEW
 ========================================================= */
