@@ -52,7 +52,10 @@ html, body {
 html.light ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12)}
 mark{background:rgba(251,191,36,.35);color:inherit;border-radius:2px;padding:0 2px}
 html.light mark{background:rgba(217,119,6,.22)}
-
+   
+/* הסתרת אלמנטים (לכיווץ ימים במסלול) */
+.hidden { display: none !important; }
+   
 /* =========================================================
    LAYOUT
 ========================================================= */
@@ -71,12 +74,13 @@ html.light mark{background:rgba(217,119,6,.22)}
 /* =========================================================
    HEADER
 ========================================================= */
-#app-header{
-  position:relative;
-  z-index:40;
-  background:color-mix(in srgb,var(--bg) 92%,transparent);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--border);
+#app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
 }
 
 .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;gap:8px;}
@@ -2825,8 +2829,7 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
 
     html += `
 <div class="agenda-day-group">
-  <div class="section-header" style="border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 12%, var(--bg)), var(--bg));">
-    <div class="section-header-left">
+<div class="section-header" style="cursor:pointer; border-right-color: ${color}; background: linear-gradient(to left, color-mix(in srgb, ${color} 12%, var(--bg)), var(--bg));" onclick="this.parentElement.querySelector('.cards-list').classList.toggle('hidden'); this.parentElement.querySelector('.progress-bar-wrap').classList.toggle('hidden');">    <div class="section-header-left">
       <span class="section-header-title">${hlHtml(key,q)}</span>
       ${completeAllBtn}
       ${mapBtn}
