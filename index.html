@@ -2947,27 +2947,23 @@ function renderCalendarPanel(items, q) {
                const tooltipText = escHtml(`${timeForTooltip}${item.placeName}`); 
                const displayIcon = item.icon ? `<span style="font-size:12px; display:inline-block; max-width:18px; text-align:center;">${escHtml(item.icon)}</span>` : '';
                
-               // --- תוספת: צבע לפי סטטוס הזמנה ---
+              // --- תוספת: צבע לפי סטטוס הזמנה ---
                let cardStyle = '';
                if (item.requiresBooking) {
                    if (state.bookedIds.has(item.id)) {
-                       cardStyle = 'background-color: var(--success-glow); border-color: var(--success);'; // ירוק - שולם/טופל
+                       cardStyle = 'background-color: var(--success-glow); border-color: var(--success);'; // ירוק
                    } else {
-                       cardStyle = 'background-color: var(--danger-glow); border-color: var(--danger);'; // אדום - דורש שריון
+                       cardStyle = 'background-color: var(--danger-glow); border-color: var(--danger);'; // אדום
                    }
                }
 
-               // --- תוספת: מיקום האטרקציה ---
-               const rawLoc = getLocStr(item).split(',')[0]; // לוקח רק את החלק הראשון כדי שלא יחרוג מהגבולות בתצוגה הצרה
-               const locHtml = rawLoc ? `<div style="font-size:9px; color:var(--text-muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">📍 ${escHtml(rawLoc)}</div>` : '';
+               // --- תוספת: מיקום בשורה אחת (לא מגדיל את הגובה) ---
+               const rawLoc = getLocStr(item).split(',')[0];
+               const locInline = rawLoc ? `<span style="opacity:0.6; font-size:10px; margin-right:4px;">📍${escHtml(rawLoc)}</span>` : '';
                
-               // --- עיצוב מחדש של הפריט שיתמוך בשתי שורות ובצבעי הרקע החדשים ---
-               html += `<div class="cal-item ${item.type === 'option' ? 'opt-event' : 'main-event'} ${done ? 'done' : ''}" style="flex-direction:column; align-items:flex-start; ${cardStyle}" draggable="true" ondragstart="onCalDragStart(event, '${item.id}')" onclick="handleCalClick('${item.id}', event)" data-tooltip="${tooltipText}">
-                      <div style="display:flex; align-items:center; gap:4px; width:100%;">
-                          ${timeStr}
-                          <span class="cal-item-text" style="display:flex; align-items:center; gap:2px;">${displayIcon} ${hlHtml(item.placeName, q)}</span>
-                      </div>
-                      ${locHtml}
+               html += `<div class="cal-item ${item.type === 'option' ? 'opt-event' : 'main-event'} ${done ? 'done' : ''}" style="${cardStyle}" draggable="true" ondragstart="onCalDragStart(event, '${item.id}')" onclick="handleCalClick('${item.id}', event)" data-tooltip="${tooltipText}">
+                      ${timeStr}
+                      <span class="cal-item-text" style="display:flex; align-items:center; gap:2px;">${displayIcon} ${hlHtml(item.placeName, q)} ${locInline}</span>
                     </div>`;
         });
         
