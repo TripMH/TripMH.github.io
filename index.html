@@ -2793,7 +2793,8 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     groups.get(k).push(i);
   });
 
-  let html = '', colorIdx = 0;
+ let html = '', colorIdx = 0;
+  const defaultHidden = (!q || q === '__all__') ? 'hidden' : ''; // מוחבא כברירת מחדל אלא אם יש חיפוש או פילטר פעיל
   groups.forEach((arr, key) => {
     const color   = DAY_COLORS[colorIdx++ % DAY_COLORS.length];
     const done    = arr.filter(i => state.completedIds.has(i.id)).length;
@@ -2837,8 +2838,8 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     </div>
     <span class="section-badge${allDone?' all-done':''}">${arr[0].type !== 'dictionary' ? done+'/' : ''}${arr.length}</span>
   </div>
-  ${arr[0].type !== 'dictionary' ? `<div class="progress-bar-wrap" style="background: color-mix(in srgb, ${color} 15%, transparent);"><div class="progress-bar-fill${allDone?' done':''}" style="width:${pct}%;background:${allDone?'var(--success)':color}"></div></div>` : ''}
-  <div class="cards-list">
+ ${arr[0].type !== 'dictionary' ? `<div class="progress-bar-wrap ${defaultHidden}" style="background: color-mix(in srgb, ${color} 15%, transparent);"><div class="progress-bar-fill${allDone?' done':''}" style="width:${pct}%;background:${allDone?'var(--success)':color}"></div></div>` : ''}
+  <div class="cards-list ${defaultHidden}">
     ${arr.map((item, index) => {
       const prevItem = index > 0 ? arr[index - 1] : null;
       if (item.type === 'tip') return renderTipCard(item, q);
@@ -2889,8 +2890,14 @@ function renderCalendarPanel(items, q) {
      const m = monthData.month;
      const daysMap = monthData.days;
 
-     html += `<div class="cal-month-block">`;
-     html += `<h3>${svgIcon('calendar')} ${monthNames[m]} ${y}</h3>`;
+    html += `<div class="cal-month-block">`;
+     html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <h3 style="margin-bottom:0;">${svgIcon('calendar')} ${monthNames[m]} ${y}</h3>
+                <div style="display:flex; gap:6px;">
+                  <button onclick="document.querySelectorAll('.agenda-day-group .cards-list, .agenda-day-group .progress-bar-wrap').forEach(el => el.classList.add('hidden'))" style="background:var(--bg-muted); color:var(--text-muted); border:1px solid var(--border); border-radius:var(--r-sm); padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">כווץ הכל</button>
+                  <button onclick="document.querySelectorAll('.agenda-day-group .cards-list, .agenda-day-group .progress-bar-wrap').forEach(el => el.classList.remove('hidden'))" style="background:var(--accent-glow); color:var(--accent); border:1px solid var(--accent-border); border-radius:var(--r-sm); padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">הרחב הכל</button>
+                </div>
+              </div>`;
      html += `<div class="cal-grid">`;
      
      dayNames.forEach(dn => {
