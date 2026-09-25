@@ -75,12 +75,22 @@ html.light mark{background:rgba(217,119,6,.22)}
    HEADER
 ========================================================= */
 #app-header {
+  position: relative; /* ביטול ההדבקה של החלק העליון הענק */
+  z-index: 40;
+  background: var(--bg);
+}
+
+/* יצירת אזור דביק חדש ורזה רק לניווט */
+#sticky-nav-wrap {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
 .header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;gap:8px;}
@@ -696,8 +706,9 @@ input:checked + .b-slider:before { transform: translateX(14px); background-color
        <button class="qf-btn" data-val="__qf__תחבורה" data-orig="🚆 תחבורה ולוגיסטיקה">🚆 תחבורה ולוגיסטיקה</button>
     </div>
 
-    <nav id="tab-bar">
-      <button class="tab-btn active" data-tab="itinerary">
+<div id="sticky-nav-wrap">
+      <nav id="tab-bar">
+         <button class="tab-btn active" data-tab="itinerary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>
         </svg>
