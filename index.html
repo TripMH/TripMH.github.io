@@ -2811,9 +2811,13 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
     groups.get(k).push(i);
   });
 
- let html = '', colorIdx = 0;
-  const defaultHidden = (!q || q === '__all__') ? 'hidden' : ''; // מוחבא כברירת מחדל אלא אם יש חיפוש או פילטר פעיל
+let html = '', colorIdx = 0;
   groups.forEach((arr, key) => {
+    let isHidden = (!q || q === '__all__') ? 'hidden' : ''; 
+    // בדיקה האם הקבוצה הייתה פתוחה לפני הרינדור מחדש
+    if (window.currentOpenGroups && window.currentOpenGroups.has(key)) {
+        isHidden = '';
+    }
     const color   = DAY_COLORS[colorIdx++ % DAY_COLORS.length];
     const done    = arr.filter(i => state.completedIds.has(i.id)).length;
     const allDone = done === arr.length && arr.length > 0;
@@ -2855,9 +2859,9 @@ function renderPanel(items, groupKey, addLabel, addType, q) {
       ${mapBtn}
     </div>
     <span class="section-badge${allDone?' all-done':''}">${arr[0].type !== 'dictionary' ? done+'/' : ''}${arr.length}</span>
-  </div>
- ${arr[0].type !== 'dictionary' ? `<div class="progress-bar-wrap ${defaultHidden}" style="background: color-mix(in srgb, ${color} 15%, transparent);"><div class="progress-bar-fill${allDone?' done':''}" style="width:${pct}%;background:${allDone?'var(--success)':color}"></div></div>` : ''}
-  <div class="cards-list ${defaultHidden}">
+</div>
+ ${arr[0].type !== 'dictionary' ? `<div class="progress-bar-wrap ${isHidden}" style="background: color-mix(in srgb, ${color} 15%, transparent);"><div class="progress-bar-fill${allDone?' done':''}" style="width:${pct}%;background:${allDone?'var(--success)':color}"></div></div>` : ''}
+  <div class="cards-list ${isHidden}">
     ${arr.map((item, index) => {
       const prevItem = index > 0 ? arr[index - 1] : null;
       if (item.type === 'tip') return renderTipCard(item, q);
@@ -3017,6 +3021,16 @@ function renderCalendarPanel(items, q) {
 ========================================================= */
 function updateUI() {
   const scrollPos = window.scrollY;
+
+  // שמירת מצב הקבוצות הפתוחות כדי שלא יסגרו ברינדור מחדש (למשל בעת סימון V)
+  window.currentOpenGroups = new Set();
+  document.querySelectorAll('.agenda-day-group').forEach(g => {
+      const list = g.querySelector('.cards-list');
+      const titleEl = g.querySelector('.section-header-title');
+      if (list && !list.classList.contains('hidden') && titleEl) {
+          window.currentOpenGroups.add(titleEl.textContent.trim());
+      }
+  });
 
   const d = state.data;
   
