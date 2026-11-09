@@ -2425,7 +2425,7 @@ window.scrollToItem = function(id) {
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${id}"]`);
     if(el) {
-      // 1. קודם כל - נפתח את היום הספציפי אם הוא מוסתר
+// 1. קודם כל - נפתח את היום הספציפי אם הוא מוסתר ונשמור אותו בזיכרון
       const dayGroup = el.closest('.agenda-day-group');
       if (dayGroup) {
           const list = dayGroup.querySelector('.cards-list');
@@ -2433,6 +2433,11 @@ window.scrollToItem = function(id) {
           if (list && list.classList.contains('hidden')) {
               list.classList.remove('hidden');
               if (progress) progress.classList.remove('hidden');
+          }
+          const gId = dayGroup.getAttribute('data-group-id');
+          if (gId && window.openGroups) {
+              window.openGroups.add(gId);
+              persistState();
           }
       }
       
@@ -2600,7 +2605,7 @@ let riskBadge = '';
       `).join('') + `</div>`;
   }
   // 2. כפתורי פעולה קריטיים עם תפריט צף
-  const mapUrl = item.mapPrev || buildMapUrl(item, prevItem);
+  const mapUrl = extractUrl(item.mapPrev || '') || buildMapUrl(item, prevItem);
   const parsedLinks = buildTipLinks(item.link);
   
   let topLinkBtn = '';
@@ -2709,10 +2714,8 @@ let addressRow = '';
 }
    
 function renderTipCard(item, q) {
-  const done     = state.completedIds.has(item.id);
-  const expanded = state.expandedIds.has(item.id);
+  const done = state.completedIds.has(item.id);
   const checkStyle = done ? 'border-color:var(--success);background:var(--success-glow);color:var(--success);' : 'color:transparent;';
-  const catBadge = item.category ? `<span class="badge badge-cat">${svgIcon('tag')}${hlHtml(item.category,q)}</span>` : '';
 
   // בונה רשימת קישורים מסודרת מעמודת הקישורים (label -> url) גם כשיש קישורים רבים
   const tipLinks = buildTipLinks(item.link);
@@ -2724,7 +2727,7 @@ function renderTipCard(item, q) {
       <div class="tip-links-block">
         <div class="tip-links-title">${svgIcon('link')} קישורים ואפליקציות (${tipLinks.length})</div>
         <div class="tip-links-grid">
-          ${tipLinks.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn tip-link" onclick="event.stopPropagation()">${svgIcon('link')} ${escHtml(l.label)}</a>`).join('')}
+          ${tipLinks.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="link-btn tip-link" onclick="event.stopPropagation()">${svgIcon('link')}${escHtml(l.label)}</a>`).join('')}
         </div>
       </div>`;
   }
@@ -2735,26 +2738,19 @@ function renderTipCard(item, q) {
   ].filter(Boolean).join('');
 
   return `
-<article class="card${done?' done':''}${expanded?' expanded':''}" data-id="${item.id}">
-<div class="card-body" onclick="toggleExpand('${item.id}')" role="button" tabindex="0">
-    <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}">
-      ${done ? svgIcon('check') : ''}
-    </button>
-    <div class="card-main">
-<div class="card-title-row">
-        <div class="card-title-inner">
-          <span class="card-icon" aria-hidden="true">💡</span>
-          <button class="icon-btn" onclick="speakField('${item.id}', 'title', 'he-IL', event)" title="הקרא את שם הטיפ" style="width:26px;height:26px;color:var(--text-muted); flex-shrink:0;">
-            ${svgIcon('speaker')}
-          </button>
-          <h3 class="card-title">${hlHtml(item.title,q)}</h3>
-        </div>
-        <span class="chevron" aria-hidden="true">${svgIcon('chev')}</span>
+<article class="card expanded${done?' done':''}" data-id="${item.id}">
+  <div class="card-details" style="display:flex; padding-top:14px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="card-check" onclick="event.stopPropagation();toggleComplete('${item.id}')" style="${checkStyle}" title="סמן כנקרא">
+          ${done ? svgIcon('check') : ''}
+        </button>
+        <span style="font-size:12px; color:var(--text-muted); font-weight:600;">סמן כנקרא / בוצע</span>
       </div>
-      <div class="card-badges">${catBadge}</div>
+      <button class="icon-btn" onclick="speakField('${item.id}', 'content', 'he-IL', event)" title="הקרא תוכן הטיפ" style="width:28px;height:28px;color:var(--text-muted);">
+        ${svgIcon('speaker')}
+      </button>
     </div>
-  </div>
-  <div class="card-details">
     <div class="details-divider"></div>
     ${item.content ? `<div class="card-desc">${hlHtml(item.content,q)}</div>` : ''}
     <div class="nav-btns" style="margin-top:10px">${navBtns}</div>
@@ -2934,8 +2930,8 @@ function renderCalendarPanel(items, q) {
      html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                 <h3 style="margin-bottom:0;">${svgIcon('calendar')} ${monthNames[m]} ${y}</h3>
                 <div style="display:flex; gap:6px;">
-                  <button onclick="document.querySelectorAll('.agenda-day-group .cards-list, .agenda-day-group .progress-bar-wrap').forEach(el => el.classList.add('hidden'))" style="background:var(--bg-muted); color:var(--text-muted); border:1px solid var(--border); border-radius:var(--r-sm); padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">כווץ הכל</button>
-                  <button onclick="document.querySelectorAll('.agenda-day-group .cards-list, .agenda-day-group .progress-bar-wrap').forEach(el => el.classList.remove('hidden'))" style="background:var(--accent-glow); color:var(--accent); border:1px solid var(--accent-border); border-radius:var(--r-sm); padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">הרחב הכל</button>
+<button onclick="document.querySelectorAll('.agenda-day-group .cards-list, .agenda-day-group .progress-bar-wrap').forEach(el => el.classList.add('hidden')); if(window.openGroups) window.openGroups.clear(); persistState();" style="background:var(--bg-muted); color:var(--text-muted); border:1px solid var(--border); border-radius:var(--r-sm); padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">כווץ הכל</button>
+                  <button onclick="document.querySelectorAll('.agenda-day-group').forEach(g => { g.querySelectorAll('.cards-list, .progress-bar-wrap').forEach(el => el.classList.remove('hidden')); const gid = g.getAttribute('data-group-id'); if(gid && window.openGroups) window.openGroups.add(gid); }); persistState();" style="background:var(--accent-glow); color:var(--accent); border:1px solid var(--accent-border); border-radius:var(--r-sm); padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit;">הרחב הכל</button>
                 </div>
               </div>`;
      html += `<div class="cal-grid">`;
@@ -3504,8 +3500,9 @@ state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
       if (allStatBtn) allStatBtn.classList.add('active');
   }
 
-  updateUI();
+updateUI();
   setTab(state.activeTab, true);
+
   const savedScrollY = Number(localStorage.getItem(LS_SCROLL) || 0);
   if (savedScrollY > 0) {
       setTimeout(() => window.scrollTo({ top: savedScrollY, behavior: 'auto' }), 80);
