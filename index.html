@@ -960,7 +960,8 @@ const LS_TAB       = 'tripmh_tab_v50';
 const LS_DARK      = 'tripmh_dark_v50';
 const LS_PREPAID   = 'tripmh_prepaid_v50'; 
 const LS_BUDGET    = 'tripmh_budget_v50';
-
+const LS_GROUPS    = 'tripmh_groups_v50';
+const LS_SCROLL    = 'tripmh_scroll_v50';
 const DAY_COLORS = [
   '#22d3ee','#4ade80','#c084fc','#fbbf24',
   '#f87171','#60a5fa','#f472b6','#34d399','#fb923c','#a78bfa',
@@ -1003,9 +1004,9 @@ function persistState() {
   lsSet(LS_BUDGET,    state.budgetToggles);
   lsSet(LS_TAB,       state.activeTab);
   lsSet(LS_PREPAID,   state.prepaidExpenses);
+  lsSet(LS_GROUPS,    window.openGroups ? [...window.openGroups] : []);
   localStorage.setItem(LS_DARK, String(state.isDark));
 }
-
 function updateUndoBtn() {
   const btn = document.getElementById('btn-undo');
   if (btn) btn.style.display = historyStack.length > 0 ? 'flex' : 'none';
@@ -2228,6 +2229,7 @@ window.toggleGroup = function(el) {
   } else {
       window.openGroups.add(groupId);
   }
+  persistState();
 };
 
 function svgIcon(name) {
@@ -3483,7 +3485,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     state.completedIds = new Set(lsGet(LS_COMPLETED, []));
     state.bookedIds    = new Set(lsGet(LS_BOOKED, []));
-    state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
+state.expandedIds  = new Set(lsGet(LS_EXPANDED,  []));
+    window.openGroups  = new Set(lsGet(LS_GROUPS, []));
     state.budgetToggles = lsGet(LS_BUDGET, {});
     state.prepaidExpenses = lsGet(LS_PREPAID, 0); 
     
@@ -3502,9 +3505,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateUI();
-  setTab(state.activeTab, true); 
+  setTab(state.activeTab, true);
+  const savedScrollY = Number(localStorage.getItem(LS_SCROLL) || 0);
+  if (savedScrollY > 0) {
+      setTimeout(() => window.scrollTo({ top: savedScrollY, behavior: 'auto' }), 80);
+  }
 
-  // כפתור איפוס כללי על הלוגו של TripMH
+  window.addEventListener('scroll', () => {
+      try { localStorage.setItem(LS_SCROLL, String(Math.round(window.scrollY))); } catch {}
+  }, { passive: true });
+
+  // כפתור איפוס כללי על הלוגו של TripMH (מחזיר להתחלה ללוח השנה)
   document.getElementById('app-logo').addEventListener('click', () => {
       state.searchQuery = '';
       document.getElementById('search-input').value = '';
@@ -3513,11 +3524,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const allStatBtn = document.querySelector(`.stat-item[data-val="__all__"]`);
       if (allStatBtn) allStatBtn.classList.add('active');
       state.expandedIds.clear();
+      if (window.openGroups) window.openGroups.clear();
+      try { localStorage.setItem(LS_SCROLL, '0'); } catch {}
       setTab('itinerary', true);
       updateUI();
       persistState();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      addToast('המערכת אופסה למצב ברירת מחדל', 'neutral');
+      addToast('המערכת אופסה לתצוגת לוח השנה', 'neutral');
   });
 
   // Tab bar
